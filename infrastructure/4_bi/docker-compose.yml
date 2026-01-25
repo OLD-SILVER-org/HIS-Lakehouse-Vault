@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  # BI Group: Superset
+  superset:
+    image: apache/superset
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: "your-secret-key"
+    volumes:
+      - ./superset_home:/app/superset_home

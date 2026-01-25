@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  # Warehouse Group: Spark, DBT
+  spark-master:
+    image: bitnami/spark:3.5
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_ssl_enabled=no
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - ./spark_apps:/opt/bitnami/spark/apps
+
+  spark-worker:
+    image: bitnami/spark:3.5
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_ssl_enabled=no
+    depends_on:
+      - spark-master
