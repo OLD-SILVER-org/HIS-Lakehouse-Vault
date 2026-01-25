@@ -1,0 +1,27 @@
+# General
+.DS_Store
+.idea/
+*.log
+*.tmp
+tmp/
+
+# Environment Variables
+.env
+.env.local
+
+# Docker
+docker-compose.override.yml
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.pytest_cache/
+
+# Java / Spark / Flink
+target/
+*.class
+*.jar
+checkpoint/
+savepoint/
