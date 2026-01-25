@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # =========================================
+  # 3. Debezium (CDC Connect)
+  # =========================================
+  debezium:
+    image: ${SOURCE_DEBEZIUM_IMAGE}
+    container_name: debezium
+    restart: always
+    env_file:
+      - ../../../.env
+    ports:
+      - "${SOURCE_DEBEZIUM_PORT}:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9094
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: hospital_connect_configs
+      OFFSET_STORAGE_TOPIC: hospital_connect_offsets
+      STATUS_STORAGE_TOPIC: hospital_connect_statuses
+      # Converter setup
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+    depends_on:
+      - kafka # Can't depend technically in different compose files, but logical dependency
+    external_links:
+      - kafka
+      - postgres-source
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    networks:
+      - hospital_network
+
+networks:
+  hospital_network:
+    external: true
