@@ -36,4 +36,4 @@ infrastructure/3_warehouse/*/data/
 infrastructure/4_bi/*/data/
 
 # Config error
-config-error.*
+config_error.*

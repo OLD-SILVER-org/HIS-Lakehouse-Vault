@@ -15,19 +15,34 @@ services:
       - "${SOURCE_KAFKA_PORT_EXT}:9092" # External access
     environment:
       # KRaft Settings
-      KAFKA_CFG_NODE_ID: 1
-      KAFKA_CFG_PROCESS_ROLES: controller,broker
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_KRAFT_CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       
       # Listeners
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,INTERNAL://:9094
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${SOURCE_KAFKA_PORT_EXT},INTERNAL://kafka:9094
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,INTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${SOURCE_KAFKA_PORT_EXT},INTERNAL://kafka:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # Controller Config (Required for formatting storage in Apache Kafka image if not auto-done)
+      # Apache Kafka image often requires explicit formatting or a command override. 
+      # We will use the default entrypoint but ensure KAFKA_CLUSTER_ID is set if supported, 
+      # or rely on auto-generation if the image supports it. 
+      # Official apache/kafka doesn't support KAFKA_KRAFT_CLUSTER_ID env var directly in all versions 
+      # like Bitnami. It usually needs a command to format storage.
+      # For simplicity in this "official" switch, we might need a custom command if the image 
+      # doesn't auto-format.
+      # However, let's try standard env vars first.
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+
     volumes:
-      - ./data:/bitnami/kafka
+      - ./data:/var/lib/kafka/data
     deploy:
       resources:
         limits:
