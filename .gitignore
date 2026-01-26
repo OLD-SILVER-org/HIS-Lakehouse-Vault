@@ -25,3 +25,15 @@ target/
 *.jar
 checkpoint/
 savepoint/
+
+# Docker Volumes - Database Data
+infrastructure/1_source/postgres/data/
+infrastructure/1_source/kafka/data/
+infrastructure/1_source/debezium/data/
+infrastructure/1_source/flink/data/
+infrastructure/2_lake/*/data/
+infrastructure/3_warehouse/*/data/
+infrastructure/4_bi/*/data/
+
+# Config error
+config-error.*
