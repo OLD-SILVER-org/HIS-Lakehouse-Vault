@@ -30,16 +30,10 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 
-      # Controller Config (Required for formatting storage in Apache Kafka image if not auto-done)
-      # Apache Kafka image often requires explicit formatting or a command override. 
-      # We will use the default entrypoint but ensure KAFKA_CLUSTER_ID is set if supported, 
-      # or rely on auto-generation if the image supports it. 
-      # Official apache/kafka doesn't support KAFKA_KRAFT_CLUSTER_ID env var directly in all versions 
-      # like Bitnami. It usually needs a command to format storage.
-      # For simplicity in this "official" switch, we might need a custom command if the image 
-      # doesn't auto-format.
-      # However, let's try standard env vars first.
+      # Cluster ID for KRaft mode
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+
+
 
     volumes:
       - ./data:/var/lib/kafka/data
@@ -47,6 +41,33 @@ services:
       resources:
         limits:
           memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - hospital_network
+
+  # =========================================
+  # Kafka UI (Provectus)
+  # =========================================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: kafka-ui
+    restart: always
+    depends_on:
+      kafka:
+        condition: service_healthy
+    env_file:
+      - ../../../.env
+    ports:
+      - "${SOURCE_KAFKA_UI_PORT}:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: hospital-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9094
+      DYNAMIC_CONFIG_ENABLED: 'true'
     networks:
       - hospital_network
 
