@@ -1,0 +1,19 @@
+{
+  "name": "hospital-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres_source",
+    "database.port": "5432",
+    "database.user": "thanhtinh",
+    "database.password": "thanhtinh@123",
+    "database.dbname": "hospital_source",
+    "database.server.name": "hospital_core",
+    "publication.name": "hospital_pub",
+    "slot.name": "hospital_slot",
+    "plugin.name": "pgoutput",
+    "topic.prefix": "hospital",
+    "schema.include.list": "pgsql_source",
+    "snapshot.mode": "initial"
+
+  }
+}
