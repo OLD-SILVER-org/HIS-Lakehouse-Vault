@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # =========================================
-  # 2. Kafka Cluster (KRaft Mode - No ZooKeeper)
+  # Kafka Cluster (KRaft Mode - No ZooKeeper)
   # =========================================
   kafka:
     image: ${SOURCE_KAFKA_IMAGE}
