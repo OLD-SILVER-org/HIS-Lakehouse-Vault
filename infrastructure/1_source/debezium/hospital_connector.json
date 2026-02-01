@@ -6,7 +6,7 @@
     "database.port": "5432",
     "database.user": "thanhtinh",
     "database.password": "thanhtinh@123",
-    "database.dbname": "hospital_source",
+    "database.dbname": "postgres",
     "database.server.name": "hospital_core",
     "publication.name": "hospital_pub",
     "slot.name": "hospital_slot",

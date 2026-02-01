@@ -41,6 +41,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 
     -- 4. Create Publication for Debezium
     CREATE PUBLICATION $CDC_PUBLICATION FOR ALL TABLES;
+    ALTER PUBLICATION $CDC_PUBLICATION OWNER TO $CDC_USER;
 EOSQL
 
 echo "✅ [init-db.sh] Initialization complete!"
