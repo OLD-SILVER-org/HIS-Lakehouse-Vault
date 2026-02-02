@@ -7,7 +7,6 @@
     "database.user": "thanhtinh",
     "database.password": "thanhtinh@123",
     "database.dbname": "postgres",
-    "database.server.name": "hospital_core",
     "publication.name": "hospital_pub",
     "slot.name": "hospital_slot",
     "plugin.name": "pgoutput",
