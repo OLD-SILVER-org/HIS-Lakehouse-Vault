@@ -5,13 +5,13 @@ services:
   # 4. Flink (Job Manager & Task Manager)
   # =========================================
   flink-jobmanager:
-    image: ${SOURCE_FLINK_IMAGE}
+    image: ${LAKE_FLINK_IMAGE}
     container_name: flink_jobmanager
     command: jobmanager
     env_file:
       - ../../../.env
     ports:
-      - "${SOURCE_FLINK_JOBMANAGER_PORT}:8081"
+      - "${LAKE_FLINK_JOBMANAGER_PORT}:8081"
     environment:
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: flink-jobmanager
@@ -23,7 +23,7 @@ services:
       - hospital_network
 
   flink-taskmanager:
-    image: ${SOURCE_FLINK_IMAGE}
+    image: ${LAKE_FLINK_IMAGE}
     container_name: flink_taskmanager
     command: taskmanager
     env_file:

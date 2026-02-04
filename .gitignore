@@ -37,3 +37,6 @@ infrastructure/4_bi/*/data/
 
 # Config error
 config_error.*
+
+# Minio data
+infrastructure/2_lake/minio/minio_data/
