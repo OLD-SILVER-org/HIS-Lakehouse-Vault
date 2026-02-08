@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Database initialization script: Restore first -> Create User & Grant permissions later
 
 echo "🚀 [init-db.sh] Starting database initialization..."
@@ -44,4 +44,4 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     ALTER PUBLICATION $CDC_PUBLICATION OWNER TO $CDC_USER;
 EOSQL
 
-echo "✅ [init-db.sh] Initialization complete!"
+echo "✅ [init-db.sh] Initialization complete !"
