@@ -1,0 +1,33 @@
+services:
+  # =========================================
+  # 1. PostgreSQL (Hive Metastore DB)
+  # =========================================
+  postgres-hive:
+    image: ${METASTORE_IMAGE}
+    container_name: hive-metastore-db
+    restart: always
+    env_file:
+      - ../../../.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${METASTORE_PORT}:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    networks:
+      - hospital_network
+
+networks:
+  hospital_network:
+    external: true
