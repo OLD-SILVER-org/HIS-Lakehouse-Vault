@@ -20,7 +20,7 @@ services:
         limits:
           memory: 1G
     networks:
-      - hospital_network
+      - lake_net
 
   flink-taskmanager:
     image: ${LAKE_FLINK_IMAGE}
@@ -39,8 +39,8 @@ services:
         limits:
           memory: 1G
     networks:
-      - hospital_network
+      - lake_net
 
 networks:
-  hospital_network:
+  lake_net:
     external: true

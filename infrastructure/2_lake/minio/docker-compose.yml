@@ -16,7 +16,7 @@ services:
     volumes:
       - ./minio_data:/data
     networks:
-      - hospital_network
+      - lake_net
 networks:
-  hospital_network:
+  lake_net:
     external: true

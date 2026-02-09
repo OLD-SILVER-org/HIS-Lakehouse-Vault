@@ -26,8 +26,8 @@ services:
         limits:
           memory: 1G
     networks:
-      - hospital_network
+      - lake_net
 
 networks:
-  hospital_network:
+  lake_net:
     external: true
