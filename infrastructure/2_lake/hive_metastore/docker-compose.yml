@@ -21,12 +21,11 @@ services:
       HIVE_SITE_CONF_fs_s3a_impl: "org.apache.hadoop.fs.s3a.S3AFileSystem"
     ports:
       - "${HIVE_METASTORE_PORT:-9083}:9083"
-    # Mount driver PostgreSQL 
+    # Mount driver / Libs
     volumes:
       - ../jars/postgresql-42.7.9.jar:/opt/hive/lib/postgresql-42.7.9.jar
       - ../jars/hadoop-aws-3.3.4.jar:/opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.3.4.jar
-      - ../jars/aws-java-sdk-bundle-1.11.375.jar:/opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.11.375.jar
-      
+      - ../jars/aws-java-sdk-bundle-1.12.785.jar:/opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.785.jar
     entrypoint: >
       /bin/sh -c "
       /opt/hive/bin/schematool -dbType postgres -info -url 'jdbc:postgresql://postgres-hive:5432/${POSTGRES_DB}' -driver 'org.postgresql.Driver' -userName '${POSTGRES_USER}' -passWord '${POSTGRES_PASSWORD}' || \
