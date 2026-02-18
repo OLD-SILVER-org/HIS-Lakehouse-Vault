@@ -1,0 +1,91 @@
+<configuration>
+
+  <!-- JDBC connect to PostgreSQL -->
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:postgresql://postgres-hive:5432/hive_metastore</value>
+    <description>Metastore DB URL</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.postgresql.Driver</value>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>hive</value>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>hive@123</value>
+  </property>
+  <!-- Bind port-->
+  <property>
+    <name>metastore.thrift.port</name>
+    <value>9083</value>
+  </property>
+
+  <property>
+    <name>metastore.thrift.bind.host</name>
+    <value>0.0.0.0</value>
+  </property>
+  <!-- Enable standalone metastore mode -->
+
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://hive-metastore:9083</value>
+  </property>
+
+  <!-- MinIO Configuration -->
+  <property>
+    <name>fs.s3a.endpoint</name>
+    <value>http://minio:9000</value>
+  </property>
+
+  <property>
+    <name>fs.s3a.access.key</name>
+    <value>admin</value>
+  </property>
+
+  <property>
+    <name>fs.s3a.secret.key</name>
+    <value>741852963</value>
+  </property>
+
+  <property>
+    <name>fs.s3a.path.style.access</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>fs.s3a.impl</name>
+    <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+  </property>
+
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>s3a://warehouse/</value>
+  </property>
+  <!-- turn off leader election-->
+  <property>
+    <name>metastore.leader.election.enabled</name>
+    <value>false</value>
+  </property>
+  <!-- turn off ACID-->
+  <property>
+    <name>metastore.compactor.initiator.on</name>
+    <value>false</value>
+  </property>
+
+  <property>
+    <name>metastore.compactor.worker.threads</name>
+    <value>0</value>
+  </property>
+
+  <property>
+    <name>metastore.acid.housekeeper.interval</name>
+    <value>0</value>
+  </property>
+</configuration>

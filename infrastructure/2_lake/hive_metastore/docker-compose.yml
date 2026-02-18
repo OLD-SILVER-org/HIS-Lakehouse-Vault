@@ -7,6 +7,8 @@ services:
       - ../../../.env
     environment:
       SERVICE_NAME: metastore
+      IS_RESUME: true
+
       # Config Metastore Database
       HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://postgres-hive:5432/${POSTGRES_DB}"
       HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
@@ -23,9 +25,14 @@ services:
       - "${HIVE_METASTORE_PORT:-9083}:9083"
     # Mount driver / Libs
     volumes:
+      - ./hive-site.xml:/opt/hive/conf/hive-site.xml
+
       - ../jars/postgresql-42.7.9.jar:/opt/hive/lib/postgresql-42.7.9.jar
-      - ../jars/hadoop-aws-3.3.4.jar:/opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.3.4.jar
-      - ../jars/aws-java-sdk-bundle-1.12.785.jar:/opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.785.jar
+      - ../jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
+      - ../jars/aws-java-sdk-bundle-1.12.785.jar:/opt/hive/lib/aws-java-sdk-bundle-1.12.785.jar
+      - ../jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
+      - ../jars/hadoop-common-3.3.4.jar:/opt/hive/lib/hadoop-common-3.3.4.jar
+      - ../jars/hadoop-yarn-common-3.3.4.jar:/opt/hive/lib/hadoop-yarn-common-3.3.4.jar
     entrypoint: >
       /bin/sh -c "
       /opt/hive/bin/schematool -dbType postgres -info -url 'jdbc:postgresql://postgres-hive:5432/${POSTGRES_DB}' -driver 'org.postgresql.Driver' -userName '${POSTGRES_USER}' -passWord '${POSTGRES_PASSWORD}' || \
