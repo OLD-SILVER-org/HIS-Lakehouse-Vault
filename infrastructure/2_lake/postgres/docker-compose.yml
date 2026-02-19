@@ -26,8 +26,8 @@ services:
         limits:
           memory: 1G
     networks:
-      - lake_net
+      - lake-net
 
 networks:
-  lake_net:
+  lake-net:
     external: true

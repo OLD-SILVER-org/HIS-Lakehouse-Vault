@@ -31,8 +31,8 @@ services:
         limits:
           memory: 1G
     networks:
-      - source_net
+      - source-net
 
 networks:
-  source_net:
+  source-net:
     external: true

@@ -2,18 +2,20 @@ services:
   # Hive Metastore Service
   hive-metastore:
     image: ${LAKE_HIVE_METASTORE_IMAGE}
-    container_name: lake_hive_metastore
+    container_name: lake-hive-metastore
     env_file:
       - ../../../.env
     environment:
       SERVICE_NAME: metastore
       IS_RESUME: true
+      # Set jars path
+      HIVE_AUX_JARS_PATH: /opt/hive/lib/*
 
       # Config Metastore Database
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://postgres-hive:5432/${POSTGRES_DB}"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://postgres-hive:5432/${LAKE_POSTGRES_DB}"
       HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: "${POSTGRES_USER}"
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: "${POSTGRES_PASSWORD}"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: "${LAKE_POSTGRES_USER}"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: "${LAKE_POSTGRES_PASSWORD}"
       # Config Warehouse (MinIO)
       HIVE_SITE_CONF_hive_metastore_warehouse_dir: "${LAKE_HIVE_WAREHOUSE_DIR}"
       HIVE_SITE_CONF_fs_s3a_access_key: "${LAKE_MINIO_ROOT_USER}"
@@ -28,21 +30,21 @@ services:
       - ./hive-site.xml:/opt/hive/conf/hive-site.xml
 
       - ../jars/postgresql-42.7.9.jar:/opt/hive/lib/postgresql-42.7.9.jar
-      - ../jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
+      - ../jars/hadoop-aws-3.3.6.jar:/opt/hive/lib/hadoop-aws-3.3.6.jar
       - ../jars/aws-java-sdk-bundle-1.12.785.jar:/opt/hive/lib/aws-java-sdk-bundle-1.12.785.jar
-      - ../jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
-      - ../jars/hadoop-common-3.3.4.jar:/opt/hive/lib/hadoop-common-3.3.4.jar
-      - ../jars/hadoop-yarn-common-3.3.4.jar:/opt/hive/lib/hadoop-yarn-common-3.3.4.jar
+      - ../jars/hadoop-aws-3.3.6.jar:/opt/hive/lib/hadoop-aws-3.3.6.jar
+      - ../jars/hadoop-common-3.3.6.jar:/opt/hive/lib/hadoop-common-3.3.6.jar
+      - ../jars/hadoop-yarn-common-3.3.6.jar:/opt/hive/lib/hadoop-yarn-common-3.3.6.jar
     entrypoint: >
       /bin/sh -c "
-      /opt/hive/bin/schematool -dbType postgres -info -url 'jdbc:postgresql://postgres-hive:5432/${POSTGRES_DB}' -driver 'org.postgresql.Driver' -userName '${POSTGRES_USER}' -passWord '${POSTGRES_PASSWORD}' || \
-      /opt/hive/bin/schematool -dbType postgres -initSchema -url 'jdbc:postgresql://postgres-hive:5432/${POSTGRES_DB}' -driver 'org.postgresql.Driver' -userName '${POSTGRES_USER}' -passWord '${POSTGRES_PASSWORD}';
+      /opt/hive/bin/schematool -dbType postgres -info -url 'jdbc:postgresql://postgres-hive:5432/${LAKE_POSTGRES_DB}' -driver 'org.postgresql.Driver' -userName '${LAKE_POSTGRES_USER}' -passWord '${LAKE_POSTGRES_PASSWORD}' || \
+      /opt/hive/bin/schematool -dbType postgres -initSchema -url 'jdbc:postgresql://postgres-hive:5432/${LAKE_POSTGRES_DB}' -driver 'org.postgresql.Driver' -userName '${LAKE_POSTGRES_USER}' -passWord '${LAKE_POSTGRES_PASSWORD}';
       /entrypoint.sh metastore
       "
 
     networks:
-      - lake_net
+      - lake-net
 
 networks:
-  lake_net:
+  lake-net:
     external: true

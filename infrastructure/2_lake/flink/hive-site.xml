@@ -93,7 +93,6 @@
     <name>metastore.acid.housekeeper.interval</name>
     <value>0</value>
   </property>
-
   <!-- Fix compatibility Hive 4.2 and Hadoop 3.3.6 (Flink/Iceberg) -->
   <!-- Hive 4.2 uses duration-based config (e.g., '60s') which older clients can't parse -->
   <property>
@@ -134,5 +133,3 @@
     <value>60000</value>
   </property>
 </configuration>
-
-

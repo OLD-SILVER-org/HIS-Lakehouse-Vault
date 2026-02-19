@@ -15,7 +15,7 @@
         <kafka.connector.version>3.1.0-1.18</kafka.connector.version>
         <iceberg.version>1.6.1</iceberg.version>
         <hadoop.version>3.3.6</hadoop.version>
-        <scala.binary.version>2.13</scala.binary.version>
+        <scala.binary.version>2.12</scala.binary.version>
         <java.version>17</java.version>
     </properties>
 

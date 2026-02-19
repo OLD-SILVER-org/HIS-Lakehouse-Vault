@@ -48,7 +48,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - source_net
+      - source-net
 
   # =========================================
   # Kafka UI (Provectus)
@@ -69,8 +69,8 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9094
       DYNAMIC_CONFIG_ENABLED: 'true'
     networks:
-      - source_net
+      - source-net
 
 networks:
-  source_net:
+  source-net:
     external: true
