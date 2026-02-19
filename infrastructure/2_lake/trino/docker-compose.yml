@@ -1,0 +1,18 @@
+services:
+  trino:
+    image: trinodb/trino:479
+    container_name: trino
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./etc:/etc/trino
+      - ./data:/var/trino/data
+    networks:
+      - serving-net
+      - lake-net
+
+networks:
+  serving-net:
+    external: true
+  lake-net:
+    external: true
