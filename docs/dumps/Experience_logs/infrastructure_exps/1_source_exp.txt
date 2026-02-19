@@ -1,0 +1,14 @@
+Cơ bản là trong này sẽ nóm tắt các vấn đề gặp phải khi build dự án.
+các mục cơ bản là : thời gian, vấn đề, nguyên nhân và cách giải quyết.
+
+1. Vấn đề : xây dựng cấu trúc dự án, xác định các image + version
+Thời gian : 1-1-2026
+Mô tả : 
+đây là dự án làm lại vì trước đó đang làm dở bên vps thật nhwung hết tiền thuê nên bị xóa code,
+bỏ bê mấy tháng trời rồi làm lại
+-Lúc trước cài native trực tiếp trên vps, không thông qua docker
+- vẫn nhớ dc quy trình CDC, cấp quyền và đưa lên kafka topic. mọi chuyện suôn sẻ.
+- bắt kịp thời đại bằng cách dùng kraft thay vì zookeeper cũ. tạm thời build trên docker local nên thêm container kafka-ui cho dễ quan sát, khi deploy bỏ qua.
+- để tự động nhất, chuyển đổi các script thành các file cmd để chạy ( đăng ký conector, tạo topic, ...)
+- thêm các lệnh tự động bung dumps file data và pgsql. sau này dễ mô tả và deploy lại.
+ 
