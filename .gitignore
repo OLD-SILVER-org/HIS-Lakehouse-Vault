@@ -40,3 +40,6 @@ config_error.*
 
 # Minio data
 infrastructure/2_lake/minio/minio_data/
+
+# venv:
+venv

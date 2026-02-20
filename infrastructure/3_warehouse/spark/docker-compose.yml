@@ -1,0 +1,41 @@
+services:
+  spark-master:
+    image: ${WAREHOUSE_SPARK_IMAGE}
+    container_name: spark-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "${WAREHOUSE_SPARK_MASTER_PORT}:7077"
+      - "${WAREHOUSE_SPARK_WEBUI_PORT}:8085"
+    env_file:
+      - ../../../.env
+    volumes:
+      - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
+      - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+    networks:
+      - lake-net
+      - warehouse-net
+
+  spark-worker:
+    image: ${WAREHOUSE_SPARK_IMAGE}
+    container_name: spark-worker
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    ports:
+      - "${WAREHOUSE_SPARK_WORKER_PORT}:8081"
+    env_file:
+      - ../../../.env
+    volumes:
+      - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
+      - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - ./conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+
+    networks:
+      - lake-net
+      - warehouse-net
+
+networks:
+  lake-net:
+    external: true
+  warehouse-net:
+    external: true
