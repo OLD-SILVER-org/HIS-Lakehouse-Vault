@@ -43,3 +43,6 @@ infrastructure/2_lake/minio/minio_data/
 
 # venv:
 venv
+
+# docs
+docs/project_description/project_description.md
