@@ -1,0 +1,15 @@
+21/2/2026
+Vấn đè : trong này là kết nối spark vào hive để hỏi data bên minio . vì data trên các container
+        khác ( minio, kafka, flink) , mà spark khi triển khai là 1 image, chỉ lấy vỏ job và chạy
+         là ra kết quả, nó là container khác nên dễ dàng truy cập các container. còn bây h phát 
+         triến spark job nên phải có data riêng. vì vậy phải tọa môi trường python + spark local
+         để test, nhưng mà phải đảm bảo môi trường local giống hệt môi trường trên cluster
+         để tránh lỗi khi triển khai - > sinh biến môi trường SPARK_ENV.
+        
+Vấn đề 2:
+Đến đây thì có hiện ra câu hỏi nếu hệ thống có thay đổi ( thêm table, thêm database) thì sao?
+    - Thì đúng là mình có chừa chổ trống trong flink job, đã cố gắn linh động nhất có thể ròi,
+    xây abstract class mà. nhwung nếu schema evolve thì sao? -> thì phải sửa lại code, 
+    chạy lại job. không khó nhưng hơi, mà nếu sau này nó còn đổi đến data mart,... nữa thì mệt chết.
+    - Chịu thôi, có cách xử lý nhưng hiện h ưu tiên chạy được đã.
+    
