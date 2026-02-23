@@ -1,10 +1,11 @@
 import sys
 import os
 
-# Add the parent directory to sys.path to allow importing from 'utils'
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add the parent directory (spark_jobs) to sys.path to allow importing 'utils' as a package.
+# This is required because spark_utils uses relative imports (e.g., from .config_loader).
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from spark_utils import SparkUtils
+from utils.spark_utils import SparkUtils
 
 def test_spark_connection():
     print("Initializing Spark Session...")

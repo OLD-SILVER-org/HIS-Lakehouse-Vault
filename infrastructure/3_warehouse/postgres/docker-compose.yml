@@ -1,0 +1,26 @@
+services:
+  postgres-warehouse:
+    image: ${WAREHOUSE_POSTGRES_IMAGE}
+    container_name: postgres-warehouse
+    restart: always
+    env_file:
+      - ../../../.env
+    environment:
+      POSTGRES_USER: ${WAREHOUSE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${WAREHOUSE_POSTGRES_PASSWORD}
+    ports:
+      - "${WAREHOUSE_POSTGRES_PORT}:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./sql/create_staging.sql:/docker-entrypoint-initdb.d/create_staging.sql
+
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    networks:
+      - warehouse-net
+
+networks:
+  warehouse-net:
+    external: true
