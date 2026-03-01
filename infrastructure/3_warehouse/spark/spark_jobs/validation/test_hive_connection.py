@@ -12,7 +12,7 @@ if utils_path not in sys.path:
 try:
     from spark_utils import SparkUtils
 except ImportError as e:
-    print(f"[✘] Failed to import SparkUtils from {utils_path}")
+    print(f"[X] Failed to import SparkUtils from {utils_path}")
     print(f"[!] Error: {e}")
     sys.exit(1)
 
@@ -21,34 +21,48 @@ def test_connection():
     utils = SparkUtils()
     spark = utils.get_spark_session("Test_Hive_Iceberg_Connection")
     
-    print("[*] Attempting to list namespaces in hospital_catalog...")
-    try:
-        # List namespaces (databases) in the catalog
-        namespaces = spark.sql("SHOW NAMESPACES IN hospital_catalog").collect()
-        print(f"[✔] Successfully connected! Found {len(namespaces)} namespaces:")
-        for ns in namespaces:
-            print(f"  - {ns[0]}")
-            
-        # Try to show tables in bronze if it exists
-        print("\n[*] Attempting to list tables in hospital_catalog.bronze...")
-        try:
-            tables = spark.sql("SHOW TABLES IN hospital_catalog.bronze").collect()
-            print(f"[✔] Found {len(tables)} tables in bronze:")
-            for t in tables:
-                print(f"  - {t['tableName']}")
-        except Exception as e:
-            print(f"[!] Could not list tables in bronze: {e}")
+    catalogs = ["hospital_catalog"]
+    total_found = 0
 
-    except Exception as e:
-        if "NoSuchNamespaceException" in str(e):
-            print(f"[✔] Connection successful! (But the warehouse is currently empty).")
-            print("[!] Instruction: You need to create a namespace or table first. Example:")
-            print("    spark.sql(\"CREATE NAMESPACE IF NOT EXISTS hospital_catalog.bronze\")")
-        else:
-            print(f"[✘] Connection failed: {e}")
-    finally:
-        print("\n[*] Stopping Spark Session...")
-        spark.stop()
+    for catalog in catalogs:
+        print(f"\n[*] Checking catalog: {catalog}")
+        try:
+            # List namespaces (databases) in the catalog
+            namespaces = spark.sql(f"SHOW NAMESPACES IN {catalog}").collect()
+            print(f"[OK] Found {len(namespaces)} namespaces in {catalog}.")
+            
+            for ns in namespaces:
+                ns_name = ns[0]
+                print(f"    - Namespace: {ns_name}")
+                try:
+                    tables = spark.sql(f"SHOW TABLES IN {catalog}.{ns_name}").collect()
+                    if not tables:
+                        print(f"      (No tables found in {ns_name})")
+                    else:
+                        for t in tables:
+                            print(f"      - Table: {t['tableName']}")
+                            total_found += 1
+                except Exception as e:
+                    print(f"      [!] Error listing tables in {ns_name}: {e}")
+
+        except Exception as e:
+            if "NoSuchNamespaceException" in str(e) or "CatalogNotFoundException" in str(e):
+                print(f"[!] Catalog '{catalog}' not found or empty.")
+            else:
+                print(f"[X] Error checking {catalog}: {e}")
+
+    print("\n" + "="*40)
+    print(f"[OK] TOTAL TABLES FOUND: {total_found}")
+    print("="*40)
+
+    if total_found == 0:
+        print("\n[TIP] Your warehouse seems empty. You can create a test table with:")
+        print("    spark.sql(\"CREATE NAMESPACE IF NOT EXISTS hospital-datalake.test_db\")")
+        print("    spark.sql(\"CREATE TABLE IF NOT EXISTS hospital-datalake.test_db.test_table (id INT, name STRING) USING iceberg\")")
+        print("    spark.sql(\"INSERT INTO hospital-datalake.test_db.test_table VALUES (1, 'test')\")")
+
+    print("\n[*] Stopping Spark Session...")
+    spark.stop()
 
 if __name__ == "__main__":
     test_connection()

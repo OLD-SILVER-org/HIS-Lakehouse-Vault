@@ -38,13 +38,15 @@ class SparkUtils:
         warehouse = self.config.LAKE_HIVE_WAREHOUSE_DIR.strip() if self.config.LAKE_HIVE_WAREHOUSE_DIR else ""
         if warehouse and not warehouse.endswith("/"):
             warehouse += "/"
-            
+        
+        print(f"[*] Spark Warehouse: '{warehouse}'")
+        
         builder = SparkSession.builder \
             .appName(app_name) \
             .config("spark.jars", jars) \
             .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
             .config("spark.sql.catalog.hospital_catalog", "org.apache.iceberg.spark.SparkCatalog") \
-            .config("spark.sql.catalog.hospital_catalog.type", "hadoop") \
+            .config("spark.sql.catalog.hospital_catalog.type", "hive") \
             .config("spark.sql.catalog.hospital_catalog.warehouse", warehouse) \
             .config("spark.hadoop.fs.s3a.endpoint", endpoint) \
             .config("spark.hadoop.fs.s3a.access.key", self.config.LAKE_MINIO_ROOT_USER.strip() if self.config.LAKE_MINIO_ROOT_USER else "") \
