@@ -1,20 +1,10 @@
 import sys
 import os
 
-# Add relevant paths to sys.path to import utils and config
-script_dir = os.path.dirname(os.path.abspath(__file__))
-# test_hive_connection.py is in validation/, utils is in ../utils/
-utils_path = os.path.abspath(os.path.join(script_dir, "..", "utils"))
+# Add parent directory to sys.path to import utils
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-if utils_path not in sys.path:
-    sys.path.append(utils_path)
-
-try:
-    from spark_utils import SparkUtils
-except ImportError as e:
-    print(f"[X] Failed to import SparkUtils from {utils_path}")
-    print(f"[!] Error: {e}")
-    sys.exit(1)
+from utils.spark_utils import SparkUtils
 
 def test_connection():
     print("[*] Initializing Spark Session...")

@@ -1,7 +1,7 @@
 import os
 import glob
 from pyspark.sql import SparkSession
-from config_loader import Config
+from utils.config_loader import Config
 
 class SparkUtils:
     """
