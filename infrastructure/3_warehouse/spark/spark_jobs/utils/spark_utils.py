@@ -54,7 +54,8 @@ class SparkUtils:
             .config("spark.hadoop.fs.s3a.path.style.access", "true") \
             .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
             .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false") \
-            .config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
+            .config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider") \
+            .config("spark.sql.session.timeZone", "UTC")
             
         # Apply Windows-specific fixes only when running locally
         if self.config.is_local():
@@ -62,8 +63,8 @@ class SparkUtils:
             builder = builder.master("local[*]") \
                 .config("spark.driver.host", "127.0.0.1") \
                 .config("spark.driver.bindAddress", "127.0.0.1") \
-                .config("spark.driver.extraJavaOptions", "-Dlog4j.logger.org.apache.spark.util.ShutdownHookManager=OFF -Dlog4j.logger.org.apache.spark.rpc.netty.Inbox=OFF") \
-                .config("spark.executor.extraJavaOptions", "-Dlog4j.logger.org.apache.spark.util.ShutdownHookManager=OFF -Dlog4j.logger.org.apache.spark.executor.Executor=OFF")
+                .config("spark.driver.extraJavaOptions", "-Duser.timezone=UTC -Dlog4j.logger.org.apache.spark.util.ShutdownHookManager=OFF -Dlog4j.logger.ShutdownHookManager=OFF -Dlog4j2.logger.ShutdownHookManager.level=OFF -Dlog4j.logger.org.apache.spark.rpc.netty.Inbox=OFF") \
+                .config("spark.executor.extraJavaOptions", "-Duser.timezone=UTC -Dlog4j.logger.org.apache.spark.util.ShutdownHookManager=OFF -Dlog4j.logger.ShutdownHookManager=OFF -Dlog4j2.logger.ShutdownHookManager.level=OFF -Dlog4j.logger.org.apache.spark.executor.Executor=OFF")
         else:
             print(f"[*] Running in '{self.config.env}' mode")
 
@@ -72,34 +73,22 @@ class SparkUtils:
             builder = builder.config("spark.hadoop.hive.metastore.uris", self.config.HIVE_METASTORE_URIS)
 
         spark = builder.getOrCreate()
-        
-        # Suppress specifically noisy classes on Windows after session creation
-        if self.config.is_local():
-            try:
-                sc = spark.sparkContext
-                log_manager = sc._jvm.org.apache.log4j.LogManager
-                level = sc._jvm.org.apache.log4j.Level
-                # Tắt các log gây nhiễu trên Windows (Heartbeat, Registration NPE, Shutdown errors)
-                log_manager.getLogger("org.apache.spark.executor.Executor").setLevel(level.OFF)
-                log_manager.getLogger("org.apache.spark.storage.BlockManagerMasterEndpoint").setLevel(level.OFF)
-                log_manager.getLogger("org.apache.spark.rpc.netty.Inbox").setLevel(level.OFF)
-                print("[*] Noisy Spark logs suppressed.")
-            except:
-                # Nếu spark 3.3.0+ dùng Log4j2, cú pháp có thể khác, nhưng ta đã có extraJavaOptions bổ trợ
-                pass
                 
         return spark
 
-    def get_jdbc_url(self):
+    def get_jdbc_url(self, db_name=None):
         """Returns the JDBC URL for the Postgres warehouse."""
-        return f"jdbc:postgresql://{self.config.WAREHOUSE_POSTGRES_HOST}:{self.config.WAREHOUSE_POSTGRES_PORT}/{self.config.WAREHOUSE_POSTGRES_DB}"
+        target_db = db_name if db_name else self.config.WAREHOUSE_POSTGRES_DB
+        return f"jdbc:postgresql://{self.config.WAREHOUSE_POSTGRES_HOST}:{self.config.WAREHOUSE_POSTGRES_PORT}/{target_db}?options=-c%20timezone=UTC"
 
     def get_postgres_properties(self):
         """Returns the properties for Postgres JDBC connection."""
         return {
             "user": self.config.WAREHOUSE_POSTGRES_USER,
             "password": self.config.WAREHOUSE_POSTGRES_PASSWORD,
-            "driver": "org.postgresql.Driver"
+            "driver": "org.postgresql.Driver",
+            "ssl": "false",
+            "timezone": "UTC"
         }
 
 if __name__ == "__main__":
