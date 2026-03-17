@@ -13,3 +13,9 @@ Vấn đề 2:
     chạy lại job. không khó nhưng hơi, mà nếu sau này nó còn đổi đến data mart,... nữa thì mệt chết.
     - Chịu thôi, có cách xử lý nhưng hiện h ưu tiên chạy được đã.
     
+17/3/26
+init cho batch đã xong, cần sửa lại schema chút cho match data type. mà data source cũng ko đầy đủ
+    mấy nên làm dc những gì có thể thôi.
+incremental load gặp vấn đề là Microsoft Store Python. chủ yếu do chạy nhiều worker python nên bị crash
+, đây là hạn chế khi chạy thửu nghieemkj trên win thôi.
+    
