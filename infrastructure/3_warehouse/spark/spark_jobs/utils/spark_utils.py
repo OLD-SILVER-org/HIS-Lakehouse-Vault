@@ -1,4 +1,5 @@
 import os
+import sys
 import glob
 from pyspark.sql import SparkSession
 from utils.config_loader import Config
@@ -29,6 +30,10 @@ class SparkUtils:
 
     def get_spark_session(self, app_name="Hospital_DWH_Job"):
         """Initializes and returns a Spark session with proper configurations."""
+        # Ensure workers use the same Python executable as the driver
+        os.environ['PYSPARK_PYTHON'] = sys.executable
+        os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
+        
         jars = self.get_jars()
         # Clean up endpoint
         endpoint = self.config.LAKE_MINIO_ENDPOINT
@@ -55,14 +60,20 @@ class SparkUtils:
             .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
             .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false") \
             .config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider") \
-            .config("spark.sql.session.timeZone", "UTC")
+            .config("spark.python.worker.reuse", "true") \
+            .config("spark.python.worker.timeout", "600") \
+            .config("spark.sql.session.timeZone", "UTC") \
+            .config("pyspark.python", sys.executable) \
+            .config("pyspark.driver.python", sys.executable)
             
         # Apply Windows-specific fixes only when running locally
         if self.config.is_local():
-            print("[*] Running in local mode (Windows fixes applied)")
-            builder = builder.master("local[*]") \
+            print("[*] Running in local mode (Windows memory & core optimizations applied)")
+            builder = builder.master("local[4]") \
                 .config("spark.driver.host", "127.0.0.1") \
                 .config("spark.driver.bindAddress", "127.0.0.1") \
+                .config("spark.driver.memory", "4g") \
+                .config("spark.executor.memory", "2g") \
                 .config("spark.driver.extraJavaOptions", "-Duser.timezone=UTC -Dlog4j.logger.org.apache.spark.util.ShutdownHookManager=OFF -Dlog4j.logger.ShutdownHookManager=OFF -Dlog4j2.logger.ShutdownHookManager.level=OFF -Dlog4j.logger.org.apache.spark.rpc.netty.Inbox=OFF") \
                 .config("spark.executor.extraJavaOptions", "-Duser.timezone=UTC -Dlog4j.logger.org.apache.spark.util.ShutdownHookManager=OFF -Dlog4j.logger.ShutdownHookManager=OFF -Dlog4j2.logger.ShutdownHookManager.level=OFF -Dlog4j.logger.org.apache.spark.executor.Executor=OFF")
         else:

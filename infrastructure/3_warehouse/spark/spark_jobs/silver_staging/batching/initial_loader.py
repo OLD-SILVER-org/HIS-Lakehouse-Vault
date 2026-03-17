@@ -200,4 +200,7 @@ if __name__ == "__main__":
     loader = InitialLoader()
     loader.spark.sparkContext.setLogLevel("ERROR") 
     loader.load()
-    loader.spark.stop()
+    try:
+        loader.spark.stop()
+    except Exception:
+        pass

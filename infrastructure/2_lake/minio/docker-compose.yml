@@ -38,6 +38,8 @@ services:
       BUCKET_NAME=$${TEMP%/};
       /usr/bin/mc mb myminio/$$BUCKET_NAME || true;
       /usr/bin/mc anonymous set public myminio/$$BUCKET_NAME;
+      /usr/bin/mc mb myminio/$${MINIO_CHECKPOINT_BUCKET} || true;
+      /usr/bin/mc anonymous set public myminio/$${MINIO_CHECKPOINT_BUCKET};
       exit 0;
       "
     networks:
