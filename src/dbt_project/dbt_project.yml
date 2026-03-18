@@ -1,0 +1,25 @@
+name: 'hospital_dwh'
+version: '1.0.0'
+config-version: 2
+
+profile: 'hospital_dwh'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  hospital_dwh:
+    staging:
+      +schema: staging
+      +materialized: view
+    raw_vault:
+      +schema: raw_vault
+      +materialized: table
