@@ -48,3 +48,12 @@ venv
 docs/project_description/project_description.md
 docs/project_description/staging_sql_data_types_review.md
 docs/project_description
+
+# DBT
+infrastructure/3_warehouse/dbt/dbt_project/dbt_packages/*
+infrastructure/3_warehouse/dbt/dbt_project/logs/*
+infrastructure/3_warehouse/dbt/dbt_project/target/*
+infrastructure/3_warehouse/dbt/dbt_project/dbt_modules/*
+infrastructure/3_warehouse/dbt/.dbt/profiles.yml
+
+
