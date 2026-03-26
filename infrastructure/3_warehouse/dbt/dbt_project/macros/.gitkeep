@@ -1,0 +1,2 @@
+# Folder này dùng để chứa các macro SQL tự viết của bạn.
+# Các macro của automate_dv nằm trong dbt_packages (hiện ra sau khi chạy dbt deps).
