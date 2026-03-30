@@ -3,8 +3,15 @@ version: 2
 sources:
   - name: staging
     database: "{{ env_var('WAREHOUSE_POSTGRES_DB') }}"
-    schema: public # Hoặc schema chứa các bảng staging từ Spark đổ vào
+    schema: staging
     tables:
       - name: dm_benh_nhan
-      - name: dm_nhan_vien
       - name: dm_dich_vu
+      - name: ct_dot_dieu_tri
+      - name: dm_khoa
+      - name: dm_nhan_vien
+      - name: dm_phong
+      - name: ct_dv_kham
+      - name: ct_dich_vu
+      - name: dm_bo_chi_dinh
+      - name: ct_phieu_thu

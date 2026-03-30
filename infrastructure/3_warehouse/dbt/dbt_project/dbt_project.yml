@@ -4,6 +4,10 @@ config-version: 2
 
 profile: hospital_dwh_dbt
 
+dispatch:
+  - macro_namespace: automate_dv
+    search_order: ['hospital_dwh_dbt', 'automate_dv']
+
 model-paths: ["models"]
 seed-paths: ["seeds"]
 test-paths: ["tests"]
