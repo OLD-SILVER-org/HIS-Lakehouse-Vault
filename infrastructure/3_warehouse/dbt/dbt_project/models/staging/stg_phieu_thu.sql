@@ -9,6 +9,10 @@ hashed_columns:
   DOT_DIEU_TRI_PK: 'nb_dot_dieu_tri_id'
   NHAN_VIEN_THU_NGAN_PK: 'thu_ngan_id'
   NHAN_VIEN_HUY_PK: 'thu_ngan_huy_thanh_toan_id'
+  LINK_THANH_TOAN_PK:
+    - 'id'
+    - 'nb_dot_dieu_tri_id'
+    - 'thu_ngan_id'
   PHIEU_THU_HASHDIFF:
     is_hashdiff: true
     columns:

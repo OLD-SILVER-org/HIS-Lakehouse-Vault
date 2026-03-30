@@ -8,6 +8,12 @@ hashed_columns:
   DOT_DIEU_TRI_PK: 'id'
   BENH_NHAN_PK: 'ma_nb'
   KHOA_PK: 'khoa_id'
+  LINK_BENH_NHAN_DIEU_TRI_PK:
+    - 'ma_nb'
+    - 'id'
+  LINK_DOT_DIEU_TRI_KHOA_PK:
+    - 'id'
+    - 'khoa_id'
   DOT_DIEU_TRI_HASHDIFF:
     is_hashdiff: true
     columns:

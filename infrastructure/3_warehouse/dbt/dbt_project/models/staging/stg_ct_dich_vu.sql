@@ -10,6 +10,11 @@ hashed_columns:
   DICH_VU_PK: 'dich_vu_id'
   NHAN_VIEN_PK: 'bac_si_chi_dinh_id'
   KHOA_PK: 'khoa_chi_dinh_id'
+  LINK_CHI_DINH_DICH_VU_PK:
+    - 'nb_dot_dieu_tri_id'
+    - 'dich_vu_id'
+    - 'bac_si_chi_dinh_id'
+    - 'khoa_chi_dinh_id'
   CHI_DINH_DV_HASHDIFF:
     is_hashdiff: true
     columns:

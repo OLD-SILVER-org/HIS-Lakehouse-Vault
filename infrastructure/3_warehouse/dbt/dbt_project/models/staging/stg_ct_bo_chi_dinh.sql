@@ -1,28 +1,15 @@
 {%- set yaml_metadata -%}
 source_model:
-  staging: 'ct_dv_kham'
+  staging: 'ct_bo_chi_dinh'
 derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
-  KHAM_BENH_PK: 'id'
-  DOT_DIEU_TRI_PK: 'nb_dot_dieu_tri_id'
-  NHAN_VIEN_KHAM_PK: 'bac_si_kham_id'
-  NHAN_VIEN_KL_PK: 'bac_si_ket_luan_id'
-  LINK_KHAM_BENH_PK:
+  LINK_BO_CHI_DINH_PK:
     - 'nb_dot_dieu_tri_id'
-    - 'bac_si_kham_id'
-  KHAM_BENH_HASHDIFF:
-    is_hashdiff: true
-    columns:
-      - 'dot_kham_moi'
-      - 'nguoi_phien_dich_id'
-      - 'stt_chuyen_khoa'
-      - 'thiet_lap'
-      - 'thoi_gian_kham'
-      - 'thoi_gian_ket_luan'
-      - 'active'
-      - 'deleted'
+    - 'bo_chi_dinh_id'
+  DOT_DIEU_TRI_PK: 'nb_dot_dieu_tri_id'
+  BO_CHI_DINH_PK: 'bo_chi_dinh_id'
 
 {%- endset -%}
 
