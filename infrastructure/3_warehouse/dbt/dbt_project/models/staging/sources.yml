@@ -16,3 +16,12 @@ sources:
       - name: dm_bo_chi_dinh
       - name: ct_phieu_thu
       - name: ct_bo_chi_dinh
+      - name: ct_dv_kham_ket_luan
+      - name: ct_dv_ky_thuat
+      - name: ct_kham_suc_khoe
+      - name: ct_nguon_nb
+      - name: dm_nhom_dich_vu_cap1
+      - name: dm_nhom_dich_vu_cap2
+      - name: dm_nhom_dich_vu_cap3
+      - name: dm_hop_dong_ksk
+      - name: dm_dv_discount
