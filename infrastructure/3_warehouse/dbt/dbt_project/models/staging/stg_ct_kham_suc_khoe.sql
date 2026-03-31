@@ -7,6 +7,9 @@ derived_columns:
 hashed_columns:
   KHAM_SUC_KHOE_PK: 'id'
   HOP_DONG_KSK_PK: 'hop_dong_ksk_id'
+  LINK_KHAM_SUC_KHOE_PK:
+    - 'id'
+    - 'hop_dong_ksk_id'
   KHAM_SUC_KHOE_HASHDIFF:
     is_hashdiff: true
     columns:
