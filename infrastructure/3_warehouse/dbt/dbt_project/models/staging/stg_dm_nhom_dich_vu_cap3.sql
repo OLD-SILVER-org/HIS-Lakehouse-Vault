@@ -7,6 +7,9 @@ derived_columns:
 hashed_columns:
   NHOM_DICH_VU_CAP3_PK: 'code_service_lvl_3'
   NHOM_DICH_VU_CAP2_PK: 'nhom_dich_vu_cap2_id'
+  LINK_CAP2_CAP3_PK:
+    - 'code_service_lvl_3'
+    - 'nhom_dich_vu_cap2_id'
   NHOM_DICH_VU_CAP3_HASHDIFF:
     is_hashdiff: true
     columns:

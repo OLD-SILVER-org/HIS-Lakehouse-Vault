@@ -8,6 +8,9 @@ hashed_columns:
   DV_KY_THUAT_PK: 'id'
   CHI_DINH_DICH_VU_PK: 'id'
   DOT_DIEU_TRI_PK: 'nb_dot_dieu_tri_id'
+  LINK_DV_KY_THUAT_PK:
+    - 'id'
+    - 'nb_dot_dieu_tri_id'
   DV_KY_THUAT_HASHDIFF:
     is_hashdiff: true
     columns:
