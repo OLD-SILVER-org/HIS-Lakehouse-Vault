@@ -25,3 +25,14 @@ sources:
       - name: dm_nhom_dich_vu_cap3
       - name: dm_hop_dong_ksk
       - name: dm_dv_discount
+      - name: dm_tinh_thanh_pho
+      - name: dm_quan_huyen
+      - name: dm_xa_phuong
+      - name: dm_chuyen_khoa
+      - name: dm_doi_tuong_kcb
+      - name: dm_hoc_ham_hoc_vi
+      - name: dm_loai_dich_vu
+      - name: dm_nguoi_gioi_thieu
+      - name: ct_address
+      - name: hospital_configs
+      - name: dm_nguon_nb
