@@ -27,3 +27,9 @@ models:
     raw_vault:
       +schema: raw_vault
       +materialized: incremental
+    reference:
+      +schema: reference
+      +materialized: table
+    business_vault:
+      +schema: business_vault
+      +materialized: incremental
