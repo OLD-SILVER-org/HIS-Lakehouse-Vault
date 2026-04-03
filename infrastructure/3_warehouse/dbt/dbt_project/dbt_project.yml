@@ -33,3 +33,10 @@ models:
     business_vault:
       +schema: business_vault
       +materialized: incremental
+    data_mart:
+      dim:
+        +schema: data_mart
+        +materialized: table
+      fact:
+        +schema: data_mart
+        +materialized: table
