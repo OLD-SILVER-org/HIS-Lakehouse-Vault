@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: fact_chi_dinh_dich_vu
+    description: "Bảng Fact giao dịch chỉ định dịch vụ"
+    columns:
+      - name: LINK_CHI_DINH_DICH_VU_PK
+        tests:
+          - unique
+          - not_null
+      - name: DOT_DIEU_TRI_PK
+        description: "Khóa ngoại đến dim_dot_dieu_tri"
+      - name: DICH_VU_PK
+        description: "Khóa ngoại đến dim_dich_vu"
+      - name: BENH_NHAN_PK
+        description: "Khóa ngoại đến dim_benh_nhan"
+
+  - name: fact_doanh_thu_theo_dich_vu
+    description: "Bảng Aggregate Fact doanh thu tổng hợp hằng ngày theo Dịch vụ"
+    columns:
+      - name: DICH_VU_PK
+        description: "Khóa ngoại đến dim_dich_vu"
+      - name: NGAY
+        description: "Ngày ghi nhận doanh thu"
+
+  - name: fact_doanh_thu_theo_khoa
+    description: "Bảng Aggregate Fact doanh thu theo Khoa y tế"
+    columns:
+      - name: KHOA_PK
+        description: "Khóa ngoại đến dim_khoa_phong"
+      - name: NGAY
+        description: "Ngày ghi nhận doanh thu (Grain chính)"
+      - name: TONG_DOANH_THU_THUC
+        description: "Tổng tiền thực thu bao gồm cả BH và NB tự trả"
+      - name: TONG_TIEN_BH
+        description: "Số tiền Bảo hiểm y tế chi trả"
+      - name: TONG_SO_LUONG_DICH_VU
+        description: "Tổng số lượng đơn vị dịch vụ đã thực hiện"
+      - name: SO_BENH_NHAN
+        description: "Số lượng bệnh nhân duy nhất trong ngày tại khoa"
+      - name: SO_DOT_DIEU_TRI
+        description: "Số lượng đợt điều trị (lượt tiếp đón) duy nhất"
+
+  - name: fact_dv_ky_thuat
+    description: "Bảng Fact thực hiện cận lâm sàng / kỹ thuật"
+    columns:
+      - name: DV_KY_THUAT_PK
+        tests:
+          - unique
+          - not_null
+      - name: DOT_DIEU_TRI_PK
+      - name: BENH_NHAN_PK
+
+  - name: fact_kham_benh
+    description: "Bảng Fact sự kiện khám bệnh"
+    columns:
+      - name: LINK_KHAM_BENH_PK
+        tests:
+          - unique
+          - not_null
+      - name: DOT_DIEU_TRI_PK
+      - name: NHAN_VIEN_KHAM_PK
+      - name: BENH_NHAN_PK
+
+  - name: fact_kham_suc_khoe
+    description: "Bảng Fact sự kiện khám sức khỏe tập đoàn"
+    columns:
+      - name: KHAM_SUC_KHOE_PK
+        tests:
+          - unique
+          - not_null
+      - name: HOP_DONG_KSK_PK
+
+  - name: fact_nguon_nb
+    description: "Factless Fact phân tích nguồn tiếp nhận bệnh nhân"
+    columns:
+      - name: LINK_NGUON_NB_PK
+        tests:
+          - unique
+          - not_null
+      - name: DOT_DIEU_TRI_PK
+      - name: BENH_NHAN_PK
+
+  - name: fact_thanh_toan
+    description: "Bảng Fact dòng tiền thu viện phí"
+    columns:
+      - name: PHIEU_THU_PK
+        tests:
+          - unique
+          - not_null
+      - name: DOT_DIEU_TRI_PK
+      - name: BENH_NHAN_PK
