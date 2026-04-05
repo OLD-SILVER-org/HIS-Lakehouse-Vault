@@ -1,0 +1,77 @@
+{{ config(
+    materialized='table',
+    schema='data_mart'
+) }}
+
+{#
+    FACT_CHI_DINH_DICH_VU - Bảng Fact sự kiện Chỉ định Dịch vụ
+    Grain: Mỗi dòng = 1 dịch vụ được bác sĩ chỉ định trong 1 đợt điều trị
+    Nguồn: link_chi_dinh_dich_vu + sat_chi_dinh_dich_vu
+    FK Dims: DOT_DIEU_TRI_PK, DICH_VU_PK, NHAN_VIEN_PK (BS chỉ định), KHOA_PK, BENH_NHAN_PK
+#}
+
+WITH latest_sat AS (
+    SELECT
+        LINK_CHI_DINH_DICH_VU_PK,
+        doi_tuong_kcb,
+        ghi_chu,
+        gia_bao_hiem,
+        gia_goc,
+        gia_khong_bao_hiem,
+        so_luong,
+        thoi_gian_chi_dinh,
+        tien_bh_thanh_toan,
+        tien_nb_cung_chi_tra,
+        tien_nb_tu_tra,
+        active,
+        deleted,
+        ROW_NUMBER() OVER (PARTITION BY LINK_CHI_DINH_DICH_VU_PK ORDER BY LOAD_DATETIME DESC) as row_num
+    FROM {{ ref('sat_chi_dinh_dich_vu') }}
+),
+
+-- Lấy BENH_NHAN_PK thông qua DOT_DIEU_TRI_PK
+link_bn AS (
+    SELECT
+        DOT_DIEU_TRI_PK,
+        BENH_NHAN_PK
+    FROM {{ ref('link_benh_nhan_dieu_tri') }}
+),
+
+final AS (
+    SELECT
+        lk.LINK_CHI_DINH_DICH_VU_PK,
+
+        -- === Dimension Keys (FK) ===
+        lk.DOT_DIEU_TRI_PK,
+        lk.DICH_VU_PK,
+        lk.NHAN_VIEN_PK          AS NHAN_VIEN_CHI_DINH_PK,
+        lk.KHOA_PK               AS KHOA_CHI_DINH_PK,
+        bn.BENH_NHAN_PK,
+
+        -- === Measures (Số tiền / Số lượng) ===
+        s.so_luong                AS SO_LUONG,
+        s.gia_goc                 AS GIA_GOC,
+        s.gia_bao_hiem            AS GIA_BAO_HIEM,
+        s.gia_khong_bao_hiem      AS GIA_KHONG_BAO_HIEM,
+        s.tien_bh_thanh_toan      AS TIEN_BH_THANH_TOAN,
+        s.tien_nb_cung_chi_tra    AS TIEN_NB_CUNG_CHI_TRA,
+        s.tien_nb_tu_tra          AS TIEN_NB_TU_TRA,
+
+        -- === Attributes ===
+        s.doi_tuong_kcb           AS DOI_TUONG_KCB,
+        s.ghi_chu                 AS GHI_CHU,
+        s.thoi_gian_chi_dinh      AS THOI_GIAN_CHI_DINH,
+        s.active                  AS IS_ACTIVE,
+
+        -- === Metadata ===
+        lk.LOAD_DATETIME          AS CREATED_AT
+
+    FROM {{ ref('link_chi_dinh_dich_vu') }} lk
+    LEFT JOIN latest_sat s
+        ON lk.LINK_CHI_DINH_DICH_VU_PK = s.LINK_CHI_DINH_DICH_VU_PK AND s.row_num = 1
+    LEFT JOIN link_bn bn
+        ON lk.DOT_DIEU_TRI_PK = bn.DOT_DIEU_TRI_PK
+    WHERE s.deleted = 0 OR s.deleted IS NULL
+)
+
+SELECT * FROM final

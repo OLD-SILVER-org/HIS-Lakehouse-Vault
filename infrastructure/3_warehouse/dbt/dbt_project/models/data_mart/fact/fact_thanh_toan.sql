@@ -1,0 +1,104 @@
+{{ config(
+    materialized='table',
+    schema='data_mart'
+) }}
+
+{#
+    FACT_THANH_TOAN - Bảng Fact sự kiện Thanh toán
+    Grain: Mỗi dòng = 1 phiếu thu/hóa đơn thanh toán
+    Nguồn: link_thanh_toan + sat_thanh_toan
+    FK Dims: PHIEU_THU_PK, DOT_DIEU_TRI_PK, NHAN_VIEN_THU_NGAN_PK, BENH_NHAN_PK
+#}
+
+WITH latest_sat AS (
+    SELECT
+        PHIEU_THU_PK,
+        so_phieu,
+        loai_phieu_thu,
+        doi_tuong_kcb,
+        thanh_tien,
+        thanh_toan,
+        tien_bh_thanh_toan,
+        tien_nb_cung_chi_tra,
+        tien_nb_tu_tra,
+        tien_nb_phu_thu,
+        tien_nguon_khac,
+        tien_giam_gia,
+        tien_hoan_tra,
+        tien_mien_giam_dich_vu,
+        tien_mien_giam_phieu_thu,
+        phan_tram_mien_giam,
+        hinh_thuc_mien_giam,
+        hoan_ung,
+        thoi_gian_tao_phieu,
+        thoi_gian_thanh_toan,
+        thoi_gian_huy_thanh_toan,
+        trang_thai_hoa_don,
+        active,
+        deleted,
+        ROW_NUMBER() OVER (PARTITION BY PHIEU_THU_PK ORDER BY LOAD_DATETIME DESC) as row_num
+    FROM {{ ref('sat_thanh_toan') }}
+),
+
+-- Lấy BENH_NHAN_PK thông qua DOT_DIEU_TRI_PK
+link_bn AS (
+    SELECT
+        DOT_DIEU_TRI_PK,
+        BENH_NHAN_PK
+    FROM {{ ref('link_benh_nhan_dieu_tri') }}
+),
+
+final AS (
+    SELECT
+        lk.LINK_THANH_TOAN_PK,
+
+        -- === Dimension Keys (FK) ===
+        lk.PHIEU_THU_PK,
+        lk.DOT_DIEU_TRI_PK,
+        lk.NHAN_VIEN_THU_NGAN_PK,
+        bn.BENH_NHAN_PK,
+
+        -- === Identifiers ===
+        s.so_phieu                  AS SO_PHIEU,
+        s.loai_phieu_thu            AS LOAI_PHIEU_THU,
+        s.doi_tuong_kcb             AS DOI_TUONG_KCB,
+
+        -- === Measures (Tài chính) ===
+        s.thanh_tien                AS THANH_TIEN,
+        s.thanh_toan                AS THANH_TOAN,
+        s.tien_bh_thanh_toan        AS TIEN_BH_THANH_TOAN,
+        s.tien_nb_cung_chi_tra      AS TIEN_NB_CUNG_CHI_TRA,
+        s.tien_nb_tu_tra            AS TIEN_NB_TU_TRA,
+        s.tien_nb_phu_thu           AS TIEN_NB_PHU_THU,
+        s.tien_nguon_khac           AS TIEN_NGUON_KHAC,
+        s.tien_giam_gia             AS TIEN_GIAM_GIA,
+        s.tien_hoan_tra             AS TIEN_HOAN_TRA,
+        s.tien_mien_giam_dich_vu    AS TIEN_MIEN_GIAM_DICH_VU,
+        s.tien_mien_giam_phieu_thu  AS TIEN_MIEN_GIAM_PHIEU_THU,
+
+        -- === Discount Attributes ===
+        s.phan_tram_mien_giam       AS PHAN_TRAM_MIEN_GIAM,
+        s.hinh_thuc_mien_giam       AS HINH_THUC_MIEN_GIAM,
+        s.hoan_ung                  AS HOAN_UNG,
+
+        -- === Timestamps ===
+        s.thoi_gian_tao_phieu       AS THOI_GIAN_TAO_PHIEU,
+        s.thoi_gian_thanh_toan      AS THOI_GIAN_THANH_TOAN,
+        s.thoi_gian_huy_thanh_toan  AS THOI_GIAN_HUY_THANH_TOAN,
+
+        -- === Status ===
+        s.trang_thai_hoa_don        AS TRANG_THAI_HOA_DON,
+        s.active                    AS IS_ACTIVE,
+
+        -- === Metadata ===
+        lk.LOAD_DATETIME            AS CREATED_AT
+
+    FROM {{ ref('link_thanh_toan') }} lk
+    LEFT JOIN latest_sat s
+        ON lk.PHIEU_THU_PK = s.PHIEU_THU_PK AND s.row_num = 1
+    LEFT JOIN link_bn bn
+        ON lk.DOT_DIEU_TRI_PK = bn.DOT_DIEU_TRI_PK
+    WHERE s.deleted = 0 OR s.deleted IS NULL
+)
+
+SELECT * FROM final

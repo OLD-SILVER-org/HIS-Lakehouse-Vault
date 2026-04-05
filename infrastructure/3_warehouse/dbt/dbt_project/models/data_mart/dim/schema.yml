@@ -1,0 +1,99 @@
+version: 2
+
+models:
+  - name: dim_benh_nhan
+    description: "Bảng Dimension lưu trữ thông tin về Bệnh Nhân"
+    columns:
+      - name: BENH_NHAN_PK
+        description: "Khóa chính (Hash Key) của Bệnh nhân"
+        tests:
+          - unique
+          - not_null
+      - name: MA_NB
+        description: "Mã y tế / Mã bệnh nhân"
+      - name: TEN_BENH_NHAN
+        description: "Tên bệnh nhân"
+
+  - name: dim_bo_chi_dinh
+    description: "Bảng Dimension lưu trữ thông tin nhóm / bộ chỉ định dịch vụ"
+    columns:
+      - name: BO_CHI_DINH_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_dich_vu
+    description: "Bảng Dimension lưu trữ danh mục dịch vụ kỹ thuật"
+    columns:
+      - name: DICH_VU_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
+      - name: MA_DICH_VU
+        description: "Mã dịch vụ"
+      - name: TEN_DICH_VU
+        description: "Tên dịch vụ"
+
+  - name: dim_dot_dieu_tri
+    description: "Bảng Dimension lưu trữ thông tin đợt điều trị"
+    columns:
+      - name: DOT_DIEU_TRI_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
+      - name: DOT_DIEU_TRI_ID
+        description: "ID đợt điều trị gốc"
+      - name: MA_BENH_AN
+        description: "Mã bệnh án"
+
+  - name: dim_dv_ky_thuat
+    description: "Bảng Dimension lưu trữ thông tin về kỹ thuật thực hiện"
+    columns:
+      - name: DV_KY_THUAT_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_hop_dong_ksk
+    description: "Bảng Dimension lưu trữ hợp đồng khám sức khỏe đoàn"
+    columns:
+      - name: HOP_DONG_KSK_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_khoa_phong
+    description: "Bảng Dimension lưu trữ sơ đồ tổ chức khoa phòng"
+    columns:
+      - name: DON_VI_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_nhan_vien
+    description: "Bảng Dimension nhân viên, bác sĩ, điều dưỡng"
+    columns:
+      - name: NHAN_VIEN_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
+      - name: MA_NHAN_VIEN
+        description: "Mã nhân viên"
+      - name: TEN_NHAN_VIEN
+        description: "Họ và tên"
+
+  - name: dim_phieu_thu
+    description: "Bảng Dimension phiếu thu / hóa đơn"
+    columns:
+      - name: PHIEU_THU_PK
+        description: "Khóa chính"
+        tests:
+          - unique
+          - not_null
