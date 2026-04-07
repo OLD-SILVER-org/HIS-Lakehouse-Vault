@@ -57,5 +57,7 @@ infrastructure/3_warehouse/dbt/dbt_project/dbt_modules/*
 infrastructure/3_warehouse/dbt/.dbt/profiles.yml
 #
 *.txt
+#AI
+AI_Folder/*
 
 
