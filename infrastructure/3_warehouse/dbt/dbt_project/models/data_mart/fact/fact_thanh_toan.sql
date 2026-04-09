@@ -58,6 +58,12 @@ final AS (
         lk.NHAN_VIEN_THU_NGAN_PK,
         bn.BENH_NHAN_PK,
 
+        -- === Human Readable Names (Added per User Request) ===
+        dbn.MA_NB,
+        dbn.TEN_BENH_NHAN,
+        dnv.TEN_NHAN_VIEN        AS TEN_NHAN_VIEN_THU_NGAN,
+        ddt.MA_HO_SO,
+
         -- === Identifiers ===
         s.so_phieu                  AS SO_PHIEU,
         s.loai_phieu_thu            AS LOAI_PHIEU_THU,
@@ -98,6 +104,15 @@ final AS (
         ON lk.PHIEU_THU_PK = s.PHIEU_THU_PK AND s.row_num = 1
     LEFT JOIN link_bn bn
         ON lk.DOT_DIEU_TRI_PK = bn.DOT_DIEU_TRI_PK
+
+    -- Joins with Dim for Readable Names
+    LEFT JOIN {{ ref('dim_benh_nhan') }} dbn
+        ON bn.BENH_NHAN_PK = dbn.BENH_NHAN_PK
+    LEFT JOIN {{ ref('dim_nhan_vien') }} dnv
+        ON lk.NHAN_VIEN_THU_NGAN_PK = dnv.NHAN_VIEN_PK
+    LEFT JOIN {{ ref('dim_dot_dieu_tri') }} ddt
+        ON lk.DOT_DIEU_TRI_PK = ddt.DOT_DIEU_TRI_PK
+
     WHERE s.deleted = 0 OR s.deleted IS NULL
 )
 

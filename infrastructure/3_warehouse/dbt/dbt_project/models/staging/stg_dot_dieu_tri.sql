@@ -1,19 +1,18 @@
 {%- set yaml_metadata -%}
-source_model:
-  staging: 'ct_dot_dieu_tri'
+source_model: 'stg_ct_dot_dieu_tri_prep'
 derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
   DOT_DIEU_TRI_PK: 'id'
   BENH_NHAN_PK: 'ma_nb'
-  KHOA_PK: 'khoa_id'
+  KHOA_PK: 'code_khoa'
   LINK_BENH_NHAN_DIEU_TRI_PK:
     - 'ma_nb'
     - 'id'
   LINK_DOT_DIEU_TRI_KHOA_PK:
     - 'id'
-    - 'khoa_id'
+    - 'code_khoa'
   DOT_DIEU_TRI_HASHDIFF:
     is_hashdiff: true
     columns:
@@ -76,4 +75,4 @@ hashed_columns:
                   source_model=metadata_dict['source_model'],
                   derived_columns=metadata_dict['derived_columns'],
                   hashed_columns=metadata_dict['hashed_columns'],
-                  ranked_columns=metadata_dict['ranked_columns']) }}
+                  ranked_columns=none) }}

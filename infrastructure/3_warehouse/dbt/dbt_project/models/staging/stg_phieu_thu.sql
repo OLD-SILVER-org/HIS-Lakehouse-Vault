@@ -1,18 +1,16 @@
 {%- set yaml_metadata -%}
-source_model:
-  staging: 'ct_phieu_thu'
+source_model: 'stg_ct_phieu_thu_prep'
 derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
   PHIEU_THU_PK: 'id'
   DOT_DIEU_TRI_PK: 'nb_dot_dieu_tri_id'
-  NHAN_VIEN_THU_NGAN_PK: 'thu_ngan_id'
-  NHAN_VIEN_HUY_PK: 'thu_ngan_huy_thanh_toan_id'
+  NHAN_VIEN_THU_NGAN_PK: 'code_thu_ngan'
   LINK_THANH_TOAN_PK:
     - 'id'
     - 'nb_dot_dieu_tri_id'
-    - 'thu_ngan_id'
+    - 'code_thu_ngan'
   PHIEU_THU_HASHDIFF:
     is_hashdiff: true
     columns:

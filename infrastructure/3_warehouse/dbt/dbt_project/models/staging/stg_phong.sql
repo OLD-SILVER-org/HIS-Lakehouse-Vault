@@ -1,12 +1,11 @@
 {%- set yaml_metadata -%}
-source_model:
-  staging: 'dm_phong'
+source_model: 'stg_dm_phong_prep'
 derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
   PHONG_PK: 'code_phong'
-  KHOA_PK: 'khoa_id'
+  KHOA_PK: 'code_khoa'
   PHONG_HASHDIFF:
     is_hashdiff: true
     columns:

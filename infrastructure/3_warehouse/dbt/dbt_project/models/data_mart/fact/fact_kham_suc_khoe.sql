@@ -42,6 +42,10 @@ final AS (
         lk.KHAM_SUC_KHOE_PK,
         lk.HOP_DONG_KSK_PK,
 
+        -- === Human Readable Names (Added per User Request) ===
+        dhd.TEN_HOP_DONG,
+        dhd.SO_HOP_DONG,
+
         -- === Thông tin đối tượng KSK ===
         s.chuc_vu                       AS CHUC_VU,
         s.phong_ban                     AS PHONG_BAN,
@@ -73,6 +77,10 @@ final AS (
     FROM {{ ref('link_kham_suc_khoe') }} lk
     LEFT JOIN latest_sat s
         ON lk.KHAM_SUC_KHOE_PK = s.KHAM_SUC_KHOE_PK AND s.row_num = 1
+
+    -- Joins with Dim for Readable Names
+    LEFT JOIN {{ ref('dim_hop_dong_ksk') }} dhd
+        ON lk.HOP_DONG_KSK_PK = dhd.HOP_DONG_KSK_PK
 )
 
 SELECT * FROM final

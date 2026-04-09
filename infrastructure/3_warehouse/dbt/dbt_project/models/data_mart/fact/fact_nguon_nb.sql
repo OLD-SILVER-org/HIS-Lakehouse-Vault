@@ -39,6 +39,11 @@ final AS (
         lk.NGUON_NB_PK,
         bn.BENH_NHAN_PK,
 
+        -- === Human Readable Names (Added per User Request) ===
+        dbn.MA_NB,
+        dbn.TEN_BENH_NHAN,
+        ddt.MA_HO_SO,
+
         -- === Attributes / Descriptors ===
         s.nguon_nb_id                   AS NGUON_NB_ID,
         s.nguoi_gioi_thieu_id           AS NGUOI_GIOI_THIEU_ID,
@@ -52,6 +57,12 @@ final AS (
         ON lk.LINK_NGUON_NB_PK = s.LINK_NGUON_NB_PK AND s.row_num = 1
     LEFT JOIN link_bn bn
         ON lk.DOT_DIEU_TRI_PK = bn.DOT_DIEU_TRI_PK
+
+    -- Joins with Dim for Readable Names
+    LEFT JOIN {{ ref('dim_benh_nhan') }} dbn
+        ON bn.BENH_NHAN_PK = dbn.BENH_NHAN_PK
+    LEFT JOIN {{ ref('dim_dot_dieu_tri') }} ddt
+        ON lk.DOT_DIEU_TRI_PK = ddt.DOT_DIEU_TRI_PK
 )
 
 SELECT * FROM final

@@ -50,4 +50,9 @@ aggregated AS (
     GROUP BY 1, 2
 )
 
-SELECT * FROM aggregated
+SELECT 
+    agg.*,
+    dkp.TEN_DON_VI AS TEN_KHOA
+FROM aggregated agg
+LEFT JOIN {{ ref('dim_khoa_phong') }} dkp
+    ON agg.KHOA_PK = dkp.DON_VI_PK

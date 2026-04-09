@@ -1,17 +1,16 @@
 {%- set yaml_metadata -%}
-source_model:
-  staging: 'ct_dv_kham'
+source_model: 'stg_ct_dv_kham_prep'
 derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
   KHAM_BENH_PK: 'id'
   DOT_DIEU_TRI_PK: 'nb_dot_dieu_tri_id'
-  NHAN_VIEN_KHAM_PK: 'bac_si_kham_id'
-  NHAN_VIEN_KL_PK: 'bac_si_ket_luan_id'
+  NHAN_VIEN_KHAM_PK: 'code_nhan_vien_kham'
+  NHAN_VIEN_KL_PK: 'code_nhan_vien_kl'
   LINK_KHAM_BENH_PK:
     - 'nb_dot_dieu_tri_id'
-    - 'bac_si_kham_id'
+    - 'code_nhan_vien_kham'
   KHAM_BENH_HASHDIFF:
     is_hashdiff: true
     columns:
@@ -23,7 +22,6 @@ hashed_columns:
       - 'thoi_gian_ket_luan'
       - 'active'
       - 'deleted'
-
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
