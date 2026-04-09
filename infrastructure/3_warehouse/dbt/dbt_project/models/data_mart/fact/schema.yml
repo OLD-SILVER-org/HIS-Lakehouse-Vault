@@ -14,12 +14,26 @@ models:
         description: "Khóa ngoại đến dim_dich_vu"
       - name: BENH_NHAN_PK
         description: "Khóa ngoại đến dim_benh_nhan"
+      - name: TEN_BENH_NHAN
+        description: "Tên đầy đủ của bệnh nhân (Lấy từ dim_benh_nhan)"
+      - name: MA_NB
+        description: "Mã số người bệnh (Business Key)"
+      - name: TEN_DICH_VU
+        description: "Tên dịch vụ kỹ thuật/khám (Lấy từ dim_dich_vu)"
+      - name: TEN_NHAN_VIEN_CHI_DINH
+        description: "Tên Bác sĩ thực hiện chỉ định"
+      - name: TEN_KHOA_CHI_DINH
+        description: "Tên Khoa y tế nơi phát sinh chỉ định"
+      - name: MA_HO_SO
+        description: "Mã hồ sơ bệnh án liên quan"
 
   - name: fact_doanh_thu_theo_dich_vu
     description: "Bảng Aggregate Fact doanh thu tổng hợp hằng ngày theo Dịch vụ"
     columns:
       - name: DICH_VU_PK
         description: "Khóa ngoại đến dim_dich_vu"
+      - name: TEN_DICH_VU
+        description: "Tên dịch vụ (Lấy từ dim_dich_vu)"
       - name: NGAY
         description: "Ngày ghi nhận doanh thu"
 
@@ -28,6 +42,8 @@ models:
     columns:
       - name: KHOA_PK
         description: "Khóa ngoại đến dim_khoa_phong"
+      - name: TEN_KHOA
+        description: "Tên khoa y tế hiển thị"
       - name: NGAY
         description: "Ngày ghi nhận doanh thu (Grain chính)"
       - name: TONG_DOANH_THU_THUC
@@ -36,7 +52,7 @@ models:
         description: "Số tiền Bảo hiểm y tế chi trả"
       - name: TONG_SO_LUONG_DICH_VU
         description: "Tổng số lượng đơn vị dịch vụ đã thực hiện"
-      - name: SO_BENH_NHAN
+      - name: SO_BEN_NHAN
         description: "Số lượng bệnh nhân duy nhất trong ngày tại khoa"
       - name: SO_DOT_DIEU_TRI
         description: "Số lượng đợt điều trị (lượt tiếp đón) duy nhất"
@@ -50,6 +66,8 @@ models:
           - not_null
       - name: DOT_DIEU_TRI_PK
       - name: BENH_NHAN_PK
+      - name: TEN_BENH_NHAN
+        description: "Tên bệnh nhân thực hiện kỹ thuật"
 
   - name: fact_kham_benh
     description: "Bảng Fact sự kiện khám bệnh"
@@ -61,6 +79,10 @@ models:
       - name: DOT_DIEU_TRI_PK
       - name: NHAN_VIEN_KHAM_PK
       - name: BENH_NHAN_PK
+      - name: TEN_BENH_NHAN
+        description: "Tên bệnh nhân được khám"
+      - name: TEN_BAC_SI_KHAM
+        description: "Tên Bác sĩ thực hiện lượt khám"
 
   - name: fact_kham_suc_khoe
     description: "Bảng Fact sự kiện khám sức khỏe tập đoàn"
@@ -70,6 +92,8 @@ models:
           - unique
           - not_null
       - name: HOP_DONG_KSK_PK
+      - name: TEN_HOP_DONG
+        description: "Tên hợp đồng khám đoàn của doanh nghiệp"
 
   - name: fact_nguon_nb
     description: "Factless Fact phân tích nguồn tiếp nhận bệnh nhân"
@@ -80,6 +104,8 @@ models:
           - not_null
       - name: DOT_DIEU_TRI_PK
       - name: BENH_NHAN_PK
+      - name: TEN_BENH_NHAN
+        description: "Tên bệnh nhân"
 
   - name: fact_thanh_toan
     description: "Bảng Fact dòng tiền thu viện phí"
@@ -90,3 +116,7 @@ models:
           - not_null
       - name: DOT_DIEU_TRI_PK
       - name: BENH_NHAN_PK
+      - name: TEN_BENH_NHAN
+        description: "Tên bệnh nhân thanh toán"
+      - name: TEN_NHAN_VIEN_THU_NGAN
+        description: "Tên nhân viên thu tiền"

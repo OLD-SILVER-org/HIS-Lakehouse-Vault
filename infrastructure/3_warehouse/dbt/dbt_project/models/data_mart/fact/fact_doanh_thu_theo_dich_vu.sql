@@ -85,4 +85,11 @@ aggregated AS (
         TUAN
 )
 
-SELECT * FROM aggregated
+SELECT 
+    agg.*,
+    ddv.TEN_DICH_VU,
+    ddv.MA_DICH_VU,
+    ddv.LOAI_DICH_VU
+FROM aggregated agg
+LEFT JOIN {{ ref('dim_dich_vu') }} ddv
+    ON agg.DICH_VU_PK = ddv.DICH_VU_PK

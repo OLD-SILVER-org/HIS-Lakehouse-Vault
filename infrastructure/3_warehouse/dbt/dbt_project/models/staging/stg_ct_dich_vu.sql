@@ -1,20 +1,19 @@
 {%- set yaml_metadata -%}
-source_model:
-  staging: 'ct_dich_vu'
+source_model: 'stg_ct_dich_vu_prep'
 derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
   CHI_DINH_DV_PK: 'id'
   DOT_DIEU_TRI_PK: 'nb_dot_dieu_tri_id'
-  DICH_VU_PK: 'dich_vu_id'
-  NHAN_VIEN_PK: 'bac_si_chi_dinh_id'
-  KHOA_PK: 'khoa_chi_dinh_id'
+  DICH_VU_PK: 'code_dichvu'
+  NHAN_VIEN_PK: 'code_nhan_vien_kham'
+  KHOA_PK: 'code_khoa'
   LINK_CHI_DINH_DICH_VU_PK:
     - 'nb_dot_dieu_tri_id'
-    - 'dich_vu_id'
-    - 'bac_si_chi_dinh_id'
-    - 'khoa_chi_dinh_id'
+    - 'code_dichvu'
+    - 'code_nhan_vien_kham'
+    - 'code_khoa'
   CHI_DINH_DV_HASHDIFF:
     is_hashdiff: true
     columns:

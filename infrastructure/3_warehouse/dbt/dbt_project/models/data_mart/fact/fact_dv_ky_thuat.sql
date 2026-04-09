@@ -49,6 +49,11 @@ final AS (
         lk.DOT_DIEU_TRI_PK,
         bn.BENH_NHAN_PK,
 
+        -- === Human Readable Names (Added per User Request) ===
+        dbn.MA_NB,
+        dbn.TEN_BENH_NHAN,
+        ddt.MA_HO_SO,
+
         -- === Trạng thái thực hiện ===
         s.trang_thai                            AS TRANG_THAI,
         s.khong_thuc_hien                       AS KHONG_THUC_HIEN,
@@ -80,6 +85,12 @@ final AS (
         ON lk.DV_KY_THUAT_PK = s.DV_KY_THUAT_PK AND s.row_num = 1
     LEFT JOIN link_bn bn
         ON lk.DOT_DIEU_TRI_PK = bn.DOT_DIEU_TRI_PK
+
+    -- Joins with Dim for Readable Names
+    LEFT JOIN {{ ref('dim_benh_nhan') }} dbn
+        ON bn.BENH_NHAN_PK = dbn.BENH_NHAN_PK
+    LEFT JOIN {{ ref('dim_dot_dieu_tri') }} ddt
+        ON lk.DOT_DIEU_TRI_PK = ddt.DOT_DIEU_TRI_PK
 )
 
 SELECT * FROM final

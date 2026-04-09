@@ -48,6 +48,14 @@ final AS (
         lk.KHOA_PK               AS KHOA_CHI_DINH_PK,
         bn.BENH_NHAN_PK,
 
+        -- === Human Readable Names (Added per User Request) ===
+        dbn.MA_NB,
+        dbn.TEN_BENH_NHAN,
+        ddv.TEN_DICH_VU,
+        dnv.TEN_NHAN_VIEN        AS TEN_NHAN_VIEN_CHI_DINH,
+        dkp.TEN_DON_VI           AS TEN_KHOA_CHI_DINH,
+        ddt.MA_HO_SO,
+
         -- === Measures (Số tiền / Số lượng) ===
         s.so_luong                AS SO_LUONG,
         s.gia_goc                 AS GIA_GOC,
@@ -71,6 +79,19 @@ final AS (
         ON lk.LINK_CHI_DINH_DICH_VU_PK = s.LINK_CHI_DINH_DICH_VU_PK AND s.row_num = 1
     LEFT JOIN link_bn bn
         ON lk.DOT_DIEU_TRI_PK = bn.DOT_DIEU_TRI_PK
+
+    -- Joins with Dim for Readable Names
+    LEFT JOIN {{ ref('dim_benh_nhan') }} dbn
+        ON bn.BENH_NHAN_PK = dbn.BENH_NHAN_PK
+    LEFT JOIN {{ ref('dim_dich_vu') }} ddv
+        ON lk.DICH_VU_PK = ddv.DICH_VU_PK
+    LEFT JOIN {{ ref('dim_nhan_vien') }} dnv
+        ON lk.NHAN_VIEN_PK = dnv.NHAN_VIEN_PK
+    LEFT JOIN {{ ref('dim_khoa_phong') }} dkp
+        ON lk.KHOA_PK = dkp.DON_VI_PK
+    LEFT JOIN {{ ref('dim_dot_dieu_tri') }} ddt
+        ON lk.DOT_DIEU_TRI_PK = ddt.DOT_DIEU_TRI_PK
+
     WHERE s.deleted = 0 OR s.deleted IS NULL
 )
 
