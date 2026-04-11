@@ -60,4 +60,7 @@ infrastructure/3_warehouse/dbt/.dbt/profiles.yml
 #AI
 AI_Folder/*
 
+# Superset
+superset_data/*
+
 
