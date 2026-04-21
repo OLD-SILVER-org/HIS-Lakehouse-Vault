@@ -5,7 +5,7 @@ derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
-  HOP_DONG_KSK_PK: 'code_hop_dong'
+  HOP_DONG_KSK_PK: 'id'
   HOP_DONG_KSK_HASHDIFF:
     is_hashdiff: true
     columns:

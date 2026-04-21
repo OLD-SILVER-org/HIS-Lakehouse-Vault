@@ -18,7 +18,7 @@ WITH latest_sat AS (
 final AS (
     SELECT
         h.HOP_DONG_KSK_PK,
-        h.code_hop_dong AS HOP_DONG_KSK_ID,
+        h.id AS HOP_DONG_KSK_ID,
         s.ten AS TEN_HOP_DONG,
         s.so_hop_dong AS SO_HOP_DONG,
         s.ngay_hieu_luc AS NGAY_HIEU_LUC,
