@@ -70,17 +70,17 @@ final AS (
         s.doi_tuong_kcb             AS DOI_TUONG_KCB,
 
         -- === Measures (Tài chính) ===
-        s.thanh_tien                AS THANH_TIEN,
-        s.thanh_toan                AS THANH_TOAN,
-        s.tien_bh_thanh_toan        AS TIEN_BH_THANH_TOAN,
-        s.tien_nb_cung_chi_tra      AS TIEN_NB_CUNG_CHI_TRA,
-        s.tien_nb_tu_tra            AS TIEN_NB_TU_TRA,
-        s.tien_nb_phu_thu           AS TIEN_NB_PHU_THU,
-        s.tien_nguon_khac           AS TIEN_NGUON_KHAC,
-        s.tien_giam_gia             AS TIEN_GIAM_GIA,
-        s.tien_hoan_tra             AS TIEN_HOAN_TRA,
-        s.tien_mien_giam_dich_vu    AS TIEN_MIEN_GIAM_DICH_VU,
-        s.tien_mien_giam_phieu_thu  AS TIEN_MIEN_GIAM_PHIEU_THU,
+        CAST(NULLIF(s.thanh_tien::TEXT, '') AS NUMERIC)                AS THANH_TIEN,
+        CAST(NULLIF(s.thanh_toan::TEXT, '') AS NUMERIC)                AS THANH_TOAN,
+        CAST(NULLIF(s.tien_bh_thanh_toan::TEXT, '') AS NUMERIC)        AS TIEN_BH_THANH_TOAN,
+        CAST(NULLIF(s.tien_nb_cung_chi_tra::TEXT, '') AS NUMERIC)      AS TIEN_NB_CUNG_CHI_TRA,
+        CAST(NULLIF(s.tien_nb_tu_tra::TEXT, '') AS NUMERIC)            AS TIEN_NB_TU_TRA,
+        CAST(NULLIF(s.tien_nb_phu_thu::TEXT, '') AS NUMERIC)           AS TIEN_NB_PHU_THU,
+        CAST(NULLIF(s.tien_nguon_khac::TEXT, '') AS NUMERIC)           AS TIEN_NGUON_KHAC,
+        CAST(NULLIF(s.tien_giam_gia::TEXT, '') AS NUMERIC)             AS TIEN_GIAM_GIA,
+        CAST(NULLIF(s.tien_hoan_tra::TEXT, '') AS NUMERIC)             AS TIEN_HOAN_TRA,
+        CAST(NULLIF(s.tien_mien_giam_dich_vu::TEXT, '') AS NUMERIC)    AS TIEN_MIEN_GIAM_DICH_VU,
+        CAST(NULLIF(s.tien_mien_giam_phieu_thu::TEXT, '') AS NUMERIC)  AS TIEN_MIEN_GIAM_PHIEU_THU,
 
         -- === Discount Attributes ===
         s.phan_tram_mien_giam       AS PHAN_TRAM_MIEN_GIAM,

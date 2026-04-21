@@ -65,10 +65,10 @@ final AS (
         s.theo_yeu_cau                          AS THEO_YEU_CAU,
         s.uu_tien                               AS UU_TIEN,
 
-        -- === Tài chính ===
-        s.tam_ung                               AS TAM_UNG,
-        s.thanh_toan_sau                        AS THANH_TOAN_SAU,
-        s.so_lan_goi                            AS SO_LAN_GOI,
+        -- === Tài chính & Trạng thái (Chuyển Boolean sang 0/1 để Superset tính toán) ===
+        CASE WHEN s.tam_ung::TEXT = 'true' THEN 1 ELSE 0 END        AS IS_TAM_UNG,
+        CASE WHEN s.thanh_toan_sau::TEXT = 'true' THEN 1 ELSE 0 END   AS IS_THANH_TOAN_SAU,
+        CAST(NULLIF(s.so_lan_goi::TEXT, '') AS NUMERIC)             AS SO_LAN_GOI,
 
         -- === Timestamps ===
         s.thoi_gian_lay_so                      AS THOI_GIAN_LAY_SO,

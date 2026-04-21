@@ -57,13 +57,13 @@ final AS (
         ddt.MA_HO_SO,
 
         -- === Measures (Số tiền / Số lượng) ===
-        s.so_luong                AS SO_LUONG,
-        s.gia_goc                 AS GIA_GOC,
-        s.gia_bao_hiem            AS GIA_BAO_HIEM,
-        s.gia_khong_bao_hiem      AS GIA_KHONG_BAO_HIEM,
-        s.tien_bh_thanh_toan      AS TIEN_BH_THANH_TOAN,
-        s.tien_nb_cung_chi_tra    AS TIEN_NB_CUNG_CHI_TRA,
-        s.tien_nb_tu_tra          AS TIEN_NB_TU_TRA,
+        CAST(NULLIF(s.so_luong::TEXT, '') AS NUMERIC)                AS SO_LUONG,
+        CAST(NULLIF(s.gia_goc::TEXT, '') AS NUMERIC)                 AS GIA_GOC,
+        CAST(NULLIF(s.gia_bao_hiem::TEXT, '') AS NUMERIC)            AS GIA_BAO_HIEM,
+        CAST(NULLIF(s.gia_khong_bao_hiem::TEXT, '') AS NUMERIC)      AS GIA_KHONG_BAO_HIEM,
+        CAST(NULLIF(s.tien_bh_thanh_toan::TEXT, '') AS NUMERIC)      AS TIEN_BH_THANH_TOAN,
+        CAST(NULLIF(s.tien_nb_cung_chi_tra::TEXT, '') AS NUMERIC)    AS TIEN_NB_CUNG_CHI_TRA,
+        CAST(NULLIF(s.tien_nb_tu_tra::TEXT, '') AS NUMERIC)          AS TIEN_NB_TU_TRA,
 
         -- === Attributes ===
         s.doi_tuong_kcb           AS DOI_TUONG_KCB,

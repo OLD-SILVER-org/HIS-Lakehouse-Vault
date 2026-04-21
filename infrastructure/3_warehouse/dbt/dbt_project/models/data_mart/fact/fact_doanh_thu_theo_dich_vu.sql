@@ -38,9 +38,9 @@ WITH base AS (
         EXTRACT(WEEK    FROM THOI_GIAN_CHI_DINH)::INT       AS TUAN,
 
         -- === Tài chính ===
-        NULLIF(GIA_GOC, '')::NUMERIC                                                    AS GIA_GOC_NUM,
+        NULLIF(GIA_GOC::TEXT, '')::NUMERIC                                                    AS GIA_GOC_NUM,
         SO_LUONG,
-        (NULLIF(GIA_GOC, '')::NUMERIC * SO_LUONG::NUMERIC)                              AS DOANH_THU_GOC,
+        (NULLIF(GIA_GOC::TEXT, '')::NUMERIC * SO_LUONG::NUMERIC)                              AS DOANH_THU_GOC,
         COALESCE(NULLIF(TIEN_BH_THANH_TOAN::TEXT,   '')::NUMERIC, 0)                   AS TIEN_BH,
         COALESCE(NULLIF(TIEN_NB_TU_TRA::TEXT,       '')::NUMERIC, 0)                   AS TIEN_NB_TU_TRA,
         COALESCE(NULLIF(TIEN_NB_CUNG_CHI_TRA::TEXT, '')::NUMERIC, 0)                   AS TIEN_NB_CUNG_CHI_TRA
