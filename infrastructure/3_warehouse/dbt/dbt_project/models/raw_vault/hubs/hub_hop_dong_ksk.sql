@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_dm_hop_dong_ksk" -%}
 {%- set src_pk = "HOP_DONG_KSK_PK" -%}
-{%- set src_nk = "code_hop_dong" -%}
+{%- set src_nk = "id" -%}
 {%- set src_ldts = "LOAD_DATETIME" -%}
 {%- set src_source = "RECORD_SOURCE" -%}
 

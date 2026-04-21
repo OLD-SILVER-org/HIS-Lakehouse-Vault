@@ -5,7 +5,7 @@ derived_columns:
   RECORD_SOURCE: '!POSTGRES_HOSPITAL'
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
-  BENH_NHAN_PK: 'ma_nb'
+  BENH_NHAN_PK: 'nb_thong_tin_id'
   BENH_NHAN_HASHDIFF:
     is_hashdiff: true
     columns:

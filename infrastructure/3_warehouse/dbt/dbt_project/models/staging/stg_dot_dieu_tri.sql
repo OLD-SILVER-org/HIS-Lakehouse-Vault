@@ -5,10 +5,10 @@ derived_columns:
   LOAD_DATETIME: 'NOW()'
 hashed_columns:
   DOT_DIEU_TRI_PK: 'id'
-  BENH_NHAN_PK: 'ma_nb'
+  BENH_NHAN_PK: 'nb_thong_tin_id'
   KHOA_PK: 'code_khoa'
   LINK_BENH_NHAN_DIEU_TRI_PK:
-    - 'ma_nb'
+    - 'nb_thong_tin_id'
     - 'id'
   LINK_DOT_DIEU_TRI_KHOA_PK:
     - 'id'

@@ -24,7 +24,7 @@ WITH latest_sat AS (
 final AS (
     SELECT
         h.BENH_NHAN_PK,
-        h.ma_nb AS MA_NB,
+        h.nb_thong_tin_id AS MA_NB,
         s.ten_nb AS TEN_BENH_NHAN,
         s.ngay_sinh AS NGAY_SINH,
         s.so_dien_thoai AS SO_DIEN_THOAI,
