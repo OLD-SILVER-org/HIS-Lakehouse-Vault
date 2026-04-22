@@ -61,7 +61,7 @@ infrastructure/3_warehouse/dbt/.dbt/profiles.yml
 AI_Folder/*
 
 # Superset
-infrastructure/4_bi/superset_data/
+infrastructure/4_bi/Superset/superset_data/
 
 
 docs/log.txt
