@@ -48,7 +48,7 @@ final AS (
         lk.KHOA_PK               AS KHOA_CHI_DINH_PK,
         bn.BENH_NHAN_PK,
 
-        -- === Human Readable Names (Added per User Request) ===
+        -- === Human Readable Names ===
         dbn.MA_NB,
         dbn.TEN_BENH_NHAN,
         ddv.TEN_DICH_VU,
@@ -57,13 +57,13 @@ final AS (
         ddt.MA_HO_SO,
 
         -- === Measures (Số tiền / Số lượng) ===
-        CAST(NULLIF(s.so_luong::TEXT, '') AS NUMERIC)                AS SO_LUONG,
-        CAST(NULLIF(s.gia_goc::TEXT, '') AS NUMERIC)                 AS GIA_GOC,
-        CAST(NULLIF(s.gia_bao_hiem::TEXT, '') AS NUMERIC)            AS GIA_BAO_HIEM,
-        CAST(NULLIF(s.gia_khong_bao_hiem::TEXT, '') AS NUMERIC)      AS GIA_KHONG_BAO_HIEM,
-        CAST(NULLIF(s.tien_bh_thanh_toan::TEXT, '') AS NUMERIC)      AS TIEN_BH_THANH_TOAN,
-        CAST(NULLIF(s.tien_nb_cung_chi_tra::TEXT, '') AS NUMERIC)    AS TIEN_NB_CUNG_CHI_TRA,
-        CAST(NULLIF(s.tien_nb_tu_tra::TEXT, '') AS NUMERIC)          AS TIEN_NB_TU_TRA,
+        COALESCE(CAST(NULLIF(s.so_luong::TEXT, '') AS NUMERIC), 0)                AS SO_LUONG,
+        COALESCE(CAST(NULLIF(s.gia_goc::TEXT, '') AS NUMERIC), 0)                 AS GIA_GOC,
+        COALESCE(CAST(NULLIF(s.gia_bao_hiem::TEXT, '') AS NUMERIC), 0)            AS GIA_BAO_HIEM,
+        COALESCE(CAST(NULLIF(s.gia_khong_bao_hiem::TEXT, '') AS NUMERIC), 0)      AS GIA_KHONG_BAO_HIEM,
+        COALESCE(CAST(NULLIF(s.tien_bh_thanh_toan::TEXT, '') AS NUMERIC), 0)      AS TIEN_BH_THANH_TOAN,
+        COALESCE(CAST(NULLIF(s.tien_nb_cung_chi_tra::TEXT, '') AS NUMERIC), 0)    AS TIEN_NB_CUNG_CHI_TRA,
+        COALESCE(CAST(NULLIF(s.tien_nb_tu_tra::TEXT, '') AS NUMERIC), 0)          AS TIEN_NB_TU_TRA,
 
         -- === Attributes ===
         s.doi_tuong_kcb           AS DOI_TUONG_KCB,

@@ -12,11 +12,11 @@ WITH base AS (
         KHOA_CHI_DINH_PK AS KHOA_PK,
         DATE_TRUNC('day', THOI_GIAN_CHI_DINH)::DATE AS NGAY,
         
-        -- Measures thô từ từng dòng chỉ định
-        (CAST(NULLIF(GIA_GOC::TEXT, '') AS NUMERIC) * CAST(NULLIF(SO_LUONG::TEXT, '') AS NUMERIC)) AS DOANH_THU_GOC,
-        CAST(NULLIF(TIEN_BH_THANH_TOAN::TEXT, '') AS NUMERIC) AS TIEN_BH,
-        CAST(NULLIF(TIEN_NB_TU_TRA::TEXT, '') AS NUMERIC)     AS TIEN_NB_TU_TRA,
-        CAST(NULLIF(TIEN_NB_CUNG_CHI_TRA::TEXT, '') AS NUMERIC) AS TIEN_NB_CUNG_CHI_TRA,
+        -- Sử dụng trực tiếp dữ liệu NUMERIC từ fact_chi_dinh_dich_vu
+        (GIA_GOC * SO_LUONG)                                 AS DOANH_THU_GOC,
+        TIEN_BH_THANH_TOAN                                   AS TIEN_BH,
+        TIEN_NB_TU_TRA                                       AS TIEN_NB_TU_TRA,
+        TIEN_NB_CUNG_CHI_TRA                                 AS TIEN_NB_CUNG_CHI_TRA,
         
         -- Phục vụ count distinct
         BENH_NHAN_PK,
