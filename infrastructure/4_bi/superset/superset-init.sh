@@ -4,8 +4,8 @@ set -e
 # Tự động tìm đường dẫn Python
 PYTHON_EXE=$(which python3 || which python)
 
-ADMIN_USER=${BI_SUPERSET_USER:-admin}
-ADMIN_PASS=${BI_SUPERSET_PASS:-admin}
+ADMIN_USER=${BI_SUPERSET_USER:-superset}
+ADMIN_PASS=${BI_SUPERSET_PASS:-superset@123}
 
 echo "===================================================="
 echo "STAGING: INITIALIZING SUPERSET"
