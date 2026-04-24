@@ -14,4 +14,4 @@ Cung cấp cái nhìn toàn cảnh về tình hình kinh doanh của bệnh vi�
 3. `bi_physician_workload.sql`: Phân tích tải trọng công việc của đội ngũ bác sĩ.
 
 ---
-*Cập nhật lần cuối: 23/04/2026*
+*Cập nhật lần cuối: 24/04/2026*
