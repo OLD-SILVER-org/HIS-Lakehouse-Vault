@@ -11,6 +11,7 @@ Theo dõi dòng tiền, cơ cấu doanh thu và đánh giá hiệu quả kinh t�
 ## 📊 Các Dataset chính
 1. `bi_physician_performance.sql`: Hiệu suất tài chính của từng bác sĩ (Doanh thu chỉ định).
 2. `bi_top_services_profitability.sql`: Phân tích top dịch vụ mang lại doanh thu cao nhất và cơ cấu thu (BHYT vs Viện phí).
+3. `bi_department_revenue_performance.sql`: Bức tranh doanh thu theo Khoa Phòng và tỷ trọng BHYT/Viện phí.
 
 ---
-*Cập nhật lần cuối: 23/04/2026*
+*Cập nhật lần cuối: 24/04/2026*
