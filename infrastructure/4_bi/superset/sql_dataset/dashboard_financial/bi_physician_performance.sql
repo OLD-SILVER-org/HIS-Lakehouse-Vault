@@ -19,8 +19,8 @@ SELECT
     f.THOI_GIAN_CHI_DINH::DATE as ngay,
     COUNT(DISTINCT f.MA_HO_SO) as so_ca_tiep_nhan,
     SUM(f.SO_LUONG) as tong_so_dich_vu,
-    SUM(f.TIEN_BH_THANH_TOAN + f.TIEN_NB_TU_TRA + f.TIEN_NB_CUNG_CHI_TRA) as tong_gia_tri_chi_dinh,
-    AVG(f.TIEN_NB_TU_TRA) as trung_binh_thu_tu_nb
+    ROUND(SUM(f.TIEN_BH_THANH_TOAN + f.TIEN_NB_TU_TRA + f.TIEN_NB_CUNG_CHI_TRA),2) as tong_gia_tri_chi_dinh,
+    ROUND(AVG(f.TIEN_NB_TU_TRA),2) as trung_binh_thu_tu_nb
 FROM public_data_mart.fact_chi_dinh_dich_vu f
 INNER JOIN public_data_mart.dim_nhan_vien nv ON f.NHAN_VIEN_CHI_DINH_PK = nv.NHAN_VIEN_PK
 INNER JOIN public_data_mart.dim_khoa_phong kp ON f.KHOA_CHI_DINH_PK = kp.DON_VI_PK
