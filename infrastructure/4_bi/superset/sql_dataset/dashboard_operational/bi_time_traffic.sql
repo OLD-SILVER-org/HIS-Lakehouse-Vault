@@ -13,6 +13,7 @@
    ==========================================================================
 */
 SELECT 
+    f.thoi_gian_kham::DATE as ngay, -- Thêm cột này để lọc thời gian
     -- Lấy giờ (0-23)
     EXTRACT(HOUR FROM f.thoi_gian_kham) as gio_trong_ngay,
     -- Lấy tên thứ (Thứ 2, Thứ 3...)
@@ -21,5 +22,5 @@ SELECT
     COUNT(*) as so_luot_kham
 FROM public_data_mart.fact_kham_benh f
 WHERE f.thoi_gian_kham IS NOT NULL
-GROUP BY 1, 2
-ORDER BY 1
+GROUP BY 1, 2, 3
+ORDER BY 1, 2
