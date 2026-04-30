@@ -12,8 +12,9 @@ Giám sát hiệu suất vận hành hàng ngày của bệnh viện, đo lườ
 1. `bi_operation_tat_analysis.sql`: Phân tích thời gian xử lý kỹ thuật (Từ lúc nhận đến lúc có kết quả).
 2. `bi_patient_insights.sql`: Chân dung bệnh nhân, phân bổ độ tuổi và khu vực.
 3. `bi_revisit_rate_analysis.sql`: Tỷ lệ bệnh nhân quay lại khám, đánh giá sự hài lòng/trung thành.
-4. `bi_time_traffic.sql`: Phân tích lưu lượng bệnh nhân theo khung giờ và các ngày trong tuần.
-5. `bi_service_usage_trend.sql`: Xu hướng sử dụng dịch vụ theo thời gian.
+4. `bi_doctor_workload.sql`: Phân tích hiệu suất và tải trọng làm việc của bác sĩ theo ngày.
+5. `bi_time_traffic.sql`: Phân tích lưu lượng bệnh nhân theo khung giờ và các ngày trong tuần.
+6. `bi_service_usage_trend.sql`: Xu hướng sử dụng dịch vụ theo thời gian.
 
 ---
 *Cập nhật lần cuối: 24/04/2026*
