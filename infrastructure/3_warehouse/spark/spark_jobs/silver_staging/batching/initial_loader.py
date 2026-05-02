@@ -7,6 +7,7 @@ from pyspark.sql.types import TimestampType, DateType, IntegerType, LongType, Fl
 # Add parent directory to sys.path to import utils
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from utils.spark_utils import SparkUtils
+from utils.slack_utils import SlackNotifier
 
 class InitialLoader:
     def __init__(self):
@@ -20,6 +21,7 @@ class InitialLoader:
         # Postgres Target Details
         self.target_db="dwh"
         self.target_schema = "staging"
+        self.notifier = SlackNotifier()
 
     def preprocess_time_columns(self, df):
         """
@@ -179,7 +181,9 @@ class InitialLoader:
             self.write_to_staging(table_name, df_matched)
             
         except Exception as e:
-            print(f"[✘] Failed to process {table_name}: {str(e)}")
+            error_msg = f"[✘] Failed to process {table_name}: {str(e)}"
+            print(error_msg)
+            self.notifier.send_message(f"❌ *Error Processing Table*: `{table_name}`\n> {str(e)}")
 
     def load(self):
         """
@@ -189,12 +193,16 @@ class InitialLoader:
         
         if not table_list:
             print("[!] No tables found in the lake to load.")
+            self.notifier.send_message("⚠️ *Initial Load Warning*: No tables found in the lake to load.")
             return
+
+        self.notifier.send_message(f"🚀 *Initial Load Started*: Starting to load {len(table_list)} tables from Lake to Staging.")
 
         for table in table_list:
             self.process_table(table)
         
         print("\n[*] Initial Load process finished.")
+        self.notifier.send_message("✅ *Initial Load Finished*: Data loading process completed successfully!")
 
 if __name__ == "__main__":
     loader = InitialLoader()

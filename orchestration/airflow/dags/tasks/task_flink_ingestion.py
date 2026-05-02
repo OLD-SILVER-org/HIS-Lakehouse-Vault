@@ -1,6 +1,6 @@
 from airflow.operators.python import PythonOperator
 
-class TaskIngestion:
+class TaskFlinkIngestion:
     def __init__(self, job_class):
         self.task_id = f"Run_{job_class.split('.')[-1]}"
         self.job_class = job_class
@@ -10,11 +10,11 @@ class TaskIngestion:
         import docker # type: ignore
         client = docker.from_env()
         
-        # Lệnh Flink bạn muốn chạy
+        # Flink job command
         command = f"flink run -c {self.job_class} {self.jar_path}"
         print(f"Executing: {command}")
         
-        # Gọi lệnh vào thẳng container flink_jobmanager
+        # Execute command in Flink container
         container = client.containers.get('flink_jobmanager')
         exit_code, output = container.exec_run(command)
         

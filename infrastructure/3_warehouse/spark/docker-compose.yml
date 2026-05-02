@@ -1,5 +1,6 @@
 services:
   spark-master:
+    build: .
     image: ${WAREHOUSE_SPARK_IMAGE}
     container_name: spark-master
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
@@ -12,7 +13,7 @@ services:
       - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./spark_jobs:/opt/spark/spark_jobs
-      - ./jars:/opt/spark/jars
+      - ./jars:/opt/spark/user_jars
     networks:
       - lake-net
       - warehouse-net
@@ -31,7 +32,7 @@ services:
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./conf/hive-site.xml:/opt/spark/conf/hive-site.xml
       - ./spark_jobs:/opt/spark/spark_jobs
-      - ./jars:/opt/spark/jars
+      - ./jars:/opt/spark/user_jars
 
     networks:
       - lake-net

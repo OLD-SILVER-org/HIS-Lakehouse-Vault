@@ -12,7 +12,7 @@ class SparkUtils:
     def __init__(self):
         self.config = Config()
         self.project_root = self._get_project_root()
-        self.jars_path = os.path.join(self.project_root, "infrastructure", "3_warehouse", "jars")
+        self.jars_path = "/opt/spark/user_jars" if not self.config.is_local() else os.path.join(self.project_root, "infrastructure", "3_warehouse", "jars")
 
     def _get_project_root(self):
         """Finds the project root directory."""
