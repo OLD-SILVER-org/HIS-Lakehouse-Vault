@@ -11,6 +11,8 @@ services:
     volumes:
       - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - ./spark_jobs:/opt/spark/spark_jobs
+      - ./jars:/opt/spark/jars
     networks:
       - lake-net
       - warehouse-net
@@ -26,9 +28,10 @@ services:
     env_file:
       - ../../../.env
     volumes:
-      - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./spark_jobs:/opt/spark/spark_jobs
+      - ./jars:/opt/spark/jars
 
     networks:
       - lake-net
