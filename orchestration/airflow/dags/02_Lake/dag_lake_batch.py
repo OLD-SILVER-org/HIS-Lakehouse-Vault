@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.utils.trigger_rule import TriggerRule
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from tasks.task_spark_ingestion import TaskSparkIngestion
 from tasks.task_slack_notification import TaskSlackNotification
 from common.dag_config import get_dag_config
@@ -29,6 +30,14 @@ with DAG(
         trigger_rule=TriggerRule.ONE_FAILED
     )
 
+    # Trigger the downstream Warehouse (dbt) DAG after successful Spark processing
+    trigger_dbt = TriggerDagRunOperator(
+        task_id="trigger_dbt_execution",
+        trigger_dag_id="dag_dbt_execution",
+        wait_for_completion=False
+    )
+
     spark_load >> [notify_success, notify_failure]
+    notify_success >> trigger_dbt
 
 globals()["dag_lake_batch"] = dag
