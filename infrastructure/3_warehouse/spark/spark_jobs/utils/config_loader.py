@@ -21,9 +21,9 @@ class Config:
         # Warehouse Postgres Configuration with defaults
         self.WAREHOUSE_POSTGRES_USER = os.getenv("WAREHOUSE_POSTGRES_USER", "dwh_admin")
         self.WAREHOUSE_POSTGRES_PASSWORD = os.getenv("WAREHOUSE_POSTGRES_PASSWORD")
-        self.WAREHOUSE_POSTGRES_PORT = os.getenv("WAREHOUSE_POSTGRES_PORT", "5435")
+        self.WAREHOUSE_POSTGRES_PORT = os.getenv("WAREHOUSE_POSTGRES_PORT", "5435") if self.is_local() else "5432"
         self.WAREHOUSE_POSTGRES_DB = os.getenv("WAREHOUSE_POSTGRES_DB", "postgres")
-        self.WAREHOUSE_POSTGRES_HOST = "localhost" if self.is_local() else "warehouse"
+        self.WAREHOUSE_POSTGRES_HOST = "localhost" if self.is_local() else "postgres-warehouse"
 
         # Adjust endpoints for the local environment
         if self.is_local():
