@@ -7,7 +7,7 @@ from common.dag_config import get_dag_config
 with DAG(
     dag_id="dag_dbt_execution",
     default_args=get_dag_config(),
-    schedule=None,
+    schedule="*/10 * * * *",
     catchup=False,
     tags=['dbt','execution']
 ) as dag:
