@@ -9,11 +9,13 @@ services:
       - "${WAREHOUSE_SPARK_WEBUI_PORT}:8085"
     env_file:
       - ../../../.env
+    environment:
+      - SPARK_ENV=docker
     volumes:
       - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./spark_jobs:/opt/spark/spark_jobs
-      - ./jars:/opt/spark/user_jars
+      - ../jars:/opt/spark/user_jars
     networks:
       - lake-net
       - warehouse-net
@@ -28,11 +30,13 @@ services:
       - "${WAREHOUSE_SPARK_WORKER_PORT}:8081"
     env_file:
       - ../../../.env
+    environment:
+      - SPARK_ENV=docker
     volumes:
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./conf/hive-site.xml:/opt/spark/conf/hive-site.xml
       - ./spark_jobs:/opt/spark/spark_jobs
-      - ./jars:/opt/spark/user_jars
+      - ../jars:/opt/spark/user_jars
 
     networks:
       - lake-net
