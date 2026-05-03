@@ -1,34 +1,31 @@
 from airflow import DAG
 from airflow.utils.trigger_rule import TriggerRule
-from tasks.task_spark_ingestion import TaskSparkIngestion
+from tasks.task_dbt_execution import TaskDbtExecution
 from tasks.task_slack_notification import TaskSlackNotification
 from common.dag_config import get_dag_config
 
 with DAG(
-    dag_id="dag_lake_streaming",
+    dag_id="dag_dbt_execution",
     default_args=get_dag_config(),
     schedule=None,
     catchup=False,
-    tags=['lake', 'streaming', 'spark']
+    tags=['dbt','execution']
 ) as dag:
-    
-    spark_load = TaskSparkIngestion(
-        python_command="python3 /opt/spark/spark_jobs/silver_staging/streaming/incremental_loader.py",
-        task_id="spark_lake_to_staging"
-    ).build(dag)
+    job_main = TaskDbtExecution(dbt_command="dbt run", task_id="dbt_run").build(dag)
+    job_test = TaskDbtExecution(dbt_command="dbt test", task_id="dbt_test").build(dag)
 
     notify_success = TaskSlackNotification(task_id="notify_success").build(
         dag=dag,
-        message="🔄 Spark Streaming (Incremental) completed successfully!",
+        message="🚀 DBT Run & Test completed successfully!",
         trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
     notify_failure = TaskSlackNotification(task_id="notify_failure").build(
         dag=dag,
-        message="🚨 Spark Streaming (Incremental) failed.",
+        message="⚠️ DBT Execution encountered an issue.",
         trigger_rule=TriggerRule.ONE_FAILED
     )
 
-    spark_load >> [notify_success, notify_failure]
+    job_main >> job_test >> [notify_success, notify_failure]
 
-globals()["dag_lake_streaming"] = dag
+globals()["dag_dbt_execution"] = dag
