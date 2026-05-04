@@ -12,6 +12,7 @@ services:
       - "${WAREHOUSE_POSTGRES_PORT}:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
+      - ./sql/create_staging_metadata.sql:/docker-entrypoint-initdb.d/create_staging_metadata.sql
       - ./sql/create_staging.sql:/docker-entrypoint-initdb.d/create_staging.sql
 
     deploy:
