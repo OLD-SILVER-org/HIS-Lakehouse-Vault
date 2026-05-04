@@ -1,5 +1,6 @@
-CREATE database dwh;
-\c dwh
+-- CREATE database dwh;
+-- \c dwh
+
 ------ staging metadata ------------
 CREATE SCHEMA IF NOT EXISTS staging_metadata;
 
