@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.task.trigger_rule import TriggerRule
 from tasks.task_spark_ingestion import TaskSparkIngestion
 from tasks.task_slack_notification import TaskSlackNotification
 from common.dag_config import get_dag_config
@@ -7,7 +7,8 @@ from common.dag_config import get_dag_config
 with DAG(
     dag_id="dag_lake_streaming",
     default_args=get_dag_config(),
-    schedule=None,
+    schedule="*/5 * * * *",
+    max_active_runs=1,
     catchup=False,
     tags=['lake', 'streaming', 'spark']
 ) as dag:
