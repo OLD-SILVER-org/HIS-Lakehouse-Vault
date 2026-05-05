@@ -8,6 +8,7 @@ services:
     environment:
       POSTGRES_USER: ${WAREHOUSE_POSTGRES_USER}
       POSTGRES_PASSWORD: ${WAREHOUSE_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${WAREHOUSE_POSTGRES_DB}
     ports:
       - "${WAREHOUSE_POSTGRES_PORT}:5432"
     volumes:
