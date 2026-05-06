@@ -10,11 +10,11 @@ services:
     env_file:
       - ../../../.env
     ports:
-      - "8182:8182"
+      - "8183:8182"
     environment:
       - DBT_PROFILES_DIR=/root/.dbt
     command: >
-      /bin/sh -c "dbt deps && dbt docs generate && dbt docs serve --port 8182"
+      /bin/sh -c "dbt deps && dbt docs generate && dbt docs serve --port 8182 --host 0.0.0.0"
     networks:
       - warehouse-net
 
