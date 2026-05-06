@@ -58,29 +58,14 @@ HOSPITAL_DWH/
 
 ## 🚀 Deployment
 
-To deploy the system, please refer to the step-by-step detailed guide here:
+The system is fully containerized and easy to deploy. Please refer to the step-by-step detailed guide for installation, operation, and access links:
 
 👉 **[Detailed Setup Guide](docs/setup_guide.md)**
 
 ---
 
-## 🔗 Quick Access Links
-
-Once the system is running, you can access the management interfaces via the following links:
-
-| Service | Tool | URL | Credentials |
-| :--- | :--- | :--- | :--- |
-| **Orchestration** | Airflow UI | [http://localhost:18082](http://localhost:18082) | *Refer to `.env`* |
-| **Visualization** | Superset UI | [http://localhost:8088](http://localhost:8088) | *Refer to `.env`* |
-| **Storage** | MinIO Console | [http://localhost:9001](http://localhost:9001) | *Refer to `.env`* |
-| **Processing** | Spark Master | [http://localhost:8085](http://localhost:8085) | - |
-| **Query Engine** | Trino UI | [http://localhost:8080](http://localhost:8080) | - |
-| **CDC Metadata** | Kafka UI | [http://localhost:8090](http://localhost:8090) | - |
-
----
-
 ## 🛠️ Additional Technical Documents
-*(Updating...)*
+- [**Data Vault 2.0 Documents**](docs/modeling/data_vault_documents.md): Detailed Hub/Link/Sat design for hospital data.
 
 ---
 
@@ -90,6 +75,37 @@ The system implements the **Data Vault 2.0** methodology in the Warehouse layer 
 - **Raw Vault**: Hubs, Links, Satellites (Raw storage from source).
 - **Business Vault**: Applied hospital business logic.
 - **Data Mart**: Star Schema (Fact & Dimension) for BI reporting.
+
+---
+
+## 🖼️ System Showcases
+
+### 1. Data Lineage & Modeling (dbt)
+The system architecture follows the **Data Vault 2.0** methodology, ensuring high scalability and historical auditability. Below is a focused lineage of the **Financial Fact** flow:
+
+![Data Vault Lineage](images/system/lineage_graph_fact_thanh_toan.png)
+
+👉 **[Explore Interactive Lineage & Documentation](http://localhost:8183/)**
+
+*   **Detailed Modeling Docs**: See [Data Vault 2.0 Documents](docs/modeling/data_vault_documents.md) for entity definitions.
+
+### 2. Business Intelligence Dashboards (Superset)
+End-to-end analytics providing insights into hospital operations, finance, and corporate health checkups.
+
+| Operational Dashboard | Financial Dashboard | Corporate Dashboard |
+| :---: | :---: | :---: |
+| ![Operational](images/dashboard/dashboard_operational.png) | ![Financial](images/dashboard/dashboard_financial.png) | ![Corporate](images/dashboard/dashboard_corporate.png) |
+
+### 3. Pipeline Orchestration & Monitoring (Airflow & Slack)
+The entire workflow is orchestrated by Airflow, with real-time failure alerts and success notifications integrated into Slack.
+
+| Airflow DAGs | Slack Notifications |
+| :---: | :---: |
+| ![Airflow](images/system/service_airflow.png) | ![Slack](images/system/slack_mess.png) |
+
+### 4. Processing Engines (Spark & Flink)
+*   **Stream Processing (Flink)**: High-performance CDC ingestion from Kafka into Apache Iceberg tables.
+    ![Flink](images/system/service_flink.png)
 
 ---
 
