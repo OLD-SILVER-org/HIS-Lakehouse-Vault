@@ -95,3 +95,19 @@ After setup, you can verify the status of all containers:
 docker ps
 ```
 Ensure all critical services are in `Up (healthy)` status.
+
+---
+
+## 5. Quick Access Links
+
+Once the system is running, you can access the management interfaces via the following links:
+
+| Service | Tool | URL | Credentials |
+| :--- | :--- | :--- | :--- |
+| **Orchestration** | Airflow UI | [http://localhost:18082](http://localhost:18082) | *Refer to `.env`* |
+| **Data Warehouse Docs** | dbt Docs | [http://localhost:8183](http://localhost:8183) | - |
+| **Visualization** | Superset UI | [http://localhost:8088](http://localhost:8088) | *Refer to `.env`* |
+| **Storage** | MinIO Console | [http://localhost:9001](http://localhost:9001) | *Refer to `.env`* |
+| **Processing** | Spark Master | [http://localhost:8085](http://localhost:8085) | - |
+| **Query Engine** | Trino UI | [http://localhost:8080](http://localhost:8080) | - |
+| **CDC Metadata** | Kafka UI | [http://localhost:8090](http://localhost:8090) | - |
