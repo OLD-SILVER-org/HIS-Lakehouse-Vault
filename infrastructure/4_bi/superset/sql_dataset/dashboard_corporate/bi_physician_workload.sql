@@ -20,8 +20,8 @@ SELECT
     SUM(f.SO_LUONG) as tong_so_dich_vu_chi_dinh,
     -- Phân tích tài chính cơ bản đi kèm
     SUM(f.TIEN_BH_THANH_TOAN + f.TIEN_NB_TU_TRA + f.TIEN_NB_CUNG_CHI_TRA) as tong_gia_tri_chi_dinh
-FROM public_data_mart.fact_chi_dinh_dich_vu f
-INNER JOIN public_data_mart.dim_nhan_vien nv ON f.NHAN_VIEN_CHI_DINH_PK = nv.NHAN_VIEN_PK
-INNER JOIN public_data_mart.dim_khoa_phong kp ON f.KHOA_CHI_DINH_PK = kp.DON_VI_PK
+FROM data_mart.fact_chi_dinh_dich_vu f
+INNER JOIN data_mart.dim_nhan_vien nv ON f.NHAN_VIEN_CHI_DINH_PK = nv.NHAN_VIEN_PK
+INNER JOIN data_mart.dim_khoa_phong kp ON f.KHOA_CHI_DINH_PK = kp.DON_VI_PK
 WHERE f.IS_ACTIVE = true
 GROUP BY 1, 2, 3

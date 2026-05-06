@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: 'stg_benh_nhan'
+source_model: 'stg_dm_benh_nhan'
 src_pk: 'BENH_NHAN_PK'
 src_hashdiff: 'BENH_NHAN_HASHDIFF'
 src_payload:

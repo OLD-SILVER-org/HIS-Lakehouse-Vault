@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: 'stg_khoa'
+source_model: 'stg_dm_khoa'
 src_pk: 'KHOA_PK'
 src_hashdiff: 'KHOA_HASHDIFF'
 src_payload:

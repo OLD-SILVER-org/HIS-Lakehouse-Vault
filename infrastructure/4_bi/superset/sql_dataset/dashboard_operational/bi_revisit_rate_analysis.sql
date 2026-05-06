@@ -22,8 +22,8 @@ FROM (
         b.MA_NB,
         k.THOI_GIAN_KHAM::DATE as ngay_kham,
         COUNT(*) OVER(PARTITION BY b.MA_NB) as so_lan_kham
-    FROM public_data_mart.dim_benh_nhan b
-    JOIN public_data_mart.fact_kham_benh k ON b.BENH_NHAN_PK = k.BENH_NHAN_PK
+    FROM data_mart.dim_benh_nhan b
+    JOIN data_mart.fact_kham_benh k ON b.BENH_NHAN_PK = k.BENH_NHAN_PK
 ) sub
 GROUP BY 1
 ORDER BY 1 DESC

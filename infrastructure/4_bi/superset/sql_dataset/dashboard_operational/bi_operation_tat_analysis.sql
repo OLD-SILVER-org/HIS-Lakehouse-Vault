@@ -23,6 +23,6 @@ SELECT
         ELSE 'Đạt chuẩn'
     END as trang_thai_toc_do,
     f.THOI_GIAN_TIEP_NHAN::DATE as ngay_thuc_hien
-FROM public_data_mart.fact_dv_ky_thuat f
+FROM data_mart.fact_dv_ky_thuat f
 WHERE f.THOI_GIAN_HOAN_THANH IS NOT NULL 
   AND f.THOI_GIAN_TIEP_NHAN IS NOT NULL

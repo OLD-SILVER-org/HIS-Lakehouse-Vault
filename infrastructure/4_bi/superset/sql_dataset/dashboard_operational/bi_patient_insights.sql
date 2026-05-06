@@ -25,5 +25,5 @@ SELECT
     END as nhom_tuoi,
     k.THOI_GIAN_KHAM::DATE as ngay_kham,
     k.DOT_DIEU_TRI_PK
-FROM public_data_mart.dim_benh_nhan b
-INNER JOIN public_data_mart.fact_kham_benh k ON b.BENH_NHAN_PK = k.BENH_NHAN_PK
+FROM data_mart.dim_benh_nhan b
+INNER JOIN data_mart.fact_kham_benh k ON b.BENH_NHAN_PK = k.BENH_NHAN_PK

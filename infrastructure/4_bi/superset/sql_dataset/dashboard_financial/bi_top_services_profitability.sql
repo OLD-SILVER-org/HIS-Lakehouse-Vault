@@ -23,8 +23,8 @@ SELECT
     -- Phân rã nguồn thu
     SUM(f.TIEN_BH_THANH_TOAN) as doanh_thu_bhyt,
     SUM(f.TIEN_NB_TU_TRA) as doanh_thu_vien_phi
-FROM public_data_mart.fact_chi_dinh_dich_vu f
-INNER JOIN public_data_mart.dim_dich_vu dv ON f.DICH_VU_PK = dv.DICH_VU_PK
+FROM data_mart.fact_chi_dinh_dich_vu f
+INNER JOIN data_mart.dim_dich_vu dv ON f.DICH_VU_PK = dv.DICH_VU_PK
 WHERE f.IS_ACTIVE = true
 GROUP BY 1, 2, 3
 ORDER BY tong_doanh_thu DESC
