@@ -24,5 +24,5 @@ SELECT
         WHEN f.SO_BEN_NHAN > 0 THEN ROUND(f.TONG_DOANH_THU_THUC / f.SO_BEN_NHAN ,2)
         ELSE 0 
     END AS rev_per_patient
-FROM public_data_mart.fact_doanh_thu_theo_khoa f
+FROM data_mart.fact_doanh_thu_theo_khoa f
 ORDER BY f.NGAY DESC, f.TONG_DOANH_THU_THUC DESC

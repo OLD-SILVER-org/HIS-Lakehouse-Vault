@@ -1,6 +1,6 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_khoa" -%}
+{%- set source_model = "stg_dm_khoa" -%}
 {%- set src_pk = "KHOA_PK" -%}
 {%- set src_nk = "code_khoa" -%}
 {%- set src_ldts = "LOAD_DATETIME" -%}

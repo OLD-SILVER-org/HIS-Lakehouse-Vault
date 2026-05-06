@@ -17,5 +17,5 @@ SELECT
     f.CREATED_AT::DATE as ngay_ghi_nhan,
     -- Đếm chính xác số người (tránh lặp)
     COUNT(DISTINCT f.KHAM_SUC_KHOE_PK) as so_luong_nguoi_kham
-FROM public_data_mart.fact_kham_suc_khoe f
+FROM data_mart.fact_kham_suc_khoe f
 GROUP BY 1, 2, 3, 4, 5

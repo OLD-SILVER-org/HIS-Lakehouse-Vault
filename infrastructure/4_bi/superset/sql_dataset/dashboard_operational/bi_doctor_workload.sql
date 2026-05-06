@@ -9,7 +9,7 @@ SELECT
     COUNT(*) as so_luot_kham,
     -- Đếm số bệnh nhân duy nhất (tránh đếm trùng nếu 1 NB khám nhiều lần/ngày)
     COUNT(DISTINCT f.benh_nhan_pk) as so_benh_nhan_unique
-FROM public_data_mart.fact_kham_benh f
+FROM data_mart.fact_kham_benh f
 WHERE f.thoi_gian_kham IS NOT NULL
   AND f.ten_bac_si_kham IS NOT NULL
 GROUP BY 1, 2

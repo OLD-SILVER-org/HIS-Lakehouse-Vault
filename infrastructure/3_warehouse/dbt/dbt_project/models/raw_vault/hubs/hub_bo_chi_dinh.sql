@@ -1,6 +1,6 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_bo_chi_dinh" -%}
+{%- set source_model = "stg_dm_bo_chi_dinh" -%}
 {%- set src_pk = "BO_CHI_DINH_PK" -%}
 {%- set src_nk = "id" -%}
 {%- set src_ldts = "LOAD_DATETIME" -%}

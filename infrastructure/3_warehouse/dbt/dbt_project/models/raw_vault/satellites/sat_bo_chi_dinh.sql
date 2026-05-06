@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: 'stg_bo_chi_dinh'
+source_model: 'stg_dm_bo_chi_dinh'
 src_pk: 'BO_CHI_DINH_PK'
 src_hashdiff: 'BO_CHI_DINH_HASHDIFF'
 src_payload:

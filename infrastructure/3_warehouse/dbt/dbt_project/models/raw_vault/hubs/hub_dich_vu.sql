@@ -1,6 +1,6 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_dich_vu" -%}
+{%- set source_model = "stg_dm_dich_vu" -%}
 {%- set src_pk = "DICH_VU_PK" -%}
 {%- set src_nk = "code_dichvu" -%}
 {%- set src_ldts = "LOAD_DATETIME" -%}

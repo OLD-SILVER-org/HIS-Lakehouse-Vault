@@ -1,6 +1,6 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_nhan_vien" -%}
+{%- set source_model = "stg_dm_nhan_vien" -%}
 {%- set src_pk = "NHAN_VIEN_PK" -%}
 {%- set src_nk = "code_nhan_vien" -%}
 {%- set src_ldts = "LOAD_DATETIME" -%}

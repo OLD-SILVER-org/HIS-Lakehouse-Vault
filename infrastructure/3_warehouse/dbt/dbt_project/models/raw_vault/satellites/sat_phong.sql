@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: 'stg_phong'
+source_model: 'stg_dm_phong'
 src_pk: 'PHONG_PK'
 src_hashdiff: 'PHONG_HASHDIFF'
 src_payload:

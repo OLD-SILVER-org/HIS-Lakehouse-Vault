@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: 'stg_dich_vu'
+source_model: 'stg_dm_dich_vu'
 src_pk: 'DICH_VU_PK'
 src_hashdiff: 'DICH_VU_HASHDIFF'
 src_payload:

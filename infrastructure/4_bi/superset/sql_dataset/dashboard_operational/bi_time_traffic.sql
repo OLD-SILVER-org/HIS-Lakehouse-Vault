@@ -20,7 +20,7 @@ SELECT
     TO_CHAR(f.thoi_gian_kham, 'Day') as thu_trong_tuan,
     -- Đếm số lượt khám
     COUNT(*) as so_luot_kham
-FROM public_data_mart.fact_kham_benh f
+FROM data_mart.fact_kham_benh f
 WHERE f.thoi_gian_kham IS NOT NULL
 GROUP BY 1, 2, 3
 ORDER BY 1, 2

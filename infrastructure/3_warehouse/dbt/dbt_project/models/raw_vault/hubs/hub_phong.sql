@@ -1,6 +1,6 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_phong" -%}
+{%- set source_model = "stg_dm_phong" -%}
 {%- set src_pk = "PHONG_PK" -%}
 {%- set src_nk = "code_phong" -%}
 {%- set src_ldts = "LOAD_DATETIME" -%}

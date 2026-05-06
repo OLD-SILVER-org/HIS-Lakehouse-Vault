@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: 'stg_nhan_vien'
+source_model: 'stg_dm_nhan_vien'
 src_pk: 'NHAN_VIEN_PK'
 src_hashdiff: 'NHAN_VIEN_HASHDIFF'
 src_payload:

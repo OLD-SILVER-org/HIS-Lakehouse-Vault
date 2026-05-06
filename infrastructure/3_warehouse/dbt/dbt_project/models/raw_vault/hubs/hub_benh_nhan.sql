@@ -1,6 +1,6 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_benh_nhan" -%}
+{%- set source_model = "stg_dm_benh_nhan" -%}
 {%- set src_pk = "BENH_NHAN_PK" -%}
 {%- set src_nk = "nb_thong_tin_id" -%}
 {%- set src_ldts = "LOAD_DATETIME" -%}
