@@ -1,7 +1,7 @@
 import requests
 import json
 from datetime import datetime
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 
 class TaskSlackNotification:
     """
