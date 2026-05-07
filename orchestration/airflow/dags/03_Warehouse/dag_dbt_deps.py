@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.task.trigger_rule import TriggerRule
 from tasks.task_dbt_execution import TaskDbtExecution
 from tasks.task_slack_notification import TaskSlackNotification
 from common.dag_config import get_dag_config

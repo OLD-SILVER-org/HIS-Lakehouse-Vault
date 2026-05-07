@@ -1,5 +1,4 @@
-from airflow.operators.python import PythonOperator
-
+from airflow.providers.standard.operators.python import PythonOperator
 class TaskDbtExecution:
     def __init__(self, dbt_command, task_id):
         self.task_id = task_id

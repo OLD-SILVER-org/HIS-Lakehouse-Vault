@@ -1,4 +1,4 @@
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 
 class TaskFlinkIngestion:
     def __init__(self, job_class):
