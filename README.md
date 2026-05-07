@@ -1,5 +1,9 @@
 # 🏥 Hospital Data Warehouse System
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Stack](https://img.shields.io/badge/stack-Data%20Vault%202.0-orange)
+
 This project builds a modern Data Warehouse system for a hospital, applying the **Medallion Architecture** combined with **Data Vault 2.0**. The system supports real-time data processing (Real-time CDC) and batch processing to provide intelligent business intelligence (BI) reports.
 
 ---
@@ -15,7 +19,7 @@ The system is designed with a distributed model, divided into 4 main layers:
 The system operates on a hybrid processing model to ensure both speed and consistency:
 *   **Real-time Streaming (CDC)**: Changes from the Source DB are captured by Debezium, streamed through Kafka, and processed by **Apache Flink** into the Iceberg Lake in near real-time.
 *   **Batch & Incremental Processing**: **Apache Spark** periodically transforms and moves data from the Lake into the Warehouse using **dbt**, building a robust Data Vault 2.0 structure.
-*   **Unified Querying**: **Trino** provides a high-performance SQL engine to query data directly across the Lake and Warehouse without data movement.
+*   **Direct Lake Querying**: **Trino** provides a high-performance SQL engine to query data directly on the **Iceberg Lake** without data movement, enabling fast exploration of raw and staging data.
 
 ---
 
@@ -31,6 +35,17 @@ The system operates on a hybrid processing model to ensure both speed and consis
 | **Query Engine** | Trino | Direct querying on Data Lake |
 | **Orchestration** | Apache Airflow | Pipeline scheduling and workflow management |
 | **Visualization** | Apache Superset | Operational & Financial BI Dashboards |
+
+---
+
+## 🌟 Key Features
+
+-   **⚡ Real-time CDC Ingestion**: Capture every change from Source DB (HIS) using Debezium and stream it into the Data Lake via Kafka & Flink.
+-   **❄️ ACID Data Lake**: Built on **Apache Iceberg** and **MinIO**, supporting concurrent reads/writes and time-travel queries.
+-   **🏗️ Data Vault 2.0 Modeling**: Robust warehouse design with Hubs, Links, and Satellites to handle historical data and high scalability.
+-   **📊 Modern BI Integration**: Dynamic dashboards on Apache Superset reflecting real-time and historical hospital performance.
+-   **🔔 Automated Monitoring**: Real-time pipeline tracking with **Airflow** and instant failure/success alerts via **Slack**.
+
 
 ---
 
@@ -62,6 +77,19 @@ The system is fully containerized and easy to deploy. Please refer to the step-b
 
 👉 **[Detailed Setup Guide](docs/setup_guide.md)**
 
+### 🔗 Quick Access Links
+Once the system is deployed, you can access the services here:
+
+| Service | Tool | URL |
+| :--- | :--- | :--- |
+| **Orchestration** | Airflow UI | [http://localhost:18082](http://localhost:18082) |
+| **BI Reporting** | Superset UI | [http://localhost:8088](http://localhost:8088) |
+| **DWH Docs** | dbt Documentation | [http://localhost:8183](http://localhost:8183) |
+| **Object Storage** | MinIO Console | [http://localhost:9001](http://localhost:9001) |
+| **Query Engine** | Trino UI | [http://localhost:8080](http://localhost:8080) |
+| **Streaming** | Kafka UI | [http://localhost:8090](http://localhost:8090) |
+
+
 ---
 
 ## 🛠️ Additional Technical Documents
@@ -92,20 +120,33 @@ The system architecture follows the **Data Vault 2.0** methodology, ensuring hig
 ### 2. Business Intelligence Dashboards (Superset)
 End-to-end analytics providing insights into hospital operations, finance, and corporate health checkups.
 
-| Operational Dashboard | Financial Dashboard | Corporate Dashboard |
-| :---: | :---: | :---: |
-| ![Operational](images/dashboard/dashboard_operational.png) | ![Financial](images/dashboard/dashboard_financial.png) | ![Corporate](images/dashboard/dashboard_corporate.png) |
+**🏥 Operational Dashboard**
+![Operational](images/dashboard/dashboard_operational.png)
+
+**💰 Financial Dashboard**
+![Financial](images/dashboard/dashboard_financial.png)
+
+**🏢 Corporate Dashboard**
+![Corporate](images/dashboard/dashboard_corporate.png)
+
 
 ### 3. Pipeline Orchestration & Monitoring (Airflow & Slack)
 The entire workflow is orchestrated by Airflow, with real-time failure alerts and success notifications integrated into Slack.
 
-| Airflow DAGs | Slack Notifications |
-| :---: | :---: |
-| ![Airflow](images/system/service_airflow.png) | ![Slack](images/system/slack_mess.png) |
+**⚙️ Airflow DAGs Management**
+![Airflow](images/system/service_airflow.png)
 
-### 4. Processing Engines (Spark & Flink)
+**🔔 Slack Notifications**
+![Slack](images/system/slack_mess.png)
+
+
+### 4. Processing Engines & Querying (Spark, Flink, Trino)
 *   **Stream Processing (Flink)**: High-performance CDC ingestion from Kafka into Apache Iceberg tables.
     ![Flink](images/system/service_flink.png)
+*   **Query Engine (Trino)**: Distributed SQL engine for fast, ad-hoc querying of the Data Lake.
+    ![Trino](images/system/service_trino.png)
+*   **Data Lake Storage (MinIO)**: Distributed object storage for Apache Iceberg tables, acting as the foundation of the Medallion architecture.
+    ![MinIO](images/system/service_minio.png)
 
 ---
 
