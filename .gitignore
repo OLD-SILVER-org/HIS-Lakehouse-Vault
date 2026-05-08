@@ -66,3 +66,4 @@ infrastructure/4_bi/Superset/superset_data/
 
 docs/log.txt
 */.cache
+infrastructure/4_bi/superset/superset_data/.cache/*
