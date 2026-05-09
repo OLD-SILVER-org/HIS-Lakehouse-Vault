@@ -23,9 +23,13 @@ venv/
 target/
 *.class
 *.jar
-!**/flink-sql-job-1.0.jar
 checkpoint/
 savepoint/
+
+# Exception: track the custom Flink SQL job JAR
+!infrastructure/2_lake/flink/flink-sql-job/target/
+infrastructure/2_lake/flink/flink-sql-job/target/*
+!infrastructure/2_lake/flink/flink-sql-job/target/flink-sql-job-1.0.jar
 
 # Docker Volumes - Database Data
 infrastructure/1_source/postgres/data/
