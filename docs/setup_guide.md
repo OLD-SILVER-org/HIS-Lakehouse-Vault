@@ -9,6 +9,7 @@ This document provides detailed instructions on how to set up and operate the en
 - **Minimum Hardware:** 16GB+ RAM, 4 Cores+ CPU, 50GB+ Disk space.
 - **Tools:** Install Docker Desktop & Docker Compose.
 - **Configuration:** Create a `.env` file from `.env.example` and adjust the connection parameters.
+- **Docker Compose:** This project uses `docker compose` (V2). If your system only has `docker-compose` (V1), you may need to install the Compose V2 plugin or use an alias: `alias docker-compose='docker compose'`.
 
 ---
 
@@ -30,6 +31,11 @@ docker-compose --env-file .env -f infrastructure/1_source/debezium/docker-compos
 .\infrastructure\1_source\debezium\send_connector.cmd
 # Linux/Bash:
 bash infrastructure/1_source/debezium/send_connector.cmd
+
+> [!TIP]
+> If you encounter `FATAL: password authentication failed for user "thanhtinh"`, it means the initialization script did not run (common if the `./data` folder already exists). 
+> Manually initialize the user and permissions with:
+> `docker exec -it postgres_source bash /docker-entrypoint-initdb.d/init-db.sh`
 ```
 
 ### Step 2: LAKE Layer
@@ -45,6 +51,11 @@ docker-compose --env-file .env -f infrastructure/2_lake/hive_metastore/docker-co
 docker-compose --env-file .env -f infrastructure/2_lake/flink/docker-compose.yml up -d
 docker-compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml up -d
 ```
+
+> [!IMPORTANT]
+> **Hive Metastore Authentication:** Hive 3.1.3 uses an older JDBC driver that does not support SCRAM-SHA-256 (default in Postgres 14+). 
+> If you see `authentication type 10 is not supported`, you must manually set the password to `md5` encryption:
+> `docker exec -it hive-metastore-db psql -U hive -d hive_metastore -c "SET password_encryption = 'md5'; ALTER USER hive WITH PASSWORD 'hive@123';"`
 
 ### Step 3: WAREHOUSE Layer
 Process data from Lake to Warehouse using Spark.
@@ -86,6 +97,7 @@ docker-compose --env-file .env -f orchestration/airflow/docker-compose.yml up -d
 - **Deployment Order:** Must follow SOURCE -> LAKE -> WAREHOUSE -> BI sequence.
 - **Networks:** Ensure all networks are created before starting containers so services can communicate.
 - **Resources:** Spark and Flink are memory-intensive; ensure Docker Desktop is allocated sufficient RAM.
+- **Database Initialization:** The `init-db.sh` for `postgres_source` only runs automatically if the volume is empty. If reusing data, run it manually using `docker exec` as noted in Step 1.
 
 ---
 
