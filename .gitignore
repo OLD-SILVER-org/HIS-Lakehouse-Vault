@@ -69,3 +69,5 @@ infrastructure/4_bi/superset/superset_data/.cache/*
 
 #airflow
 orchestration/airflow/logs
+services/logs/*
+services/notes/*
