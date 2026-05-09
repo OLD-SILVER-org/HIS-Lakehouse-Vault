@@ -1,0 +1,15 @@
+{
+    email {$NETWORK_EMAIL}
+}
+
+{$NETWORK_DOMAIN} {
+    encode zstd gzip
+
+    # WGDashboard
+    reverse_proxy wgdashboard:{$NETWORK_WGDASHBOARD_PORT}
+
+    # MinIO Console
+    handle_path /minio* {
+        reverse_proxy minio:9001
+    }
+}
