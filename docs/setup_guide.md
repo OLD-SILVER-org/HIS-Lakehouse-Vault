@@ -56,6 +56,9 @@ docker-compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml
 > **Hive Metastore Authentication:** Hive 3.1.3 uses an older JDBC driver that does not support SCRAM-SHA-256 (default in Postgres 14+). 
 > If you see `authentication type 10 is not supported`, you must manually set the password to `md5` encryption:
 > `docker exec -it hive-metastore-db psql -U hive -d hive_metastore -c "SET password_encryption = 'md5'; ALTER USER hive WITH PASSWORD 'hive@123';"`
+>
+> **Trino Permissions:** If Trino fails to start with "Permission denied" on `/var/trino/data`, run:
+> `sudo chmod -R 777 infrastructure/2_lake/trino/data`
 
 ### Step 3: WAREHOUSE Layer
 Process data from Lake to Warehouse using Spark.
@@ -90,6 +93,10 @@ Set up Apache Airflow to schedule and automate the entire pipeline workflow.
 ```bash
 docker-compose --env-file .env -f orchestration/airflow/docker-compose.yml up -d
 ```
+
+> [!IMPORTANT]
+> **Docker Socket Permissions:** If Airflow tasks fail with `Permission denied` when calling Docker API, run:
+> `sudo chmod 666 /var/run/docker.sock`
 
 ---
 
