@@ -23,6 +23,7 @@ venv/
 target/
 *.class
 *.jar
+!**/flink-sql-job-1.0.jar
 checkpoint/
 savepoint/
 
