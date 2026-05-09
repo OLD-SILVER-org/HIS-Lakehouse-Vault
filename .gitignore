@@ -54,7 +54,6 @@ infrastructure/3_warehouse/dbt/dbt_project/dbt_packages/*
 infrastructure/3_warehouse/dbt/dbt_project/logs/*
 infrastructure/3_warehouse/dbt/dbt_project/target/*
 infrastructure/3_warehouse/dbt/dbt_project/dbt_modules/*
-infrastructure/3_warehouse/dbt/.dbt/profiles.yml
 #
 *.txt
 #AI
