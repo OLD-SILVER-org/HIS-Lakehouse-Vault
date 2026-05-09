@@ -12,6 +12,7 @@ services:
       POSTGRES_USER: ${LAKE_POSTGRES_USER}
       POSTGRES_PASSWORD: ${LAKE_POSTGRES_PASSWORD}
       POSTGRES_DB: ${LAKE_POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "${LAKE_POSTGRES_PORT}:5432"
     command: ["postgres", "-c", "password_encryption=md5"]

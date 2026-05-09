@@ -32,15 +32,14 @@ docker-compose --env-file .env -f infrastructure/1_source/debezium/docker-compos
 # Linux/Bash:
 bash infrastructure/1_source/debezium/send_connector.cmd
 
-> [!TIP]
-> If you encounter `FATAL: password authentication failed for user "thanhtinh"`, it means the initialization script did not run (common if the `./data` folder already exists). 
-> Manually initialize the user and permissions with:
-> `docker exec -it postgres_source bash /docker-entrypoint-initdb.d/init-db.sh`
 ```
 
 ### Step 2: LAKE Layer
 Set up Iceberg storage infrastructure and processing/query engines.
 ```bash
+# Download required JAR dependencies
+bash infrastructure/2_lake/jars/download_jars.sh
+
 # Create lake network
 docker network create lake-net
 
@@ -52,17 +51,14 @@ docker-compose --env-file .env -f infrastructure/2_lake/flink/docker-compose.yml
 docker-compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml up -d
 ```
 
-> [!IMPORTANT]
-> **Hive Metastore Authentication:** Hive 3.1.3 uses an older JDBC driver that does not support SCRAM-SHA-256 (default in Postgres 14+). 
-> If you see `authentication type 10 is not supported`, you must manually set the password to `md5` encryption:
-> `docker exec -it hive-metastore-db psql -U hive -d hive_metastore -c "SET password_encryption = 'md5'; ALTER USER hive WITH PASSWORD 'hive@123';"`
->
-> **Trino Permissions:** If Trino fails to start with "Permission denied" on `/var/trino/data`, run:
-> `sudo chmod -R 777 infrastructure/2_lake/trino/data`
+
 
 ### Step 3: WAREHOUSE Layer
 Process data from Lake to Warehouse using Spark.
 ```bash
+# Download required JAR dependencies
+bash infrastructure/3_warehouse/jars/download_jars.sh
+
 # Create warehouse network
 docker network create warehouse-net
 
@@ -94,9 +90,7 @@ Set up Apache Airflow to schedule and automate the entire pipeline workflow.
 docker-compose --env-file .env -f orchestration/airflow/docker-compose.yml up -d
 ```
 
-> [!IMPORTANT]
-> **Docker Socket Permissions:** If Airflow tasks fail with `Permission denied` when calling Docker API, run:
-> `sudo chmod 666 /var/run/docker.sock`
+
 
 ---
 
@@ -130,3 +124,39 @@ Once the system is running, you can access the management interfaces via the fol
 | **Processing** | Spark Master | [http://localhost:8085](http://localhost:8085) | - |
 | **Query Engine** | Trino UI | [http://localhost:8080](http://localhost:8080) | - |
 | **CDC Metadata** | Kafka UI | [http://localhost:8090](http://localhost:8090) | - |
+
+---
+
+## 6. Troubleshooting
+
+### 6.1. Source PostgreSQL Initialization Fails
+If you encounter `FATAL: password authentication failed for user "your_user"`, it means the initialization script did not run (common if the `./data` folder already exists). 
+Manually initialize the user and permissions with:
+```bash
+docker exec -it postgres_source bash /docker-entrypoint-initdb.d/init-db.sh
+```
+
+### 6.2. PostgreSQL Authentication (MD5 vs SCRAM-SHA-256)
+Older drivers (like Hive 3.1.3's JDBC) do not support the Postgres 14+ default `scram-sha-256`. 
+If you see `authentication type 10 is not supported` or `User ... does not have a valid SCRAM secret` in any Postgres container logs, you must switch authentication to `md5`:
+1. In `docker-compose.yml`, add `POSTGRES_HOST_AUTH_METHOD: md5` to environment variables and `command: ["postgres", "-c", "password_encryption=md5"]`.
+2. **CRITICAL:** If the database `data` folder was already initialized, changing the compose file won't update `pg_hba.conf`. You must manually replace `scram-sha-256` with `md5` in the physical file:
+   ```bash
+   sed -i 's/scram-sha-256/md5/g' <path-to-postgres-data>/pg_hba.conf
+   ```
+3. Restart the Postgres container, then reset the user password to generate the md5 hash:
+   ```bash
+   docker exec -it <postgres-container-name> psql -U <username> -d <database> -c "ALTER USER <username> WITH PASSWORD '<password>';"
+   ```
+
+### 6.3. Trino Permission Denied
+If Trino fails to start with "Permission denied" on `/var/trino/data`, run:
+```bash
+sudo chmod -R 777 infrastructure/2_lake/trino/data
+```
+
+### 6.4. Airflow Docker Socket Permissions
+If Airflow tasks fail with `Permission denied` when calling the Docker API, run:
+```bash
+sudo chmod 666 /var/run/docker.sock
+```
