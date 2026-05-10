@@ -117,11 +117,13 @@ Once the system is running, you can access the management interfaces via the fol
 
 | Service | Tool | URL | Credentials |
 | :--- | :--- | :--- | :--- |
-| **Orchestration** | Airflow UI | [http://localhost:18082](http://localhost:18082) | *Refer to `.env`* |
-| **Data Warehouse Docs** | dbt Docs | [http://localhost:8183](http://localhost:8183) | - |
-| **Visualization** | Superset UI | [http://localhost:8088](http://localhost:8088) | *Refer to `.env`* |
-| **Storage** | MinIO Console | [http://localhost:9001](http://localhost:9001) | *Refer to `.env`* |
-| **Processing** | Spark Master | [http://localhost:8085](http://localhost:8085) | - |
+| **VPN/Auth** | WGDashboard | [https://vmi3040316.contaboserver.net](https://vmi3040316.contaboserver.net) | `admin` / `admin` |
+| **Orchestration** | Airflow UI | [http://vmi3040316.contaboserver.net:18888](http://vmi3040316.contaboserver.net:18888) | `guest` / `thanhtinh@Pass1` |
+| **Visualization** | Superset UI | [http://vmi3040316.contaboserver.net:18088](http://vmi3040316.contaboserver.net:18088) | `guest` / `thanhtinh@Pass1` |
+| **Storage** | MinIO Console | [http://vmi3040316.contaboserver.net:19001](http://vmi3040316.contaboserver.net:19001) | `guest` / `thanhtinh@Pass1` |
+| **Processing** | Spark Master | [http://vmi3040316.contaboserver.net:18085](http://vmi3040316.contaboserver.net:18085) | `guest` / `thanhtinh@Pass1` |
+| **Processing** | Flink UI | [http://vmi3040316.contaboserver.net:8081](http://vmi3040316.contaboserver.net:8081) | `guest` / `thanhtinh@Pass1` |
+| **Streaming** | Kafka UI | [http://vmi3040316.contaboserver.net:18090](http://vmi3040316.contaboserver.net:18090) | `guest` / `thanhtinh@Pass1` |
 | **Query Engine** | Trino UI | [http://localhost:8080](http://localhost:8080) | - |
 | **CDC Metadata** | Kafka UI | [http://localhost:8090](http://localhost:8090) | - |
 

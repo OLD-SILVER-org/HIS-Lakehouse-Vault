@@ -1,5 +1,5 @@
-# Network Services: WGDashboard & Caddy
-# Purpose: VPN Management and Reverse Proxy with Auto-SSL
+# Network Services: WGDashboard, Caddy & Login Tracker
+# Purpose: VPN Management, Reverse Proxy with Auth, and Login Monitoring
 services:
   # WGDashboard: Web GUI for WireGuard management
   wgdashboard:
@@ -13,23 +13,25 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
       - net.ipv4.ip_forward=1
     environment:
-      - TZ=${NETWORK_WGDASHBOARD_TZ}
-      - wgd_port=${NETWORK_WGDASHBOARD_PORT}
-      - global_dns=${NETWORK_WGDASHBOARD_DNS}
+      - TZ=${NETWORK_WGDASHBOARD_TZ:-Asia/Ho_Chi_Minh}
+      - wgd_port=${NETWORK_WGDASHBOARD_PORT:-10086}
+      - global_dns=${NETWORK_WGDASHBOARD_DNS:-8.8.8.8}
     volumes:
       - /opt/wgdashboard/wgd_data:/data
       - /opt/wgdashboard/wg_data:/etc/wireguard
       - /lib/modules:/lib/modules
     ports:
-      - "${NETWORK_WGDASHBOARD_WG_PORT}:${NETWORK_WGDASHBOARD_WG_PORT}/udp"
+      - "${NETWORK_WGDASHBOARD_WG_PORT:-51820}:${NETWORK_WGDASHBOARD_WG_PORT:-51820}/udp"
     networks:
       - network_stack
 
-  # Caddy: Reverse proxy with automatic HTTPS
+  # Caddy: Reverse proxy with automatic HTTPS and BasicAuth
   caddy:
     image: ${NETWORK_CADDY_IMAGE}
     container_name: caddy
     restart: always
+    env_file:
+      - ../service_env.env
     environment:
       - NETWORK_DOMAIN=${NETWORK_DOMAIN}
       - NETWORK_EMAIL=${NETWORK_EMAIL}
@@ -38,10 +40,17 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - /opt/wgdashboard/caddy_data:/data
       - /opt/wgdashboard/caddy_config:/config
+      - caddy_logs:/data/logs
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+      - "8081:8081"
+      - "18888:8888"
+      - "18088:8088"
+      - "18085:8085"
+      - "18090:8090"
+      - "19001:9001"
     depends_on:
       - wgdashboard
     networks:
@@ -50,6 +59,22 @@ services:
       - serving-net
       - source-net
       - warehouse-net
+
+  # Login Tracker: Monitors Caddy access logs and sends Slack alerts on login
+  login-tracker:
+    image: python:3.12-slim
+    container_name: login_tracker
+    restart: always
+    env_file:
+      - ../service_env.env
+    volumes:
+      - caddy_logs:/data
+      - ../scripts/login_tracker.py:/app/login_tracker.py:ro
+    command: python /app/login_tracker.py
+    depends_on:
+      - caddy
+    networks:
+      - network_stack
 
 
 # Shared network for the stack
@@ -64,4 +89,6 @@ networks:
     external: true
   warehouse-net:
     external: true
-    
+
+volumes:
+  caddy_logs:
