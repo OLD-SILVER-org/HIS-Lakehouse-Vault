@@ -10,7 +10,7 @@ services:
     env_file:
       - ../../../.env
     ports:
-      - "${SOURCE_KAFKA_PORT_EXT}:9092" # External access
+      - "127.0.0.1:${SOURCE_KAFKA_PORT_EXT}:9092" # External access
     environment:
       # KRaft Settings
       KAFKA_NODE_ID: 1
@@ -61,7 +61,7 @@ services:
     env_file:
       - ../../../.env
     ports:
-      - "${SOURCE_KAFKA_UI_PORT}:8080"
+      - "127.0.0.1:${SOURCE_KAFKA_UI_PORT}:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: hospital-kafka
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9094

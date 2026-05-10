@@ -50,7 +50,7 @@ services:
       # Job
       - ./flink-sql-job/target/flink-sql-job-1.0.jar:/opt/flink/jobs/flink-sql-job-1.0.jar
     ports:
-      - "${LAKE_FLINK_JOBMANAGER_PORT}:8081"
+      - "127.0.0.1:${LAKE_FLINK_JOBMANAGER_PORT}:8081"
     environment:
       AWS_REGION: ${LAKE_FLINK_AWS_REGION}
       HIVE_CONF_DIR: /opt/flink/conf
@@ -113,7 +113,7 @@ services:
       # Job
       - ./flink-sql-job/target/flink-sql-job-1.0.jar:/opt/flink/jobs/flink-sql-job-1.0.jar
     ports:
-      - "${LAKE_FLINK_TASKMANAGER_PORT}:8082"
+      - "127.0.0.1:${LAKE_FLINK_TASKMANAGER_PORT}:8082"
     environment:
       AWS_REGION: ${LAKE_FLINK_AWS_REGION}
       HIVE_CONF_DIR: /opt/flink/conf

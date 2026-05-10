@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${WAREHOUSE_POSTGRES_PASSWORD}
       POSTGRES_DB: ${WAREHOUSE_POSTGRES_DB}
     ports:
-      - "${WAREHOUSE_POSTGRES_PORT}:5432"
+      - "127.0.0.1:${WAREHOUSE_POSTGRES_PORT}:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
       - ./sql/create_staging_metadata.sql:/docker-entrypoint-initdb.d/create_staging_metadata.sql
