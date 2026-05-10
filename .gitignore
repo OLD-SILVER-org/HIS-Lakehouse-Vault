@@ -76,3 +76,6 @@ infrastructure/4_bi/superset/superset_data/.cache/*
 orchestration/airflow/logs
 services/logs/*
 services/notes/*
+
+# Embedded_web
+embedded_web/*
