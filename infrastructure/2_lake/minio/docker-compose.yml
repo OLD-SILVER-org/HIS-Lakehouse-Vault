@@ -5,8 +5,8 @@ services:
     container_name: minio
     command: server /data --console-address ":9001"
     ports:
-      - "${LAKE_MINIO_PORT_API}:9000"
-      - "${LAKE_MINIO_PORT_CONSOLE}:9001"
+      - "127.0.0.1:${LAKE_MINIO_PORT_API}:9000"
+      - "127.0.0.1:${LAKE_MINIO_PORT_CONSOLE}:9001"
     env_file:
       - ../../../.env
     environment:

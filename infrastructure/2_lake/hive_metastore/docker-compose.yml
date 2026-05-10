@@ -24,7 +24,7 @@ services:
       HIVE_SITE_CONF_fs_s3a_path_style_access: "true"
       HIVE_SITE_CONF_fs_s3a_impl: "org.apache.hadoop.fs.s3a.S3AFileSystem"
     ports:
-      - "${HIVE_METASTORE_PORT:-9083}:9083"
+      - "127.0.0.1:${HIVE_METASTORE_PORT:-9083}:9083"
     # Mount driver / Libs
     volumes:
       - ./hive-site.xml:/opt/hive/conf/hive-site.xml

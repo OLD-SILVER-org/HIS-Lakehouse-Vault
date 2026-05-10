@@ -5,8 +5,8 @@ services:
     container_name: spark-master
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
     ports:
-      - "${WAREHOUSE_SPARK_MASTER_PORT}:7077"
-      - "${WAREHOUSE_SPARK_WEBUI_PORT}:8085"
+      - "127.0.0.1:${WAREHOUSE_SPARK_MASTER_PORT}:7077"
+      - "127.0.0.1:${WAREHOUSE_SPARK_WEBUI_PORT}:8085"
     env_file:
       - ../../../.env
     environment:
@@ -27,7 +27,7 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "${WAREHOUSE_SPARK_WORKER_PORT}:8081"
+      - "127.0.0.1:${WAREHOUSE_SPARK_WORKER_PORT}:8081"
     env_file:
       - ../../../.env
     environment:

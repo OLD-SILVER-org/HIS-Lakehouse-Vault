@@ -3,7 +3,7 @@ services:
     image: trinodb/trino:479
     container_name: trino
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
       - ./etc:/etc/trino
       - ./data:/var/trino/data

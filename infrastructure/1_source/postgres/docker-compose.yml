@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${SOURCE_POSTGRES_PASSWORD}
       POSTGRES_DB: ${SOURCE_POSTGRES_DB}
     ports:
-      - "${SOURCE_POSTGRES_PORT}:5432"
+      - "127.0.0.1:${SOURCE_POSTGRES_PORT}:5432"
     command: ["postgres", "-c", "wal_level=logical", "-c", "max_wal_senders=10", "-c", "max_replication_slots=10"]
     volumes:
       - ./data:/var/lib/postgresql/data
