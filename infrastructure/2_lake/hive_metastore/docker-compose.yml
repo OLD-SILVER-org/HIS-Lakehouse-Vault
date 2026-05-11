@@ -7,7 +7,7 @@ services:
       - ../../../.env
     environment:
       SERVICE_NAME: metastore
-      IS_RESUME: true
+      IS_RESUME: "true"
       # Set jars path
       HIVE_AUX_JARS_PATH: /opt/hive/lib/*
 
