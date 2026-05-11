@@ -124,7 +124,7 @@ Once the system is running, you can access the management interfaces via the fol
 | **Processing** | Spark Master | [http://vmi3040316.contaboserver.net:18085](http://vmi3040316.contaboserver.net:18085) | `guest` / `thanhtinh@Pass1` |
 | **Processing** | Flink UI | [http://vmi3040316.contaboserver.net:8081](http://vmi3040316.contaboserver.net:8081) | `guest` / `thanhtinh@Pass1` |
 | **Streaming** | Kafka UI | [http://vmi3040316.contaboserver.net:18090](http://vmi3040316.contaboserver.net:18090) | `guest` / `thanhtinh@Pass1` |
-| **Query Engine** | Trino UI | [http://localhost:8080](http://localhost:8080) | - |
+| **Query Engine** | Trino UI | [http://vmi3040316.contaboserver.net:18080](http://vmi3040316.contaboserver.net:18080) | `guest` / `thanhtinh@Pass1` |
 | **CDC Metadata** | Kafka UI | [http://localhost:8090](http://localhost:8090) | - |
 
 ---

@@ -19,10 +19,10 @@
 }
 
 # Airflow UI
-:8888 {
-    import auth_block
-    reverse_proxy airflow-apiserver:8080
-}
+#:8888 {
+#    import auth_block
+#    reverse_proxy airflow-apiserver:8080
+#}
 
 # Superset UI
 :8088 {
@@ -40,6 +40,12 @@
 :8090 {
     import auth_block
     reverse_proxy kafka-ui:8080
+}
+
+# Trino UI
+:8080 {
+    import auth_block
+    reverse_proxy trino:8080
 }
 
 # MinIO Console (Direct Port)
