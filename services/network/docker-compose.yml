@@ -38,7 +38,7 @@ services:
       - NETWORK_WGDASHBOARD_PORT=${NETWORK_WGDASHBOARD_PORT}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - /opt/wgdashboard/caddy_data:/data
+      - /opt/wgdashboard/caddy_data:/data/caddy
       - /opt/wgdashboard/caddy_config:/config
       - caddy_logs:/data/logs
     ports:
@@ -68,8 +68,9 @@ services:
     env_file:
       - ../service_env.env
     volumes:
-      - caddy_logs:/data
+      - caddy_logs:/data/logs:ro
       - ../scripts/login_tracker.py:/app/login_tracker.py:ro
+      - ../data:/opt/his-lakehouse/services/data
     command: python /app/login_tracker.py
     depends_on:
       - caddy

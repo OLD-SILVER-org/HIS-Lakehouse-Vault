@@ -80,3 +80,4 @@ services/notes/*
 # Embedded_web
 embedded_web/*
 services/service_env.env
+services/
