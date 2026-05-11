@@ -7,7 +7,7 @@
         output file /data/logs/caddy_access.log
         format json
     }
-    basicauth {
+    basic_auth bcrypt "HIS-Lakehouse Authentication" {
         {$LOGIN_USER} {$LOGIN_PASS_HASH}
     }
 }
@@ -52,7 +52,8 @@
 {$NETWORK_DOMAIN} {
     encode zstd gzip
 
-    # WGDashboard (Internal Auth)
+    # WGDashboard (Now protected by Caddy Basic Auth)
+    import auth_block
     reverse_proxy wgdashboard:{$NETWORK_WGDASHBOARD_PORT}
 
     # MinIO Console (Path based)
