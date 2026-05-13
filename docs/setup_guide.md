@@ -81,6 +81,8 @@ docker-compose --env-file .env -f infrastructure/3_warehouse/dbt/docker-compose.
 
 ### Step 5: BI Layer
 Launch Apache Superset to build intelligent analytical dashboards.
+> **Note:** Remember to import the zip files from the `exports` directory into Superset to be able to create the dashboards.
+
 ```bash
 docker compose --env-file .env -f infrastructure/4_bi/superset/docker-compose.yml up -d
 ```
