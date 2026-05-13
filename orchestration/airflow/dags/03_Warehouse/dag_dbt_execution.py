@@ -7,7 +7,7 @@ from common.dag_config import get_dag_config
 with DAG(
     dag_id="dag_dbt_execution",
     default_args=get_dag_config(),
-    schedule="*/10 * * * *",
+    schedule="*/20 * * * *",
     catchup=False,
     tags=['dbt','execution']
 ) as dag:
@@ -26,6 +26,7 @@ with DAG(
         trigger_rule=TriggerRule.ONE_FAILED
     )
 
-    job_main >> job_test >> [notify_success, notify_failure]
+    job_main >> job_test >> notify_success
+    [job_main, job_test] >> notify_failure
 
 globals()["dag_dbt_execution"] = dag

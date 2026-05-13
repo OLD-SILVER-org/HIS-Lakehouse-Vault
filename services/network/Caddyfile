@@ -53,3 +53,8 @@
     #import auth_block
     reverse_proxy portainer:9000
 }
+
+# Embedded Web
+:8083 {
+    reverse_proxy superset-embedded-web:80
+}
