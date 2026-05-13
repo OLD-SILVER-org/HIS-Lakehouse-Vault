@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Tự động tìm đường dẫn Python
+# Automatically find the Python path
 PYTHON_EXE=$(which python3 || which python)
 
 ADMIN_USER=${BI_SUPERSET_USER:-superset}
@@ -13,11 +13,11 @@ echo "Python: $PYTHON_EXE"
 echo "Admin User: $ADMIN_USER"
 echo "===================================================="
 
-# 0. Cài đặt driver Postgres và thư viện CORS (Mượn Pip hệ thống cài vào thư mục VirtualEnv)
+# 0. Install Postgres driver and CORS libraries (using system Pip to install into VirtualEnv)
 echo "Step 0: Installing Postgres driver and CORS libraries into VirtualEnv..."
 pip install --target /app/.venv/lib/python3.10/site-packages psycopg2-binary flask-cors
 
-# 1. Chờ Postgres sẵn sàng
+# 1. Wait for Postgres to be ready
 echo "Step 1: Waiting for Postgres (postgres-warehouse:5432)..."
 for i in {1..30}; do
   $PYTHON_EXE -c "import socket; s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.settimeout(1); s.connect(('postgres-warehouse', 5432))" && break
@@ -25,7 +25,7 @@ for i in {1..30}; do
   sleep 1
 done
 
-# 2. Tự động tạo Database 'superset_metadata'
+# 2. Automatically create 'superset_metadata' database
 echo "Step 2: Checking/Creating database 'superset_metadata'..."
 $PYTHON_EXE -c "
 import psycopg2
@@ -46,7 +46,7 @@ except Exception as e:
     print(f'ERROR during DB creation: {e}')
 "
 
-# 3. Init Superset
+# 3. Initialize Superset
 echo "Step 3: Running DB Upgrade..."
 superset db upgrade
 
