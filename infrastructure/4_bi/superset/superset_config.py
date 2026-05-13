@@ -10,16 +10,20 @@ MAPBOX_API_KEY = ''
 
 # Cho phép nhúng vào iframe (embedded web portal)
 # Talisman trong Superset 5.x override X-Frame-Options, phải config đúng ở đây
-TALISMAN_ENABLED = True
+# Tắt Talisman tạm thời để debug lỗi redirect trên HTTP
+TALISMAN_ENABLED = False
 TALISMAN_CONFIG = {
     "content_security_policy": None,       # Tắt CSP để iframe load được
     "force_https": False,                  # Không redirect sang HTTPS
     "frame_options": "ALLOWALL",           # Cho phép nhúng vào iframe từ mọi nguồn
     "frame_options_allow_from": None,
 }
-SESSION_COOKIE_SAMESITE = None
+# SESSION_COOKIE_SAMESITE = 'Lax' 
 SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_HTTPONLY = False
+SESSION_COOKIE_HTTPONLY = True
+
+# Hỗ trợ chạy sau Reverse Proxy (Caddy/Nginx)
+ENABLE_PROXY_FIX = True
 
 FEATURE_FLAGS = {
     "EMBEDDED_SUPERSET": True,

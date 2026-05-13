@@ -53,9 +53,9 @@ superset db upgrade
 echo "Step 4: Creating Admin User ($ADMIN_USER)..."
 superset fab create-admin \
               --username "$ADMIN_USER" \
-              --firstname "Superset" \
-              --lastname "Admin" \
-              --email "admin@superset.com" \
+              --firstname "ThanhTinh" \
+              --lastname "ThanhTinh" \
+              --email "thanhtinh.de@gmail.com" \
               --password "$ADMIN_PASS" || echo "User already exists."
 
 echo "Step 5: Initializing roles..."
