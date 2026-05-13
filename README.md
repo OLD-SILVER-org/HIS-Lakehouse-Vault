@@ -77,17 +77,39 @@ The system is fully containerized and easy to deploy. Please refer to the step-b
 
 👉 **[Detailed Setup Guide](docs/setup_guide.md)**
 
-### 🔗 Quick Access Links
-Once the system is deployed, you can access the services here:
+### 🌍 Access Portal
+The system is deployed on a VPS; you can access the primary services directly here:
 
-| Service | Tool | URL |
-| :--- | :--- | :--- |
-| **Orchestration** | Airflow UI | [http://localhost:18082](http://localhost:18082) |
-| **BI Reporting** | Superset UI | [http://localhost:8088](http://localhost:8088) |
-| **DWH Docs** | dbt Documentation | [http://localhost:8183](http://localhost:8183) |
-| **Object Storage** | MinIO Console | [http://localhost:9001](http://localhost:9001) |
-| **Query Engine** | Trino UI | [http://localhost:8080](http://localhost:8080) |
-| **Streaming** | Kafka UI | [http://localhost:8090](http://localhost:8090) |
+> [!IMPORTANT]
+> ### 🚀 **PRIMARY ENTRY: [BI PORTAL](http://vmi3040316.contaboserver.net:18083/)**
+> This is the unified dashboard portal. All users should start here.
+> 
+> **Login Credentials (2-Layer Security):**
+> 1. **Layer 1 (Browser Basic Auth):** User: `guest` | Pass: `thanhtinh@Pass1`
+> 2. **Layer 2 (Viewer Account):** User: `Viewer` | Pass: `passviewer` (Required to view dashboards)
+
+---
+
+### 🔗 Quick Access Links
+
+#### ✅ Public Services (Externally Accessible)
+| Service | Tool | URL | Access Note |
+| :--- | :--- | :--- | :--- |
+| **Data Portal** | **BI Portal** | [Access Here](http://vmi3040316.contaboserver.net:18083/) | Unified dashboard interface |
+| **Documentation** | **DWH Docs** | [View Docs](http://vmi3040316.contaboserver.net:18183/) | Data definitions & Lineage |
+
+#### 🔒 Internal Services (Firewall Protected - Admin Only)
+*The following services are protected by a firewall and can only be accessed via the internal network or VPN:*
+
+| Category | Tool | Port | Status |
+| :--- | :--- | :--- | :--- |
+| **Orchestration** | Airflow UI | `18888` | Restricted |
+| **Object Storage** | MinIO Console | `19001` | Restricted |
+| **Query Engine** | Trino UI | `18080` | Restricted |
+| **Data Processing** | Spark Master | `18085` | Restricted |
+| **Streaming** | Kafka UI | `18090` | Restricted |
+
+---
 
 
 ---

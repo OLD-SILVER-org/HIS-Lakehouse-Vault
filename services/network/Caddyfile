@@ -18,49 +18,51 @@
 
 # Flink UI
 :8081 {
-    #import auth_block
     reverse_proxy flink_jobmanager:8081
 }
 
 # Airflow UI
 :8888 {
-    #import auth_block
     reverse_proxy airflow-apiserver:8080
 }
 
 # Superset UI
 :8088 {
-    #import auth_block
     reverse_proxy superset_bi:8088
 }
 
 # Spark Master
 :8085 {
     #import auth_block
-    reverse_proxy spark-master:8085
+    reverse_proxy spark-master:8080
 }
 
 # Kafka UI
 :8090 {
-    #import auth_block
     reverse_proxy kafka-ui:8080
 }
 
 # Trino UI
 :8080 {
-    #import auth_block
     reverse_proxy trino:8080
 }
 
 # MinIO Console
 :9001 {
-    #import auth_block
     reverse_proxy minio:9001
 }
 # Portainer UI
 :19000 {
-    #import auth_block
     reverse_proxy portainer:9000
+}
+
+# dbt Documentation
+:18183 {
+    import log_config
+    basicauth {
+        {$LOGIN_USER} {$LOGIN_PASS_HASH}
+    }
+    reverse_proxy dbt-warehouse:8182
 }
 
 # Embedded Web
