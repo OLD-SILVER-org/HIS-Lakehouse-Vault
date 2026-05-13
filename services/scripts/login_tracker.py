@@ -9,8 +9,8 @@ LOG_FILE = "/data/logs/caddy_access.log"
 WEBHOOK_URL = os.environ.get("LOGIN_WEBHOOK")
 CACHE_FILE = "/opt/his-lakehouse/services/data/login_cache.json"
 
-SESSION_TIMEOUT_HOURS = 12
-IP_COOLDOWN_MINUTES = 10
+SESSION_TIMEOUT_HOURS = 2
+IP_COOLDOWN_MINUTES = 0
 
 # To store user data: username -> { "total_logins": int, "last_ip": str, "last_login_time": str, "last_alert_time": str }
 user_cache = {}
@@ -95,11 +95,10 @@ def process_log_line(line):
             should_alert = False
             
             if ip != last_ip:
-                # IP changed
-                if now - last_alert_time >= timedelta(minutes=IP_COOLDOWN_MINUTES):
-                    should_alert = True
+                # IP changed or first time login
+                should_alert = True
             else:
-                # IP is the same, but check if it's been a long time
+                # IP is the same, check if more than 2 hours passed since last alert
                 if now - last_alert_time >= timedelta(hours=SESSION_TIMEOUT_HOURS):
                     should_alert = True
                     

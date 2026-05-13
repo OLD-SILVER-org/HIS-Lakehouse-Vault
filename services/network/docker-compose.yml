@@ -64,22 +64,32 @@ services:
       - source-net
       - warehouse-net
 
+  # Portal: Embedded Web Interface (Nginx)
+  portal:
+    image: nginx:alpine
+    container_name: bi-portal
+    restart: unless-stopped
+    volumes:
+      - ../ui/portal:/usr/share/nginx/html:ro
+    networks:
+      - network_stack
+
   # Login Tracker: Monitors Caddy access logs and sends Slack alerts on login
-  #login-tracker:
-  #  image: python:3.12-slim
-  #  container_name: login_tracker
-  #  restart: always
-  #  env_file:
-  #    - ../service_env.env
-  #  volumes:
-  #    - caddy_logs:/data/logs:ro
-  #    - ../scripts/login_tracker.py:/app/login_tracker.py:ro
-  #    - ../data:/opt/his-lakehouse/services/data
-  #  command: python /app/login_tracker.py
-  #  depends_on:
-  #    - caddy
-  #  networks:
-  #    - network_stack
+  login-tracker:
+    image: python:3.12-slim
+    container_name: login_tracker
+    restart: always
+    env_file:
+      - ../service_env.env
+    volumes:
+      - caddy_logs:/data/logs:ro
+      - ../scripts/login_tracker.py:/app/login_tracker.py:ro
+      - /opt/his-lakehouse/services/data:/opt/his-lakehouse/services/data
+    command: python /app/login_tracker.py
+    depends_on:
+      - caddy
+    networks:
+      - network_stack
 
 
 # Shared network for the stack
