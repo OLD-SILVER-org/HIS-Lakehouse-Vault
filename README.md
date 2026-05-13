@@ -1,4 +1,8 @@
-# 🏥 Hospital Data Warehouse System
+# 🏥 Hospital Lakehouse Platform (HIS-Lakehouse)
+
+![System Architecture](images/system/system_architecture.png)
+
+## 📖 Overview
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -82,6 +86,7 @@ The system is deployed on a VPS; you can access the primary services directly he
 
 > [!IMPORTANT]
 > ### 🚀 **PRIMARY ENTRY: [BI PORTAL](http://vmi3040316.contaboserver.net:18083/)**
+> ![BI Portal](images/system/web_bi_portal.png)
 > This is the unified dashboard portal. All users should start here.
 > 
 > **Login Credentials (2-Layer Security):**
@@ -130,12 +135,12 @@ The system implements the **Data Vault 2.0** methodology in the Warehouse layer 
 
 ## 🖼️ System Showcases
 
-### 1. Data Lineage & Modeling (dbt)
-The system architecture follows the **Data Vault 2.0** methodology, ensuring high scalability and historical auditability. Below is a focused lineage of the **Financial Fact** flow:
+### 1. Data Modeling & Documentation (dbt)
+The warehouse is built using **Data Vault 2.0** for flexibility and scalability. All models are automatically documented and lineage is tracked.
 
-![Data Vault Lineage](images/system/lineage_graph_fact_thanh_toan.png)
+![Lineage Graph](images/system/lineage_graph_fact_thanh_toan.png)
 
-👉 **[Explore Interactive Lineage & Documentation](http://localhost:8183/)**
+👉 **[Explore Interactive Lineage & Documentation](http://vmi3040316.contaboserver.net:18183/)**
 
 *   **Detailed Modeling Docs**: See [Data Vault 2.0 Documents](docs/modeling/data_vault_documents.md) for entity definitions.
 
@@ -170,9 +175,15 @@ The entire workflow is orchestrated by Airflow, with real-time failure alerts an
 *   **Data Lake Storage (MinIO)**: Distributed object storage for Apache Iceberg tables, acting as the foundation of the Medallion architecture.
     ![MinIO](images/system/service_minio.png)
 
+### 5. Network & Security (WGDashboard)
+Secure access to the infrastructure is managed via WireGuard VPN, with a centralized dashboard for peer management.
+
+![WGDashboard](images/system/wgdashboard.png)
+
 ---
 
 ## 📝 Contact
 - **Project Lead**: Nguyễn Thanh Tính
 - **Email**: thanhtinh.de@gmail.com
+- **Git**: https://github.com/OLD-SILVER-org
 - **Version**: 1.0.0
