@@ -2,68 +2,54 @@
     email {$NETWORK_EMAIL}
 }
 
-(auth_block) {
-    log {
-        output file /data/logs/caddy_access.log
-        format json
-    }
-    basic_auth bcrypt "HIS-Lakehouse Authentication" {
-        {$LOGIN_USER} {$LOGIN_PASS_HASH}
-    }
+# Main Domain
+{$NETWORK_DOMAIN} {
+    reverse_proxy wgdashboard:{$NETWORK_WGDASHBOARD_PORT}
 }
 
 # Flink UI
 :8081 {
-    import auth_block
+    #import auth_block
     reverse_proxy flink_jobmanager:8081
 }
 
 # Airflow UI
-#:8888 {
-#    import auth_block
-#    reverse_proxy airflow-apiserver:8080
-#}
+:8888 {
+    #import auth_block
+    reverse_proxy airflow-apiserver:8080
+}
 
 # Superset UI
 :8088 {
-    import auth_block
+    #import auth_block
     reverse_proxy superset_bi:8088
 }
 
 # Spark Master
 :8085 {
-    import auth_block
+    #import auth_block
     reverse_proxy spark-master:8085
 }
 
 # Kafka UI
 :8090 {
-    import auth_block
+    #import auth_block
     reverse_proxy kafka-ui:8080
 }
 
 # Trino UI
 :8080 {
-    import auth_block
+    #import auth_block
     reverse_proxy trino:8080
 }
 
-# MinIO Console (Direct Port)
+# MinIO Console
 :9001 {
-    import auth_block
+    #import auth_block
     reverse_proxy minio:9001
 }
-
-# Main Domain
-{$NETWORK_DOMAIN} {
-    encode zstd gzip
-
-    # WGDashboard (Now protected by Caddy Basic Auth)
-    import auth_block
-    reverse_proxy wgdashboard:{$NETWORK_WGDASHBOARD_PORT}
-
-    # MinIO Console (Path based)
-    handle_path /minio* {
-        reverse_proxy minio:9001
-    }
+# Portainer UI
+:19000 {
+    #import auth_block
+    reverse_proxy portainer:9000
 }

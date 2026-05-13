@@ -51,7 +51,9 @@ services:
       - "18085:8085"
       - "18090:8090"
       - "18080:8080"
+      - "19000:19000"
       - "19001:9001"
+      - "19443:9443"
     depends_on:
       - wgdashboard
     networks:
@@ -62,21 +64,21 @@ services:
       - warehouse-net
 
   # Login Tracker: Monitors Caddy access logs and sends Slack alerts on login
-  login-tracker:
-    image: python:3.12-slim
-    container_name: login_tracker
-    restart: always
-    env_file:
-      - ../service_env.env
-    volumes:
-      - caddy_logs:/data/logs:ro
-      - ../scripts/login_tracker.py:/app/login_tracker.py:ro
-      - ../data:/opt/his-lakehouse/services/data
-    command: python /app/login_tracker.py
-    depends_on:
-      - caddy
-    networks:
-      - network_stack
+  #login-tracker:
+  #  image: python:3.12-slim
+  #  container_name: login_tracker
+  #  restart: always
+  #  env_file:
+  #    - ../service_env.env
+  #  volumes:
+  #    - caddy_logs:/data/logs:ro
+  #    - ../scripts/login_tracker.py:/app/login_tracker.py:ro
+  #    - ../data:/opt/his-lakehouse/services/data
+  #  command: python /app/login_tracker.py
+  #  depends_on:
+  #    - caddy
+  #  networks:
+  #    - network_stack
 
 
 # Shared network for the stack

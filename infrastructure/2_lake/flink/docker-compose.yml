@@ -61,7 +61,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 6G
     networks:
       - lake-net
       - source-net
