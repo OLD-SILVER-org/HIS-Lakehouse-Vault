@@ -54,6 +54,7 @@ services:
       - "19000:19000"
       - "19001:9001"
       - "19443:9443"
+      - "18083:8083"
     depends_on:
       - wgdashboard
     networks:
