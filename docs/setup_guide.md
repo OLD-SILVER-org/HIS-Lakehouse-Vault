@@ -63,6 +63,7 @@ bash infrastructure/3_warehouse/jars/download_jars.sh
 docker network create warehouse-net
 
 # Launch Spark Cluster and Warehouse Postgres
+docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml build
 docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml up -d
 docker-compose --env-file .env -f infrastructure/3_warehouse/postgres/docker-compose.yml up -d
 
