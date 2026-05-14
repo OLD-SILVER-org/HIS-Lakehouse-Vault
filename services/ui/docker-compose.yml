@@ -1,0 +1,18 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:2.41.1
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - network_stack
+
+volumes:
+  portainer_data:
+
+networks:
+  network_stack:
+    name: network_stack
+    external: true
