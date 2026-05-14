@@ -54,10 +54,10 @@ All services are accessible via your domain name and specific ports.
 
 **Authentication Layers:**
 1. **Layer 1 (Caddy Basic Auth)**: Whenever you access *any* service (including WGDashboard), a browser pop-up will ask for credentials.
-   - **User**: Lấy từ biến `LOGIN_USER` trong file `.env`.
-   - **Pass**: Pass tương ứng với `LOGIN_PASS_HASH` (Pass hiện tại là: `thanhtinh@Pass1`).
-2. **Layer 2 (Application Auth)**: Một số app sẽ có form đăng nhập riêng của nó (VD: WGDashboard, Superset, Airflow).
-   - *Đối với WGDashboard*: Ở lần truy cập đầu tiên, tài khoản mặc định thường là `admin` / `admin`. Hãy đăng nhập và đổi mật khẩu trong mục Settings nhé!
+   - **User**: Get from the `LOGIN_USER` variable in the `.env` file.
+   - **Pass**: Password corresponding to `LOGIN_PASS_HASH` (Current password is: `thanhtinh@Pass1`).
+2. **Layer 2 (Application Auth)**: Some apps will have their own login forms (e.g., WGDashboard, Superset, Airflow).
+   - *For WGDashboard*: On first access, the default account is usually `admin` / `admin`. Please log in and change the password in the Settings section!
 
 **Service Endpoints:**
 - **Main Domain / WGDashboard**: `https://<NETWORK_DOMAIN>`
