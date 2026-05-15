@@ -1,0 +1,52 @@
+services:
+  elasticsearch:
+    image: ${ELASTIC_IMAGE} # Use the image defined in .env
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node # Required for single-node development setup
+      - xpack.security.enabled=true # Fixed typo 'truse'
+      - ES_JAVA_OPTS=-Xms1024m -Xmx1024m # Fixed typo '-Xm' to '-Xms'
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+    ports:
+      - "9200:9200" # HTTP API
+      - "9300:9300" # Node-to-node communication
+    volumes:
+      - esdata:/usr/share/elasticsearch/data # Persistent data volume
+    networks:
+      - elastic-net
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:${ES_PASSWORD} -f http://localhost:9200/_cat/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  kibana:
+    image: ${KIBANA_IMAGE}
+    container_name: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - SERVERNAME=kibana
+      - SERVER_HOST=0.0.0.0
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+    # ports:
+    #   - "5601:5601"
+    networks:
+      - elastic-net
+    restart: always
+
+volumes:
+  esdata:
+    driver: local
+
+networks:
+  elastic-net:
+    name: elastic-net
+    driver: bridge

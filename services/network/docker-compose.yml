@@ -56,6 +56,7 @@ services:
       - "19443:9443"
       - "18083:8083"
       - "18183:18183"
+      - "5601:5601"
     depends_on:
       - wgdashboard
     networks:
@@ -64,6 +65,7 @@ services:
       - serving-net
       - source-net
       - warehouse-net
+      - elastic-net
 
   # Portal: Embedded Web Interface (Nginx)
   portal:
@@ -104,6 +106,8 @@ networks:
   lake-net:
     external: true
   warehouse-net:
+    external: true
+  elastic-net:
     external: true
 
 volumes:

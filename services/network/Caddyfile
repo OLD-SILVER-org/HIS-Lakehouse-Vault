@@ -73,3 +73,9 @@
     }
     reverse_proxy bi-portal:80
 }
+
+# Kibana UI
+:5601 {
+    import log_config
+    reverse_proxy kibana:5601
+}
