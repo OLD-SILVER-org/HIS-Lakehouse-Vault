@@ -41,7 +41,6 @@ services:
     networks:
       - elastic-net
     restart: always
-
 volumes:
   esdata:
     driver: local
@@ -50,3 +49,4 @@ networks:
   elastic-net:
     name: elastic-net
     driver: bridge
+

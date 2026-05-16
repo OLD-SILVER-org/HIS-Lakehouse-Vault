@@ -37,6 +37,11 @@
     reverse_proxy spark-master:8080
 }
 
+# Spark Master (ES)
+:8089 {
+    reverse_proxy spark-es-master:8080
+}
+
 # Kafka UI
 :8090 {
     reverse_proxy kafka-ui:8080

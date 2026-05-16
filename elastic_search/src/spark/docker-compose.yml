@@ -1,0 +1,50 @@
+name: spark-es
+services:
+  spark-es-master:
+    build: .
+    image: ${ES_SPARK_IMAGE}
+    container_name: spark-es-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "127.0.0.1:${ES_SPARK_MASTER_PORT}:7077"
+      - "127.0.0.1:${ES_SPARK_WEBUI_PORT}:8080"
+    env_file:
+      - ../../.env
+    environment:
+      - SPARK_ENV=docker
+    volumes:
+      - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
+      - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - ./spark_jobs:/opt/spark/spark_jobs
+      - ../jars:/opt/spark/user_jars
+    networks:
+      - lake-net
+      - elastic-net
+
+  spark-es-worker:
+    image: ${ES_SPARK_IMAGE}
+    container_name: spark-es-worker
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-es-master:7077
+    depends_on:
+      - spark-es-master
+    ports:
+      - "127.0.0.1:${ES_SPARK_WORKER_PORT}:8081"
+    env_file:
+      - ../../.env
+    environment:
+      - SPARK_ENV=docker
+    volumes:
+      - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - ./conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./spark_jobs:/opt/spark/spark_jobs
+      - ../jars:/opt/spark/user_jars
+
+    networks:
+      - lake-net
+      - elastic-net
+
+networks:
+  lake-net:
+    external: true
+  elastic-net:
+    external: true

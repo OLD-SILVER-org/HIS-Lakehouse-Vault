@@ -4,11 +4,24 @@ This directory contains the Docker Compose setup for **Elasticsearch** and **Kib
 
 ## 🚀 How to Run
 
-To start the stack, navigate to this directory and run:
+To start the **Elasticsearch & Kibana** stack, run:
 
 ```bash
-docker compose up -d
+docker compose --env-file .env up -d
 ```
+
+To start the **Spark for Elasticsearch** stack (dedicated cluster), run:
+
+```bash
+cd src/spark
+docker compose --env-file ../../.env up -d
+```
+
+### 📊 Spark Web UIs (ES Cluster)
+- **Spark Master UI (Internal)**: [http://localhost:8089](http://localhost:8089)
+- **Spark Master UI (External)**: [http://vmi3040316.contaboserver.net:18089/](http://vmi3040316.contaboserver.net:18089/)
+- **Spark Worker UI**: [http://localhost:8084](http://localhost:8084)
+- **Spark Master Internal**: `spark://spark-es-master:7077`
 
 ### ⚙️ Configuration
 The stack uses environment variables defined in the `.env` file:
