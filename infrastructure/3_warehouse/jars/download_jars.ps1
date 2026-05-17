@@ -43,6 +43,9 @@ $Jars = @(
     # XML Processing
     @{ name = "stax2-api-4.2.1.jar"; url = "https://repo1.maven.org/maven2/org/codehaus/woodstox/stax2-api/4.2.1/stax2-api-4.2.1.jar" },
     @{ name = "woodstox-core-5.0.3.jar"; url = "https://repo1.maven.org/maven2/com/fasterxml/woodstox/woodstox-core/5.0.3/woodstox-core-5.0.3.jar" }
+    
+    #Elastic Search
+    @{ name = "elasticsearch-hadoop-8.13.4.jar"; url = "https://repo1.maven.org/maven2/org/elasticsearch/elasticsearch-hadoop/8.13.4/elasticsearch-hadoop-8.13.4.jar"}
 )
 
 Write-Host "=== Downloading JAR files for Warehouse layer ===" -ForegroundColor Green
