@@ -19,6 +19,14 @@
         <div class="list-group list-group-flush" id="dashboard-list">
             <!-- Dashboards will be loaded here dynamically -->
         </div>
+        <div class="sidebar-heading border-bottom text-center py-3 fs-6 fw-bold border-top text-muted">
+            <i class="fas fa-search me-2"></i> Search Engine
+        </div>
+        <div class="list-group list-group-flush" id="search-list">
+            <a class="list-group-item list-group-item-action dashboard-item" id="elasticsearch-item">
+                <i class="fas fa-search text-warning me-2"></i> Elasticsearch Search
+            </a>
+        </div>
     </div>
     <!-- /#sidebar-wrapper -->
 
@@ -41,7 +49,169 @@
                 <p class="text-muted">Please choose a dashboard from the sidebar on the left.</p>
             </div>
             <iframe id="dashboard-frame" src="" class="d-none w-100 h-100 border-0"></iframe>
-        </div>
+
+            <!-- Elasticsearch Container -->
+            <div id="elasticsearch-container" class="d-none h-100 overflow-auto bg-light p-4">
+                <div class="container-fluid">
+                    <!-- Header -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #1f2937, #111827); border-radius: 12px;">
+                                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h3 class="fw-bold mb-1"><i class="fas fa-search text-warning me-2"></i> HIS Lakehouse Elasticsearch</h3>
+                                        <p class="mb-0 text-muted" style="color: #adb5bd !important;">Hệ thống tìm kiếm toàn văn (Full-text Search) tốc độ cao, hỗ trợ phân tích và truy vấn dữ liệu lâm sàng, hành chính.</p>
+                                    </div>
+                                    <div class="d-none d-md-block">
+                                        <span class="badge bg-warning text-dark px-3 py-2 fs-6">Elasticsearch 8.17.2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Left Column: Search Form and Results -->
+                        <div class="col-lg-8 mb-4">
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title fw-bold text-dark mb-4"><i class="fas fa-filter text-primary me-2"></i> Công cụ Tìm kiếm Trực tiếp</h5>
+                                    
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label for="search-index" class="form-label fw-semibold text-secondary">Chọn Index dữ liệu</label>
+                                            <select id="search-index" class="form-select">
+                                                <option value="_all">Tất cả Index (_all)</option>
+                                                <option value="idx_benh_nhan" selected>Bệnh nhân (idx_benh_nhan)</option>
+                                                <option value="idx_dich_vu">Danh mục Dịch vụ (idx_dich_vu)</option>
+                                                <option value="idx_dot_dieu_tri">Đợt Điều trị (idx_dot_dieu_tri)</option>
+                                                <option value="idx_nhan_vien">Nhân viên (idx_nhan_vien)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label for="search-query" class="form-label fw-semibold text-secondary">Từ khóa tìm kiếm (Full-text Search)</label>
+                                            <div class="input-group">
+                                                <input type="text" id="search-query" class="form-control" placeholder="Nhập tên bệnh nhân, mã dịch vụ, hoặc từ khóa bất kỳ...">
+                                                <button class="btn btn-primary px-4 shadow-sm" id="btn-search-es"><i class="fas fa-search me-2"></i>Tìm kiếm</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Connection Mode Toggle -->
+                                    <div class="d-flex justify-content-between align-items-center pt-2">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="search-mode-switch" checked>
+                                            <label class="form-check-label text-muted small fw-semibold" for="search-mode-switch">
+                                                Chế độ Demo / Mock Search (Không lo lỗi kết nối)
+                                            </label>
+                                        </div>
+                                        <span class="badge bg-warning-subtle text-warning px-2.5 py-1.5 border border-warning-subtle rounded-pill small" id="connection-status">
+                                            <i class="fas fa-circle text-warning me-1"></i> Demo Mode
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Results Section -->
+                            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fas fa-list-ul text-success me-2"></i> Kết quả tìm kiếm</h5>
+                                        <span class="text-muted small fw-semibold" id="search-metrics">Chưa thực hiện truy vấn</span>
+                                    </div>
+
+                                    <!-- Results List -->
+                                    <div id="search-results-list" class="vstack gap-3">
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="fas fa-keyboard fs-1 mb-3 text-secondary" style="opacity: 0.5;"></i>
+                                            <p class="mb-0">Nhập từ khóa và nhấn nút Tìm kiếm để xem kết quả.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Kibana Guidance and Settings -->
+                        <div class="col-lg-4">
+                            <!-- Kibana Quick Access Card -->
+                            <div class="card border-0 shadow-sm mb-4 bg-white" style="border-radius: 12px;">
+                                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                                    <h5 class="card-title fw-bold text-dark mb-0"><i class="fas fa-external-link-alt text-info me-2"></i> Cổng thông tin Kibana</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <p class="text-muted small">Kibana cung cấp giao diện trực quan hóa dữ liệu mạnh mẽ đi kèm với Elasticsearch, cho phép bạn tạo các Dashboard biểu đồ, theo dõi Log, cấu hình Index Patterns, và thực hiện truy vấn nâng cao một cách trực quan.</p>
+                                    
+                                    <div class="d-grid gap-2 mb-4">
+                                        <a href="http://vmi3040316.contaboserver.net:5601/" target="_blank" class="btn btn-info text-white fw-semibold py-2.5 shadow-sm">
+                                            <i class="fas fa-rocket me-2"></i> Truy cập Kibana UI <i class="fas fa-chevron-right small ms-1"></i>
+                                        </a>
+                                    </div>
+
+                                    <div class="bg-light rounded p-3 mb-3 border" style="border-radius: 8px;">
+                                        <h6 class="fw-bold mb-3 text-secondary small text-uppercase tracking-wider"><i class="fas fa-key me-1"></i> Thông tin đăng nhập</h6>
+                                        
+                                        <!-- Username -->
+                                        <div class="mb-2">
+                                            <label class="form-label text-muted small mb-1">Tài khoản (Username):</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control bg-white" id="kibana-username" value="elastic" readonly>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('elastic'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Đã copy tài khoản!', showConfirmButton: false, timer: 1500, background: '#1a1a1a', color: '#fff'})">
+                                                    <i class="far fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Password -->
+                                        <div>
+                                            <label class="form-label text-muted small mb-1">Mật khẩu (Password):</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="password" class="form-control bg-white" id="kibana-password" value="thanhtinh@Pass123" readonly>
+                                                <button class="btn btn-outline-secondary" type="button" id="toggle-password-btn">
+                                                    <i class="far fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('thanhtinh@Pass123'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Đã copy mật khẩu!', showConfirmButton: false, timer: 1500, background: '#1a1a1a', color: '#fff'})">
+                                                    <i class="far fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-warning border-0 small mb-0" style="border-radius: 8px;" role="alert">
+                                        <i class="fas fa-info-circle me-1"></i> <strong>Lưu ý:</strong> Khi truy cập Kibana lần đầu, hãy đăng nhập bằng tài khoản <code>elastic</code> ở trên, sau đó di chuyển vào mục <strong>Discover</strong> để bắt đầu tìm kiếm.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ES Index Guide Card -->
+                            <div class="card border-0 shadow-sm bg-white" style="border-radius: 12px;">
+                                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                                    <h5 class="card-title fw-bold text-dark mb-0"><i class="fas fa-database text-warning me-2"></i> Cấu trúc Data Index</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="list-group list-group-flush small">
+                                        <div class="list-group-item px-0 border-0 pb-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_benh_nhan</h6>
+                                            <p class="text-muted mb-0">Chứa thông tin hành chính bệnh nhân. Khóa chính: <code>ma_nb</code> (Mã người bệnh).</p>
+                                        </div>
+                                        <div class="list-group-item px-0 border-0 py-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_dich_vu</h6>
+                                            <p class="text-muted mb-0">Danh mục dịch vụ y tế, xét nghiệm, chẩn đoán. Khóa chính: <code>code_dichvu</code>.</p>
+                                        </div>
+                                        <div class="list-group-item px-0 border-0 py-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_dot_dieu_tri</h6>
+                                            <p class="text-muted mb-0">Hồ sơ bệnh án và các đợt điều trị lâm sàng. Khóa chính: <code>ma_benh_an</code>.</p>
+                                        </div>
+                                        <div class="list-group-item px-0 border-0 pt-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_nhan_vien</h6>
+                                            <p class="text-muted mb-0">Thông tin bác sĩ, điều dưỡng, nhân viên y tế. Khóa chính: <code>code_nhan_vien</code>.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
     <!-- /#page-content-wrapper -->
 </div>

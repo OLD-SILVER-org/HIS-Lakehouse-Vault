@@ -80,3 +80,73 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     width: 20px;
     text-align: center;
 }
+
+/* Elasticsearch Search Portal Styling */
+#elasticsearch-container {
+    background-color: #f8f9fa;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+#elasticsearch-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+#elasticsearch-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+#elasticsearch-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+#search-results-list .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#search-results-list .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.form-switch .form-check-input {
+    cursor: pointer;
+}
+
+.tracking-wider {
+    letter-spacing: 0.05em;
+}
+
+.border-warning-subtle {
+    border-color: rgba(255, 193, 7, 0.25) !important;
+}
+
+.bg-warning-subtle {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+.border-success-subtle {
+    border-color: rgba(25, 135, 84, 0.25) !important;
+}
+
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.border-info-subtle {
+    border-color: rgba(13, 202, 240, 0.25) !important;
+}
+
+.bg-info-subtle {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+.border-primary-subtle {
+    border-color: rgba(13, 110, 253, 0.25) !important;
+}
+
+.bg-primary-subtle {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+}
