@@ -19,12 +19,15 @@
         <div class="list-group list-group-flush" id="dashboard-list">
             <!-- Dashboards will be loaded here dynamically -->
         </div>
-        <div class="sidebar-heading border-bottom text-center py-3 fs-6 fw-bold border-top text-muted">
-            <i class="fas fa-search me-2"></i> Search Engine
+        <div class="sidebar-section-heading">
+            <i class="fas fa-database me-2"></i> Search Engine
         </div>
         <div class="list-group list-group-flush" id="search-list">
             <a class="list-group-item list-group-item-action dashboard-item" id="elasticsearch-item">
-                <i class="fas fa-search text-warning me-2"></i> Elasticsearch Search
+                <i class="fas fa-bolt text-warning"></i> ES Full-text Search
+            </a>
+            <a class="list-group-item list-group-item-action dashboard-item" id="kibana-item">
+                <i class="fas fa-chart-area text-info"></i> Kibana Dashboard
             </a>
         </div>
     </div>
@@ -133,51 +136,61 @@
 
                         <!-- Right Column: Kibana Guidance and Settings -->
                         <div class="col-lg-4">
-                            <!-- Kibana Quick Access Card -->
-                            <div class="card border-0 shadow-sm mb-4 bg-white" style="border-radius: 12px;">
-                                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-                                    <h5 class="card-title fw-bold text-dark mb-0"><i class="fas fa-external-link-alt text-info me-2"></i> Cổng thông tin Kibana</h5>
-                                </div>
+                            <!-- Kibana Quick Access Card - Pinned Top -->
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: linear-gradient(135deg, #0f4c81, #1565c0);">
                                 <div class="card-body p-4">
-                                    <p class="text-muted small">Kibana cung cấp giao diện trực quan hóa dữ liệu mạnh mẽ đi kèm với Elasticsearch, cho phép bạn tạo các Dashboard biểu đồ, theo dõi Log, cấu hình Index Patterns, và thực hiện truy vấn nâng cao một cách trực quan.</p>
-                                    
-                                    <div class="d-grid gap-2 mb-4">
-                                        <a href="http://vmi3040316.contaboserver.net:5601/" target="_blank" class="btn btn-info text-white fw-semibold py-2.5 shadow-sm">
-                                            <i class="fas fa-rocket me-2"></i> Truy cập Kibana UI <i class="fas fa-chevron-right small ms-1"></i>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;background:rgba(255,255,255,0.15);">
+                                            <i class="fas fa-chart-area text-white fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold text-white mb-0">Kibana Analytics</h6>
+                                            <small class="text-white" style="opacity:0.7;">Visualization &amp; Discover</small>
+                                        </div>
+                                    </div>
+                                    <p class="text-white small mb-3" style="opacity:0.85;">Giao diện trực quan hóa mạnh mẽ. Tạo biểu đồ, khám phá dữ liệu, truy vấn nâng cao — không lo CORS.</p>
+                                    <div class="d-grid gap-2">
+                                        <button id="btn-open-kibana-portal" class="btn btn-light fw-semibold shadow-sm">
+                                            <i class="fas fa-expand-alt me-2 text-primary"></i> Mở Kibana trong Portal
+                                        </button>
+                                        <a href="http://vmi3040316.contaboserver.net:5601/" target="_blank" class="btn btn-outline-light btn-sm">
+                                            <i class="fas fa-external-link-alt me-1"></i> Mở tab mới
                                         </a>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <div class="bg-light rounded p-3 mb-3 border" style="border-radius: 8px;">
-                                        <h6 class="fw-bold mb-3 text-secondary small text-uppercase tracking-wider"><i class="fas fa-key me-1"></i> Thông tin đăng nhập</h6>
-                                        
-                                        <!-- Username -->
-                                        <div class="mb-2">
-                                            <label class="form-label text-muted small mb-1">Tài khoản (Username):</label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control bg-white" id="kibana-username" value="elastic" readonly>
-                                                <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('elastic'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Đã copy tài khoản!', showConfirmButton: false, timer: 1500, background: '#1a1a1a', color: '#fff'})">
-                                                    <i class="far fa-copy"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Password -->
-                                        <div>
-                                            <label class="form-label text-muted small mb-1">Mật khẩu (Password):</label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="password" class="form-control bg-white" id="kibana-password" value="thanhtinh@Pass123" readonly>
-                                                <button class="btn btn-outline-secondary" type="button" id="toggle-password-btn">
-                                                    <i class="far fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('thanhtinh@Pass123'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Đã copy mật khẩu!', showConfirmButton: false, timer: 1500, background: '#1a1a1a', color: '#fff'})">
-                                                    <i class="far fa-copy"></i>
-                                                </button>
-                                            </div>
+                            <!-- Credentials Card -->
+                            <div class="card border-0 shadow-sm mb-4 bg-white" style="border-radius: 12px;">
+                                <div class="card-header bg-transparent border-0 pt-3 px-4 pb-0">
+                                    <h6 class="fw-bold text-dark mb-0"><i class="fas fa-key text-warning me-2"></i> Thông tin đăng nhập Kibana</h6>
+                                </div>
+                                <div class="card-body px-4 pt-3 pb-3">
+                                    <!-- Username -->
+                                    <div class="mb-2">
+                                        <label class="form-label text-muted small mb-1">Tài khoản:</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control bg-light" id="kibana-username" value="elastic" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('elastic'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Đã copy!', showConfirmButton: false, timer: 1200, background: '#1a1a1a', color: '#fff'})">
+                                                <i class="far fa-copy"></i>
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <div class="alert alert-warning border-0 small mb-0" style="border-radius: 8px;" role="alert">
-                                        <i class="fas fa-info-circle me-1"></i> <strong>Lưu ý:</strong> Khi truy cập Kibana lần đầu, hãy đăng nhập bằng tài khoản <code>elastic</code> ở trên, sau đó di chuyển vào mục <strong>Discover</strong> để bắt đầu tìm kiếm.
+                                    <!-- Password -->
+                                    <div>
+                                        <label class="form-label text-muted small mb-1">Mật khẩu:</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="password" class="form-control bg-light" id="kibana-password" value="thanhtinh@Pass123" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggle-password-btn">
+                                                <i class="far fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('thanhtinh@Pass123'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Đã copy!', showConfirmButton: false, timer: 1200, background: '#1a1a1a', color: '#fff'})">
+                                                <i class="far fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-warning border-0 small mt-3 mb-0 p-2" style="border-radius: 8px;">
+                                        <i class="fas fa-lightbulb me-1"></i> Sau khi đăng nhập, vào <strong>Discover</strong> để tìm kiếm full-text.
                                     </div>
                                 </div>
                             </div>
@@ -212,6 +225,8 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <!-- /#iframe-container -->
     </div>
     <!-- /#page-content-wrapper -->
 </div>

@@ -70,13 +70,23 @@
     reverse_proxy dbt-warehouse:8182
 }
 
-# Embedded Web
+# Embedded Web + Elasticsearch API Proxy
 :8083 {
     import log_config
-    basicauth {
-        {$LOGIN_USER} {$LOGIN_PASS_HASH}
+
+    # ES Search API — no portal basicauth (ES handles its own auth)
+    handle /api/es/* {
+        uri strip_prefix /api/es
+        reverse_proxy elasticsearch:9200
     }
-    reverse_proxy bi-portal:80
+
+    # Portal UI — protected by basicauth
+    handle {
+        basicauth {
+            {$LOGIN_USER} {$LOGIN_PASS_HASH}
+        }
+        reverse_proxy bi-portal:80
+    }
 }
 
 # Kibana UI

@@ -150,3 +150,30 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
 .bg-primary-subtle {
     background-color: rgba(13, 110, 253, 0.1) !important;
 }
+
+/* Sidebar section heading separator */
+.sidebar-section-heading {
+    padding: 10px 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6c757d;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 4px;
+}
+
+/* Kibana item special active color */
+#kibana-item.active {
+    background: linear-gradient(90deg, #0f4c81, #1565c0) !important;
+    color: #fff;
+    font-weight: 500;
+}
+
+#kibana-item:hover:not(.active) {
+    background-color: #1a2535;
+    color: #7ec8f7;
+}
+
