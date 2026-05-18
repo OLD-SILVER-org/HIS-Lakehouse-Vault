@@ -2,7 +2,8 @@ from elastic_batch import ElasticBatch
 
 class PatientPipelineBatch(ElasticBatch):
     def __init__(self):
-        super().__init__("dm_benh_nhan", "idx_benh_nhan")
+        # Truyền đủ 3 tham số: source, target_index, id_col
+        super().__init__("dm_benh_nhan", "idx_benh_nhan", "nb_thong_tin_id")
         
     def extract(self):
         query = f"""
@@ -18,11 +19,6 @@ class PatientPipelineBatch(ElasticBatch):
 
     def transform(self, df):
         return df
-    
-    def load(self, df):
-        df.show(10)
-        return df
-        
     
 if __name__ == "__main__":
     job = PatientPipelineBatch()

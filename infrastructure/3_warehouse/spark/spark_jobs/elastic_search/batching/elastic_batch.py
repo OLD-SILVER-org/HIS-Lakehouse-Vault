@@ -11,18 +11,22 @@ from utils.slack_utils import SlackNotifier
 from abc import ABC, abstractmethod
 
 class ElasticBatch (ABC):
-    def __init__(self, source, target_index):
+    def __init__(self, source, target_index, id_col):
         self.source = source
         self.target_index = target_index
+        self.id_col = id_col
         self.utils = SparkUtils()
         self.spark = self.utils.get_spark_session("Elastic_Batch_Job")
         
         # Iceberg Catalog and Minio
         self.source_sink = "hospital_catalog.hospital_db_sink"
         
-        # Elasticsearch Target Details
-        self.target_index = target_index
+        # Slack Notifier
         self.notifier = SlackNotifier()
+
+        # Auth
+        self.user = "elastic"
+        self.password = os.getenv("ES_PASSWORD", "")
     
     @abstractmethod
     def extract(self):
@@ -32,11 +36,36 @@ class ElasticBatch (ABC):
     def transform(self, df):
         pass
     
-    @abstractmethod
-    def load(self, df):
-        pass
+    def write_to_es(self, df):
+        """
+        Helper method to write Spark DataFrame to Elasticsearch.
+        """
+        es_conf = {
+            "es.nodes": "elasticsearch",
+            "es.port": "9200",
+            "es.resource": self.target_index,
+            "es.net.http.auth.user": self.user,
+            "es.net.http.auth.pass": self.password,
+            "es.nodes.wan.only": "true",
+            "es.index.auto.create": "true",
+            "es.write.operation": "upsert" if self.id_col else "index"
+        }
+
+        if self.id_col:
+            es_conf["es.mapping.id"] = self.id_col
+        
+        try:
+            df.write.format("org.elasticsearch.spark.sql") \
+                .options(**es_conf) \
+                .mode("append") \
+                .save()
+        except Exception as e:
+            if self.notifier:
+                error_msg = f"❌ Failed to write to ES index: {self.target_index}\nError: {str(e)}\n{traceback.format_exc()}"
+                self.notifier.send_message(error_msg)
+            raise e
 
     def run(self):
         df = self.extract()
         transformed_df = self.transform(df)
-        self.load(transformed_df)
+        self.write_to_es(transformed_df)

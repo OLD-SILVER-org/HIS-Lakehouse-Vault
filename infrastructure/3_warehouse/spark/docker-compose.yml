@@ -21,6 +21,7 @@ services:
     networks:
       - lake-net
       - warehouse-net
+      - elastic-net
 
   spark-worker:
     image: ${WAREHOUSE_SPARK_IMAGE}
@@ -43,9 +44,12 @@ services:
     networks:
       - lake-net
       - warehouse-net
+      - elastic-net
 
 networks:
   lake-net:
     external: true
   warehouse-net:
+    external: true
+  elastic-net:
     external: true
