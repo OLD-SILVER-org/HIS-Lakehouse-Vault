@@ -22,9 +22,9 @@ Create networks and services to capture data changes (CDC) from the Postgres HIS
 docker network create source-net
 
 # Launch services (Postgres, Kafka, Debezium)
-docker-compose --env-file .env -f infrastructure/1_source/postgres/docker-compose.yml up -d
-docker-compose --env-file .env -f infrastructure/1_source/kafka/docker-compose.yml up -d
-docker-compose --env-file .env -f infrastructure/1_source/debezium/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/1_source/postgres/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/1_source/kafka/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/1_source/debezium/docker-compose.yml up -d
 
 # Configure Debezium Connector
 # Windows:
@@ -44,11 +44,16 @@ bash infrastructure/2_lake/jars/download_jars.sh
 docker network create lake-net
 
 # Deploy storage and metadata services
-docker-compose --env-file .env -f infrastructure/2_lake/postgres/docker-compose.yml up -d
-docker-compose --env-file .env -f infrastructure/2_lake/minio/docker-compose.yml up -d
-docker-compose --env-file .env -f infrastructure/2_lake/hive_metastore/docker-compose.yml up -d
-docker-compose --env-file .env -f infrastructure/2_lake/flink/docker-compose.yml up -d
-docker-compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/postgres/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/minio/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/hive_metastore/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/flink/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/postgres/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/minio/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/hive_metastore/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/flink/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml up -d
 ```
 
 
@@ -63,13 +68,13 @@ bash infrastructure/3_warehouse/jars/download_jars.sh
 docker network create warehouse-net
 
 # Launch Spark Cluster and Warehouse Postgres
-docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml build
-docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml build
+docker compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml up -d
 
 # If you want to increase Spark capacity for concurrent pipelines, scale the Spark worker service:
-# docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml up --scale spark-worker=2 -d
+docker compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml up --scale spark-worker=2 -d
 
-docker-compose --env-file .env -f infrastructure/3_warehouse/postgres/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/3_warehouse/postgres/docker-compose.yml up -d
 
 # Initialize Staging and Metadata Schemas (Only if containers are already running without schemas; default Docker entrypoint runs these on first launch)
 docker exec -it postgres-warehouse psql -U dwh_admin -d dwh -f /docker-entrypoint-initdb.d/create_staging_metadata.sql
@@ -78,23 +83,26 @@ docker exec -it postgres-warehouse psql -U dwh_admin -d dwh -f /docker-entrypoin
 
 ### Step 4: DBT Transformation
 Build the Data Vault 2.0 model.
+docker compose --env-file .env -f infrastructure/3_warehouse/dbt/docker-compose.yml up -d
 ```bash
 # Run dbt container
-docker-compose --env-file .env -f infrastructure/3_warehouse/dbt/docker-compose.yml up -d
+docker compose --env-file .env -f infrastructure/3_warehouse/dbt/docker-compose.yml up -d
 ```
 
 ### Step 5: BI Layer
 Launch Apache Superset to build intelligent analytical dashboards.
 > **Note:** Remember to import the zip files from the `exports` directory into Superset to be able to create the dashboards.
 
+docker compose --env-file .env -f infrastructure/4_bi/superset/docker-compose.yml up -d
 ```bash
 docker compose --env-file .env -f infrastructure/4_bi/superset/docker-compose.yml up -d
 ```
 
 ### Step 6: Orchestration Layer
 Set up Apache Airflow to schedule and automate the entire pipeline workflow.
+docker compose --env-file .env -f orchestration/airflow/docker-compose.yml up -d
 ```bash
-docker-compose --env-file .env -f orchestration/airflow/docker-compose.yml up -d
+docker compose --env-file .env -f orchestration/airflow/docker-compose.yml up -d
 ```
 
 

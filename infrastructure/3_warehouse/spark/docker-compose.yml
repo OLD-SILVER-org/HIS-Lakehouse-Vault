@@ -25,12 +25,12 @@ services:
 
   spark-worker:
     image: ${WAREHOUSE_SPARK_IMAGE}
-    container_name: spark-worker
+    # container_name: spark-worker  <-- Comment out để Docker Compose tự sinh tên
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
     ports:
-      - "127.0.0.1:${WAREHOUSE_SPARK_WORKER_PORT}:8081"
+      - "127.0.0.1::8081" # <-- Bỏ map port cố định để không bị đụng port khi scale 2 node
     env_file:
       - ../../../.env
     environment:
