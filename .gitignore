@@ -77,3 +77,4 @@ orchestration/airflow/logs
 services/logs/*
 services/notes/*
 services/data/login_cache.json
+docs/log.txt

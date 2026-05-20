@@ -63,6 +63,158 @@
                                 <div class="card-body p-4 d-flex align-items-center justify-content-between">
                                     <div>
                                         <h3 class="fw-bold mb-1"><i class="fas fa-search text-warning me-2"></i> HIS Lakehouse Elasticsearch</h3>
+                                        <p class="mb-0" style="color: #adb5bd;">High-performance full-text search engine for clinical and administrative data across all hospital indices.</p>
+                                    </div>
+                                    <div class="d-none d-md-block">
+                                        <span class="badge bg-warning text-dark px-3 py-2 fs-6">Elasticsearch 8.17.2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Left Column: Search Form and Results -->
+                        <div class="col-lg-8 mb-4">
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title fw-bold text-dark mb-4"><i class="fas fa-filter text-primary me-2"></i> Search Console</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="search-index" class="form-label fw-semibold text-secondary">Index</label>
+                                            <select id="search-index" class="form-select">
+                                                <option value="_all">All Indices</option>
+                                                <option value="idx_benh_nhan" selected>Patients (idx_benh_nhan)</option>
+                                                <option value="idx_dich_vu">Services (idx_dich_vu)</option>
+                                                <option value="idx_dot_dieu_tri">Episodes (idx_dot_dieu_tri)</option>
+                                                <option value="idx_nhan_vien">Staff (idx_nhan_vien)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label for="search-query" class="form-label fw-semibold text-secondary">Search Query</label>
+                                            <div class="input-group">
+                                                <input type="text" id="search-query" class="form-control" placeholder="Enter patient name, service code, or any keyword...">
+                                                <button class="btn btn-primary px-4 shadow-sm" id="btn-search-es"><i class="fas fa-search me-2"></i>Search</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Results Section -->
+                            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fas fa-list-ul text-success me-2"></i> Results</h5>
+                                        <span class="text-muted small fw-semibold" id="search-metrics">No query executed yet</span>
+                                    </div>
+                                    <div id="search-results-list" class="vstack gap-3">
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="fas fa-keyboard fs-1 mb-3 text-secondary" style="opacity: 0.5;"></i>
+                                            <p class="mb-0">Type a keyword and click <strong>Search</strong> to query Elasticsearch.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-lg-4">
+                            <!-- Kibana Card -->
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: linear-gradient(135deg, #0f4c81, #1565c0);">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;background:rgba(255,255,255,0.15);">
+                                            <i class="fas fa-chart-area text-white fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold text-white mb-0">Kibana Analytics</h6>
+                                            <small class="text-white" style="opacity:0.7;">Visualization &amp; Discover</small>
+                                        </div>
+                                    </div>
+                                    <p class="text-white small mb-3" style="opacity:0.85;">Powerful visualization UI built on Elasticsearch. Create dashboards, explore data, and run advanced queries — no CORS issues.</p>
+                                    <div class="d-grid gap-2">
+                                        <button id="btn-open-kibana-portal" class="btn btn-light fw-semibold shadow-sm">
+                                            <i class="fas fa-expand-alt me-2 text-primary"></i> Open Kibana in Portal
+                                        </button>
+                                        <a href="http://vmi3040316.contaboserver.net:5601/" target="_blank" class="btn btn-outline-light btn-sm">
+                                            <i class="fas fa-external-link-alt me-1"></i> Open in new tab
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Credentials Card -->
+                            <div class="card border-0 shadow-sm mb-4 bg-white" style="border-radius: 12px;">
+                                <div class="card-header bg-transparent border-0 pt-3 px-4 pb-0">
+                                    <h6 class="fw-bold text-dark mb-0"><i class="fas fa-key text-warning me-2"></i> Kibana Credentials</h6>
+                                </div>
+                                <div class="card-body px-4 pt-3 pb-3">
+                                    <div class="mb-2">
+                                        <label class="form-label text-muted small mb-1">Username:</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control bg-light" id="kibana-username" value="elastic" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('elastic'); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Copied!',showConfirmButton:false,timer:1200,background:'#1a1a1a',color:'#fff'})">
+                                                <i class="far fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="form-label text-muted small mb-1">Password:</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="password" class="form-control bg-light" id="kibana-password" value="thanhtinh@Pass123" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggle-password-btn">
+                                                <i class="far fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('thanhtinh@Pass123'); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Copied!',showConfirmButton:false,timer:1200,background:'#1a1a1a',color:'#fff'})">
+                                                <i class="far fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-warning border-0 small mt-3 mb-0 p-2" style="border-radius: 8px;">
+                                        <i class="fas fa-lightbulb me-1"></i> After login, go to <strong>Discover</strong> for full-text search.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Index Reference Card -->
+                            <div class="card border-0 shadow-sm bg-white" style="border-radius: 12px;">
+                                <div class="card-header bg-transparent border-0 pt-3 px-4 pb-0">
+                                    <h6 class="fw-bold text-dark mb-0"><i class="fas fa-database text-warning me-2"></i> Index Reference</h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="list-group list-group-flush small">
+                                        <div class="list-group-item px-0 border-0 pb-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_benh_nhan</h6>
+                                            <p class="text-muted mb-0">Patient administrative records. Primary key: <code>ma_nb</code></p>
+                                        </div>
+                                        <div class="list-group-item px-0 border-0 py-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_dich_vu</h6>
+                                            <p class="text-muted mb-0">Medical service catalog. Primary key: <code>code_dichvu</code></p>
+                                        </div>
+                                        <div class="list-group-item px-0 border-0 py-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_dot_dieu_tri</h6>
+                                            <p class="text-muted mb-0">Treatment episodes &amp; medical records. Primary key: <code>ma_benh_an</code></p>
+                                        </div>
+                                        <div class="list-group-item px-0 border-0 pt-3">
+                                            <h6 class="fw-bold mb-1 text-dark">idx_nhan_vien</h6>
+                                            <p class="text-muted mb-0">Staff — doctors, nurses &amp; medical personnel. Primary key: <code>code_nhan_vien</code></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="container-fluid">
+                    <!-- Header -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #1f2937, #111827); border-radius: 12px;">
+                                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h3 class="fw-bold mb-1"><i class="fas fa-search text-warning me-2"></i> HIS Lakehouse Elasticsearch</h3>
                                         <p class="mb-0 text-muted" style="color: #adb5bd !important;">Hệ thống tìm kiếm toàn văn (Full-text Search) tốc độ cao, hỗ trợ phân tích và truy vấn dữ liệu lâm sàng, hành chính.</p>
                                     </div>
                                     <div class="d-none d-md-block">
