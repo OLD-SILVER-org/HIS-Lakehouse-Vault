@@ -65,6 +65,10 @@ docker network create warehouse-net
 # Launch Spark Cluster and Warehouse Postgres
 docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml build
 docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml up -d
+
+# If you want to increase Spark capacity for concurrent pipelines, scale the Spark worker service:
+# docker-compose --env-file .env -f infrastructure/3_warehouse/spark/docker-compose.yml up --scale spark-worker=2 -d
+
 docker-compose --env-file .env -f infrastructure/3_warehouse/postgres/docker-compose.yml up -d
 
 # Initialize Staging and Metadata Schemas (Only if containers are already running without schemas; default Docker entrypoint runs these on first launch)
@@ -165,8 +169,4 @@ If Airflow tasks fail with `Permission denied` when calling the Docker API, run:
 ```bash
 sudo chmod 666 /var/run/docker.sock
 ```
-    > **💡 Tip: Elastic Scaling for Spark Workers**
-    > To run parallel pipelines without resource blocking (e.g., dedicating 1 worker for regular ETL and 1 worker for Elasticsearch sync), you can dynamically scale the Spark workers:
-
-docker compose -f infrastructure/3_warehouse/spark/docker-compose.yml up --scale spark-worker=2 -d
 

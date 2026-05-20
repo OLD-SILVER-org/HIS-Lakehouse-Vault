@@ -36,6 +36,10 @@ class ElasticBatch (ABC):
     def transform(self, df):
         pass
     
+    def send_slack_message(self, message: str):
+        if self.notifier:
+            self.notifier.send_message(message)
+
     def prepare_df_for_write(self, df):
         """Prepare DataFrame before writing to Elasticsearch."""
         df = df.persist()
@@ -43,15 +47,21 @@ class ElasticBatch (ABC):
         num_partitions = df.rdd.getNumPartitions()
         target_partitions = min(max(self.spark.sparkContext.defaultParallelism, 4), 8)
 
-        print(f"[INFO] Elasticsearch target index: {self.target_index}")
-        print(f"[INFO] Rows to write: {row_count}")
-        print(f"[INFO] Current partitions: {num_partitions}")
-        print(f"[INFO] Default parallelism: {self.spark.sparkContext.defaultParallelism}")
-        print(f"[INFO] Target partitions for ES write: {target_partitions}")
+        message = (
+            f"📌 Elasticsearch target index: {self.target_index}\n"
+            f"📌 Rows to write: {row_count}\n"
+            f"📌 Current partitions: {num_partitions}\n"
+            f"📌 Default parallelism: {self.spark.sparkContext.defaultParallelism}\n"
+            f"📌 Target partitions for ES write: {target_partitions}"
+        )
+        self.send_slack_message(message)
 
         if num_partitions > target_partitions:
             df = df.repartition(target_partitions)
-            print(f"[INFO] Repartitioned DataFrame to {target_partitions} partitions for Elasticsearch write")
+            repartition_message = (
+                f"📌 Repartitioned DataFrame to {target_partitions} partitions for Elasticsearch write"
+            )
+            self.send_slack_message(repartition_message)
         return df, row_count
 
     def write_to_es(self, df):
@@ -86,7 +96,9 @@ class ElasticBatch (ABC):
                 .options(**es_conf) \
                 .mode("append") \
                 .save()
-            print(f"[INFO] Successfully wrote {row_count} rows to Elasticsearch index: {self.target_index}")
+            success_message = f"✅  Successfully wrote {row_count} rows to Elasticsearch index: {self.target_index}"
+            print(success_message)
+            self.send_slack_message(success_message)
         except Exception as e:
             if self.notifier:
                 error_msg = f"❌ Failed to write to ES index: {self.target_index}\nError: {str(e)}\n{traceback.format_exc()}"

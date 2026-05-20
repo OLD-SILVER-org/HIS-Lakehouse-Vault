@@ -78,3 +78,4 @@ services/logs/*
 services/notes/*
 services/data/login_cache.json
 docs/log.txt
+services/data/login_cache.json
