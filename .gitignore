@@ -76,3 +76,4 @@ infrastructure/4_bi/superset/superset_data/.cache/*
 orchestration/airflow/logs
 services/logs/*
 services/notes/*
+services/data/login_cache.json
