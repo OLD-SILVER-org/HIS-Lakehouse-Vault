@@ -2,8 +2,7 @@ from elastic_batch import ElasticBatch
 
 class TreatmentPipelineBatch(ElasticBatch):
     def __init__(self):
-        # Truyền 3 tham số: source, target_index, id_col
-        super().__init__("ct_dot_dieu_tri", "idx_dot_dieu_tri", "ma_benh_an")
+        super().__init__("ct_dot_dieu_tri", "idx_dot_dieu_tri", "id")
         
     def extract(self):
         query = f"""
