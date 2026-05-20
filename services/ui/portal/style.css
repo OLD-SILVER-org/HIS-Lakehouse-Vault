@@ -177,3 +177,32 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     color: #7ec8f7;
 }
 
+/* Card interactive states */
+.result-card {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+.result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(0,0,0,0.1) !important;
+}
+
+/* SweetAlert custom styles for tabs */
+#modal-detail-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    transition: all 0.2s;
+}
+
+#modal-detail-tabs .nav-link.active {
+    background-color: #1f2937 !important;
+    color: #fff !important;
+}
+
+#modal-detail-tabs .nav-link:hover:not(.active) {
+    color: #1f2937;
+    background-color: rgba(0,0,0,0.05);
+}
+
