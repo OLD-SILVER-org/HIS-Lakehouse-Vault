@@ -63,8 +63,8 @@ $(document).ready(function() {
         $iframe.removeClass('d-none').css('opacity', '0.5').attr('src', KIBANA_URL);
         $iframe.one('load', function() { $(this).css('opacity', '1'); });
         Swal.fire({
-            title: 'Đang tải Kibana...',
-            text: 'Đăng nhập: elastic / thanhtinh@Pass123',
+            title: 'Loading Kibana...',
+            text: 'Login: elastic / thanhtinh@Pass123',
             icon: 'info', toast: true, position: 'top-end',
             showConfirmButton: false, timer: 3500, timerProgressBar: true,
             background: '#0f4c81', color: '#fff'
@@ -94,11 +94,11 @@ $(document).ready(function() {
         $list.html(`
             <div class="text-center py-5">
                 <div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">Loading...</span></div>
-                <p class="text-muted fw-semibold">Đang truy vấn Elasticsearch...</p>
+                <p class="text-muted fw-semibold">Querying Elasticsearch...</p>
                 <small class="text-muted">Index: <code>${selectedIndex}</code></small>
             </div>
         `);
-        $metrics.html('<span class="text-muted">Đang tải...</span>');
+        $metrics.html('<span class="text-muted">Loading...</span>');
 
         const dslQuery = query
             ? { query: { multi_match: { query: query, fields: ["*"], fuzziness: "AUTO" } }, size: 50, track_total_hits: true }
@@ -118,14 +118,14 @@ $(document).ready(function() {
                 const total = res.hits?.total?.value ?? hits.length;
 
                 $list.data('loaded', true);
-                $metrics.html(`Tìm thấy <strong>${total.toLocaleString()}</strong> tài liệu — trả về <strong>${hits.length}</strong>, thời gian <strong>${ms}ms</strong>`);
+                $metrics.html(`Found <strong>${total.toLocaleString()}</strong> documents — returned <strong>${hits.length}</strong>, in <strong>${ms}ms</strong>`);
 
                 if (hits.length === 0) {
                     $list.html(`
                         <div class="text-center py-5 text-muted border rounded bg-white" style="border-radius:8px;">
                             <i class="fas fa-search-minus fs-1 mb-3 text-secondary" style="opacity:.4;"></i>
-                            <p class="mb-0">Không tìm thấy tài liệu nào${query ? ` cho từ khóa <strong>"${$('<div>').text(query).html()}"</strong>` : ''}.</p>
-                            <small class="text-muted">Index <code>${selectedIndex}</code> có thể chưa có dữ liệu. Chạy Spark job để đồng bộ.</small>
+                            <p class="mb-0">No documents found${query ? ` for keyword <strong>"${$('<div>').text(query).html()}"</strong>` : ''}.</p>
+                            <small class="text-muted">Index <code>${selectedIndex}</code> may be empty. Run the Spark job to sync data.</small>
                         </div>
                     `);
                     return;
@@ -136,20 +136,20 @@ $(document).ready(function() {
             error: function(xhr) {
                 const ms  = (performance.now() - t0).toFixed(0);
                 const msg = xhr.responseJSON?.error?.reason ?? xhr.statusText ?? 'Unknown error';
-                $metrics.html(`<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Lỗi kết nối</span>`);
+                $metrics.html(`<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Connection error</span>`);
                 $list.html(`
                     <div class="alert alert-danger border-0 p-4" style="border-radius:12px;">
                         <h5 class="alert-heading fw-bold mb-3">
-                            <i class="fas fa-exclamation-triangle me-2"></i>Không thể kết nối Elasticsearch
+                            <i class="fas fa-exclamation-triangle me-2"></i>Unable to connect to Elasticsearch
                         </h5>
                         <p class="mb-1">URL: <code>${ES_PROXY}/${indexPath}/_search</code></p>
-                        <p class="mb-3">Lỗi: <code>${$('<div>').text(msg).html()}</code></p>
+                        <p class="mb-3">Error: <code>${$('<div>').text(msg).html()}</code></p>
                         <hr>
-                        <p class="mb-1 fw-bold">Kiểm tra:</p>
+                        <p class="mb-1 fw-bold">Check:</p>
                         <ol class="small mb-0">
-                            <li>Container <code>elasticsearch</code> đang chạy: <code>docker start elasticsearch</code></li>
-                            <li>Container <code>bi-portal</code> đang ở đúng network <code>elastic-net</code></li>
-                            <li>Index <code>${selectedIndex}</code> tồn tại: chạy Spark job để đồng bộ dữ liệu</li>
+                            <li>The <code>elasticsearch</code> container is running: <code>docker start elasticsearch</code></li>
+                            <li>The <code>bi-portal</code> container is on the correct network: <code>elastic-net</code></li>
+                            <li>The index <code>${selectedIndex}</code> exists: run the Spark job to sync data</li>
                         </ol>
                     </div>
                 `);
@@ -159,52 +159,52 @@ $(document).ready(function() {
 
     // ── Translation & Formatter Helpers ────────────────────────────────────────
     const FIELD_LABELS = {
-        id: "ID tài liệu",
-        active: "Trạng thái",
-        gioi_tinh: "Giới tính",
+        id: "Document ID",
+        active: "Status",
+        gioi_tinh: "Gender",
         email: "Email",
-        ngay_sinh: "Ngày sinh",
-        so_dien_thoai: "Số điện thoại",
+        ngay_sinh: "Date of Birth",
+        so_dien_thoai: "Phone",
         
         // Patient index (idx_benh_nhan)
-        nb_thong_tin_id: "ID thông tin NB",
-        ma_nb: "Mã người bệnh",
-        ten_nb: "Tên người bệnh",
-        ten_nb_khong_dau: "Tên không dấu",
+        nb_thong_tin_id: "Patient Info ID",
+        ma_nb: "Patient Code",
+        ten_nb: "Patient Name",
+        ten_nb_khong_dau: "Name (no accents)",
 
         // Service index (idx_dich_vu)
-        code_dichvu: "Mã dịch vụ",
-        ten: "Tên dịch vụ",
-        ten_tuong_duong: "Tên tương đương",
-        viet_tat: "Viết tắt",
-        gia_bao_hiem: "Giá bảo hiểm",
-        gia_khong_bao_hiem: "Giá không bảo hiểm",
-        loai_dich_vu: "Loại dịch vụ",
+        code_dichvu: "Service Code",
+        ten: "Service Name",
+        ten_tuong_duong: "Equivalent Name",
+        viet_tat: "Abbreviation",
+        gia_bao_hiem: "Insurance Price",
+        gia_khong_bao_hiem: "Private Price",
+        loai_dich_vu: "Service Type",
 
         // Episode index (idx_dot_dieu_tri)
-        cap_cuu: "Cấp cứu",
-        doi_tuong: "Đối tượng",
-        doi_tuong_kcb: "Đối tượng KCB",
-        kham_suc_khoe: "Khám sức khỏe",
-        khoa_id: "Khoa điều trị (ID)",
-        khoa_tiep_don_id: "Khoa tiếp đón (ID)",
-        loai_benh_an_id: "Loại bệnh án (ID)",
-        loai_doi_tuong_id: "Loại đối tượng (ID)",
-        ma_benh_an: "Mã bệnh án",
-        ma_ho_so: "Mã hồ sơ",
-        so_bao_hiem_xa_hoi: "Số BHXH",
-        so_ngay_dieu_tri: "Số ngày điều trị",
-        so_phoi: "Số phôi",
-        thoi_gian_lap_benh_an: "Thời gian lập bệnh án",
-        thoi_gian_ra_vien: "Thời gian ra viện",
-        thoi_gian_vao_vien: "Thời gian vào viện",
-        trang_thai: "Trạng thái điều trị",
-        uu_tien: "Diện ưu tiên",
+        cap_cuu: "Emergency",
+        doi_tuong: "Patient Category",
+        doi_tuong_kcb: "Insurance Category",
+        kham_suc_khoe: "Health Check",
+        khoa_id: "Department ID",
+        khoa_tiep_don_id: "Reception Dept ID",
+        loai_benh_an_id: "Record Type ID",
+        loai_doi_tuong_id: "Patient Type ID",
+        ma_benh_an: "Medical Record Code",
+        ma_ho_so: "File Code",
+        so_bao_hiem_xa_hoi: "Social Insurance No.",
+        so_ngay_dieu_tri: "Treatment Days",
+        so_phoi: "Number of Sheets",
+        thoi_gian_lap_benh_an: "Record Created",
+        thoi_gian_ra_vien: "Discharge Time",
+        thoi_gian_vao_vien: "Admission Time",
+        trang_thai: "Treatment Status",
+        uu_tien: "Priority",
 
         // Staff index (idx_nhan_vien)
-        code_nhan_vien: "Mã nhân viên",
-        chung_chi: "Chứng chỉ hành nghề",
-        ds_chuyen_khoa_id: "Mã chuyên khoa (DS)"
+        code_nhan_vien: "Staff Code",
+        chung_chi: "Professional License",
+        ds_chuyen_khoa_id: "Specialty IDs"
     };
 
     const FIELD_ICONS = {
@@ -249,7 +249,7 @@ $(document).ready(function() {
     };
 
     function formatValue(key, val) {
-        if (val === null || val === undefined || val === '') return '<em class="text-muted">Chưa cập nhật</em>';
+        if (val === null || val === undefined || val === '') return '<em class="text-muted">Not updated</em>';
 
         if (key === 'gia_bao_hiem' || key === 'gia_khong_bao_hiem') {
             return `<strong class="text-success">${formatCurrency(val)}</strong>`;
@@ -257,27 +257,27 @@ $(document).ready(function() {
         
         if (key === 'gioi_tinh') {
             const numVal = parseInt(val, 10);
-            if (numVal === 1 || String(val).toLowerCase() === 'nam') {
-                return `<span class="badge bg-primary-subtle text-primary"><i class="fas fa-mars me-1"></i>Nam</span>`;
+            if (numVal === 1 || String(val).toLowerCase() === 'nam' || String(val).toLowerCase() === 'male') {
+                return `<span class="badge bg-primary-subtle text-primary"><i class="fas fa-mars me-1"></i>Male</span>`;
             }
-            if (numVal === 2 || String(val).toLowerCase() === 'nữ' || String(val).toLowerCase() === 'nu') {
-                return `<span class="badge bg-danger-subtle text-danger"><i class="fas fa-venus me-1"></i>Nữ</span>`;
+            if (numVal === 2 || String(val).toLowerCase() === 'nữ' || String(val).toLowerCase() === 'nu' || String(val).toLowerCase() === 'female') {
+                return `<span class="badge bg-danger-subtle text-danger"><i class="fas fa-venus me-1"></i>Female</span>`;
             }
             return `<span class="badge bg-secondary-subtle text-secondary"><i class="fas fa-genderless me-1"></i>${esc(val)}</span>`;
         }
 
         if (key === 'active') {
-            const isActive = val === true || val === 'true' || val === 1 || val === '1' || val === 'Active';
+            const isActive = val === true || val === 'true' || val === 1 || val === '1' || String(val).toLowerCase() === 'active';
             return isActive 
-                ? `<span class="badge bg-success-subtle text-success"><i class="fas fa-check-circle me-1"></i>Đang hoạt động</span>`
-                : `<span class="badge bg-danger-subtle text-danger"><i class="fas fa-times-circle me-1"></i>Ngưng hoạt động</span>`;
+                ? `<span class="badge bg-success-subtle text-success"><i class="fas fa-check-circle me-1"></i>Active</span>`
+                : `<span class="badge bg-danger-subtle text-danger"><i class="fas fa-times-circle me-1"></i>Inactive</span>`;
         }
 
         if (key === 'cap_cuu' || key === 'uu_tien' || key === 'kham_suc_khoe') {
-            const isTrue = val === true || val === 'true' || val === 1 || val === '1' || String(val).toLowerCase() === 'yes';
+            const isTrue = val === true || val === 'true' || val === 1 || val === '1' || String(val).toLowerCase() === 'yes' || String(val).toLowerCase() === 'true';
             return isTrue 
-                ? `<span class="badge bg-danger-subtle text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Có</span>`
-                : `<span class="badge bg-light text-muted">Không</span>`;
+                ? `<span class="badge bg-danger-subtle text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Yes</span>`
+                : `<span class="badge bg-light text-muted">No</span>`;
         }
 
         if (key.includes('thoi_gian') || key.includes('ngay_sinh')) {
@@ -290,7 +290,7 @@ $(document).ready(function() {
     function formatCurrency(value) {
         const num = parseFloat(value);
         if (isNaN(num)) return value;
-        return num.toLocaleString('vi-VN') + ' ₫';
+        return num.toLocaleString('en-US') + ' ₫';
     }
 
     function formatDateTime(value) {
@@ -327,16 +327,16 @@ $(document).ready(function() {
                 html = `
                 <div class="card border-0 shadow-sm bg-white result-card" data-index="${i}" style="border-left:4px solid #0d6efd; border-radius:8px; cursor:pointer;">
                     <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <span class="badge bg-primary-subtle text-primary mb-1 small"><i class="fas fa-user-injured me-1"></i>Bệnh nhân</span>
+                                <span class="badge bg-primary-subtle text-primary mb-1 small"><i class="fas fa-user-injured me-1"></i>Patient</span>
                                 <h6 class="fw-bold text-dark mb-0">${esc(s.ten_nb)}</h6>
                             </div>
                             <span class="badge bg-secondary-subtle text-secondary font-monospace small">${esc(s.ma_nb || hit._id)}</span>
                         </div>
                         <div class="row g-2 small mt-1">
-                            <div class="col-sm-6"><strong>Số điện thoại:</strong> <span class="text-secondary">${esc(s.so_dien_thoai || 'Chưa cập nhật')}</span></div>
-                            <div class="col-sm-6"><strong>ID thông tin NB:</strong> <span class="text-secondary font-monospace">${esc(s.nb_thong_tin_id || '')}</span></div>
+                            <div class="col-sm-6"><strong>Phone:</strong> <span class="text-secondary">${esc(s.so_dien_thoai || 'Not updated')}</span></div>
+                            <div class="col-sm-6"><strong>Patient Info ID:</strong> <span class="text-secondary font-monospace">${esc(s.nb_thong_tin_id || '')}</span></div>
                         </div>
                     </div>
                 </div>`;
@@ -345,18 +345,18 @@ $(document).ready(function() {
                 html = `
                 <div class="card border-0 shadow-sm bg-white result-card" data-index="${i}" style="border-left:4px solid #ffc107; border-radius:8px; cursor:pointer;">
                     <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <span class="badge bg-warning-subtle mb-1 small" style="color:#664d03;"><i class="fas fa-stethoscope me-1"></i>Dịch vụ</span>
+                                <span class="badge bg-warning-subtle mb-1 small" style="color:#664d03;"><i class="fas fa-stethoscope me-1"></i>Service</span>
                                 <h6 class="fw-bold text-dark mb-0">${esc(s.ten)}</h6>
                             </div>
                             <span class="badge bg-secondary-subtle text-secondary font-monospace small">${esc(s.code_dichvu || hit._id)}</span>
                         </div>
                         <div class="row g-2 small mt-1">
-                            <div class="col-sm-6"><strong>Loại dịch vụ:</strong> <span class="badge bg-light text-dark">${esc(s.loai_dich_vu || 'Khác')}</span></div>
-                            <div class="col-sm-6"><strong>Trạng thái:</strong> ${formatValue('active', s.active)}</div>
-                            <div class="col-sm-6"><strong>Giá BH:</strong> ${formatValue('gia_bao_hiem', s.gia_bao_hiem)}</div>
-                            <div class="col-sm-6"><strong>Giá tự nguyện:</strong> ${formatValue('gia_khong_bao_hiem', s.gia_khong_bao_hiem)}</div>
+                            <div class="col-sm-6"><strong>Service Type:</strong> <span class="badge bg-light text-dark">${esc(s.loai_dich_vu || 'Other')}</span></div>
+                            <div class="col-sm-6"><strong>Status:</strong> ${formatValue('active', s.active)}</div>
+                            <div class="col-sm-6"><strong>Insurance Price:</strong> ${formatValue('gia_bao_hiem', s.gia_bao_hiem)}</div>
+                            <div class="col-sm-6"><strong>Private Price:</strong> ${formatValue('gia_khong_bao_hiem', s.gia_khong_bao_hiem)}</div>
                         </div>
                     </div>
                 </div>`;
@@ -365,20 +365,20 @@ $(document).ready(function() {
                 html = `
                 <div class="card border-0 shadow-sm bg-white result-card" data-index="${i}" style="border-left:4px solid #198754; border-radius:8px; cursor:pointer;">
                     <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <span class="badge bg-success-subtle text-success mb-1 small"><i class="fas fa-notes-medical me-1"></i>Đợt điều trị</span>
-                                <h6 class="fw-bold text-dark mb-0">${esc(s.ten_nb || 'Hồ sơ điều trị')}</h6>
+                                <span class="badge bg-success-subtle text-success mb-1 small"><i class="fas fa-notes-medical me-1"></i>Treatment Episode</span>
+                                <h6 class="fw-bold text-dark mb-0">${esc(s.ten_nb || 'Treatment Record')}</h6>
                             </div>
                             <span class="badge bg-secondary-subtle text-secondary font-monospace small">${esc(s.ma_benh_an || hit._id)}</span>
                         </div>
                         <div class="row g-2 small mt-1">
-                            <div class="col-sm-6 col-md-4"><strong>Mã NB:</strong> <span class="text-secondary">${esc(s.ma_nb || '')}</span></div>
-                            <div class="col-sm-6 col-md-4"><strong>Giới tính:</strong> ${formatValue('gioi_tinh', s.gioi_tinh)}</div>
-                            <div class="col-sm-6 col-md-4"><strong>Cấp cứu:</strong> ${formatValue('cap_cuu', s.cap_cuu)}</div>
-                            <div class="col-sm-6 col-md-4"><strong>Vào viện:</strong> ${formatValue('thoi_gian_vao_vien', s.thoi_gian_vao_vien)}</div>
-                            <div class="col-sm-6 col-md-4"><strong>Số ngày ĐT:</strong> <span class="text-dark fw-bold">${esc(s.so_ngay_dieu_tri || '0')} ngày</span></div>
-                            <div class="col-sm-6 col-md-4"><strong>Đối tượng:</strong> <span class="badge bg-info-subtle text-dark">${esc(s.doi_tuong || 'Không rõ')}</span></div>
+                            <div class="col-sm-6 col-md-4"><strong>Patient Code:</strong> <span class="text-secondary">${esc(s.ma_nb || '')}</span></div>
+                            <div class="col-sm-6 col-md-4"><strong>Gender:</strong> ${formatValue('gioi_tinh', s.gioi_tinh)}</div>
+                            <div class="col-sm-6 col-md-4"><strong>Emergency:</strong> ${formatValue('cap_cuu', s.cap_cuu)}</div>
+                            <div class="col-sm-6 col-md-4"><strong>Admission:</strong> ${formatValue('thoi_gian_vao_vien', s.thoi_gian_vao_vien)}</div>
+                            <div class="col-sm-6 col-md-4"><strong>Treatment Days:</strong> <span class="text-dark fw-bold">${esc(s.so_ngay_dieu_tri || '0')} days</span></div>
+                            <div class="col-sm-6 col-md-4"><strong>Category:</strong> <span class="badge bg-info-subtle text-dark">${esc(s.doi_tuong || 'Unknown')}</span></div>
                         </div>
                     </div>
                 </div>`;
@@ -387,18 +387,18 @@ $(document).ready(function() {
                 html = `
                 <div class="card border-0 shadow-sm bg-white result-card" data-index="${i}" style="border-left:4px solid #0dcaf0; border-radius:8px; cursor:pointer;">
                     <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <span class="badge bg-info-subtle text-info mb-1 small" style="color:#055160!important;"><i class="fas fa-user-md me-1"></i>Nhân viên y tế</span>
+                                <span class="badge bg-info-subtle text-info mb-1 small" style="color:#055160!important;"><i class="fas fa-user-md me-1"></i>Medical Staff</span>
                                 <h6 class="fw-bold text-dark mb-0">${esc(s.ten)}</h6>
                             </div>
                             <span class="badge bg-secondary-subtle text-secondary font-monospace small">${esc(s.code_nhan_vien || hit._id)}</span>
                         </div>
                         <div class="row g-2 small mt-1">
-                            <div class="col-sm-6"><strong>Chứng chỉ:</strong> <span class="text-secondary">${esc(s.chung_chi || 'Không có')}</span></div>
-                            <div class="col-sm-6"><strong>Trạng thái:</strong> ${formatValue('active', s.active)}</div>
-                            <div class="col-sm-6"><strong>Email:</strong> <span class="text-secondary">${esc(s.email || 'Chưa cập nhật')}</span></div>
-                            <div class="col-sm-6"><strong>Giới tính:</strong> ${formatValue('gioi_tinh', s.gioi_tinh)}</div>
+                            <div class="col-sm-6"><strong>License:</strong> <span class="text-secondary">${esc(s.chung_chi || 'None')}</span></div>
+                            <div class="col-sm-6"><strong>Status:</strong> ${formatValue('active', s.active)}</div>
+                            <div class="col-sm-6"><strong>Email:</strong> <span class="text-secondary">${esc(s.email || 'Not updated')}</span></div>
+                            <div class="col-sm-6"><strong>Gender:</strong> ${formatValue('gioi_tinh', s.gioi_tinh)}</div>
                         </div>
                     </div>
                 </div>`;
@@ -412,7 +412,7 @@ $(document).ready(function() {
                             <span class="badge bg-secondary-subtle text-secondary font-monospace small">${esc(hit._id)}</span>
                         </div>
                         <div class="row g-2 small mt-1">
-                            <div class="col-12"><strong>Nội dung:</strong> <span class="text-secondary font-monospace">${esc(JSON.stringify(s).substring(0, 150))}...</span></div>
+                            <div class="col-12"><strong>Content:</strong> <span class="text-secondary font-monospace">${esc(JSON.stringify(s).substring(0, 150))}...</span></div>
                         </div>
                     </div>
                 </div>`;
@@ -429,20 +429,20 @@ $(document).ready(function() {
 
         let headerColor = '#0d6efd';
         let indexIcon = 'fa-user-injured';
-        let indexTitle = 'Thông Tin Bệnh Nhân';
+        let indexTitle = 'Patient Details';
 
         if (idx.includes('dich_vu')) {
             headerColor = '#e0a800'; 
             indexIcon = 'fa-stethoscope';
-            indexTitle = 'Thông Tin Dịch Vụ';
+            indexTitle = 'Service Details';
         } else if (idx.includes('dot_dieu_tri')) {
             headerColor = '#198754';
             indexIcon = 'fa-notes-medical';
-            indexTitle = 'Chi Tiết Đợt Điều Trị';
+            indexTitle = 'Treatment Episode Details';
         } else if (idx.includes('nhan_vien')) {
             headerColor = '#0dcaf0';
             indexIcon = 'fa-user-md';
-            indexTitle = 'Thông Tin Nhân Viên Y Tế';
+            indexTitle = 'Medical Staff Details';
         }
 
         // Build the fields grid dynamically
@@ -489,7 +489,7 @@ $(document).ready(function() {
             <ul class="nav nav-pills nav-fill mb-3 bg-light p-1 rounded-pill" id="modal-detail-tabs" role="tablist" style="font-size: 0.9rem;">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active rounded-pill fw-semibold" id="tab-info" data-bs-toggle="pill" data-bs-target="#panel-info" type="button" role="tab" aria-controls="panel-info" aria-selected="true">
-                        <i class="fas fa-info-circle me-1"></i>Thông tin chi tiết
+                        <i class="fas fa-info-circle me-1"></i>Detailed Info
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
