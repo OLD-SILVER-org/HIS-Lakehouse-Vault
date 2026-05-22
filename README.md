@@ -69,7 +69,8 @@ HOSPITAL_DWH/
 │       └── dags/
 │           ├── 01_Ingestion/ # CDC & Flink Pipelines
 │           ├── 02_Lake/      # Data Lake Processing Pipelines
-│           └── 03_Warehouse/ # Spark & dbt Pipelines
+│           ├── 03_Warehouse/ # Spark & dbt Pipelines
+│           └── elastic/      # Elasticsearch Continuous Streaming Pipelines
 ├── docs/                     # Detailed documentation
 ├── .env                      # Environment configuration
 └── README.md                 # This file
@@ -173,6 +174,7 @@ The entire workflow is orchestrated by Airflow, with real-time failure alerts an
 ### 4. Processing Engines & Querying (Spark, Flink, Trino)
 *   **Stream Processing (Flink)**: High-performance CDC ingestion from Kafka into Apache Iceberg tables.
     ![Flink](images/system/service_flink.png)
+*   **Continuous Streaming (Spark)**: 24/7 Spark Continuous Streaming jobs syncing data from Iceberg directly to Elasticsearch for near-real-time search.
 *   **Query Engine (Trino)**: Distributed SQL engine for fast, ad-hoc querying of the Data Lake.
     ![Trino](images/system/service_trino.png)
 *   **Data Lake Storage (MinIO)**: Distributed object storage for Apache Iceberg tables, acting as the foundation of the Medallion architecture.

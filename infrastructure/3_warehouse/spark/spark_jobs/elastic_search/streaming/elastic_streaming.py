@@ -126,7 +126,7 @@ class ElasticStreaming(ABC):
                 .outputMode("append") \
                 .option("checkpointLocation", checkpoint_dir) \
                 .foreachBatch(lambda df, batch_id: self._write_micro_batch(df, batch_id)) \
-                .trigger(availableNow=True) \
+                .trigger(processingTime='10 seconds') \
                 .start()
 
             # 4. Await termination
