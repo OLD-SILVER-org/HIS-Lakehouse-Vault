@@ -195,6 +195,8 @@ An intelligent search system supporting rapid patient lookup, service catalog au
 
 ## 📝 Contact
 - **Project Lead**: Nguyễn Thanh Tính
+- **Phone**: 0917 026 597
 - **Email**: thanhtinh.de@gmail.com
 - **Git**: https://github.com/OLD-SILVER-org
+- **Zalo**: https://zalo.me/0917026597
 - **Version**: 1.0.0
