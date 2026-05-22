@@ -14,8 +14,8 @@ with DAG(
 ) as dag:
     
     spark_load = TaskSparkIngestion(
-        python_command="python3 /opt/spark/spark_jobs/silver_staging/batching/initial_loader.py",
-        task_id="spark_lake_to_staging"
+        task_id="spark_lake_to_staging",
+        pipeline_script="/opt/spark/spark_jobs/silver_staging/batching/initial_loader.py"
     ).build(dag)
 
     notify_success = TaskSlackNotification(task_id="notify_success").build(

@@ -8,7 +8,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Stack](https://img.shields.io/badge/stack-Data%20Vault%202.0-orange)
 
-This project builds a modern Data Warehouse system for a hospital, applying the **Medallion Architecture** combined with **Data Vault 2.0**. The system supports real-time data processing (Real-time CDC) and batch processing to provide intelligent business intelligence (BI) reports.
+This project builds a modern Data Warehouse system for a hospital, applying the **Medallion Architecture** combined with **Data Vault 2.0**. The system supports real-time data processing (Real-time CDC), batch processing, and enterprise search/log analytics powered by **Elasticsearch + Kibana** to provide intelligent business intelligence (BI) reports.
 
 ---
 
@@ -37,6 +37,7 @@ The system operates on a hybrid processing model to ensure both speed and consis
 | **Data Processing** | Apache Spark | Data processing (Batch & Incremental) from Lake to Warehouse |
 | **Transformation** | dbt (data build tool) | Build Data Vault 2.0 & Dimensional Models |
 | **Query Engine** | Trino | Direct querying on Data Lake |
+| **Search & Analytics** | Elasticsearch, Kibana | Full-text search, log analysis, and operational analytics |
 | **Orchestration** | Apache Airflow | Pipeline scheduling and workflow management |
 | **Visualization** | Apache Superset | Operational & Financial BI Dashboards |
 
@@ -48,6 +49,7 @@ The system operates on a hybrid processing model to ensure both speed and consis
 -   **❄️ ACID Data Lake**: Built on **Apache Iceberg** and **MinIO**, supporting concurrent reads/writes and time-travel queries.
 -   **🏗️ Data Vault 2.0 Modeling**: Robust warehouse design with Hubs, Links, and Satellites to handle historical data and high scalability.
 -   **📊 Modern BI Integration**: Dynamic dashboards on Apache Superset reflecting real-time and historical hospital performance.
+-   **🔎 Enterprise Search & Log Analytics**: Elasticsearch + Kibana supports fast full-text search, document lookup, and centralized log analysis across the HIS platform.
 -   **🔔 Automated Monitoring**: Real-time pipeline tracking with **Airflow** and instant failure/success alerts via **Slack**.
 
 
@@ -101,6 +103,7 @@ The system is deployed on a VPS; you can access the primary services directly he
 | Service | Tool | URL | Access Note |
 | :--- | :--- | :--- | :--- |
 | **Data Portal** | **BI Portal** | [Access Here](http://vmi3040316.contaboserver.net:18083/) | Unified dashboard interface |
+| **Search Analytics** | **Kibana** | [Access Here](http://vmi3040316.contaboserver.net:5601/) | Elasticsearch analytics & dashboarding |
 | **Documentation** | **DWH Docs** | [View Docs](http://vmi3040316.contaboserver.net:18183/) | Data definitions & Lineage |
 
 #### 🔒 Internal Services (Firewall Protected - Admin Only)

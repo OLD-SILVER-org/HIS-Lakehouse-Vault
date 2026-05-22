@@ -1,28 +1,27 @@
-from airflow.providers.standard.operators.python import PythonOperator
+from typing import List, Optional
+from airflow.operators.bash import BashOperator
 
 class TaskSparkIngestion:
-    def __init__(self, python_command, task_id):
+    def __init__(
+        self,
+        task_id: str,
+        pipeline_script: str,
+        spark_master_url: str = "spark://spark-master:7077",
+        extra_args: Optional[List[str]] = None,
+    ):
         self.task_id = task_id
-        self.python_command = python_command
-
-    def execute_command(self):
-        import docker # type: ignore
-        client = docker.from_env()
-        
-        command = f"{self.python_command}"
-        print(f"Executing: {command}")
-        
-        # Call command in Spark container
-        container = client.containers.get('spark-master')
-        exit_code, output = container.exec_run(command)
-        
-        print(output.decode('utf-8'))
-        if exit_code != 0:
-            raise Exception(f"Spark job failed with exit code {exit_code}")
+        self.pipeline_script = pipeline_script
+        self.spark_master_url = spark_master_url
+        self.extra_args = extra_args or []
 
     def build(self, dag):
-        return PythonOperator(
+        # We use docker exec to run spark-submit inside the spark-master container
+        args_str = " ".join(self.extra_args) if self.extra_args else ""
+        submit_cmd = f"spark-submit --master {self.spark_master_url} {args_str} {self.pipeline_script}"
+        bash_command = f"docker exec spark-master {submit_cmd.strip()}"
+        
+        return BashOperator(
             task_id=self.task_id,
-            python_callable=self.execute_command,
+            bash_command=bash_command,
             dag=dag,
         )

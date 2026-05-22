@@ -13,23 +13,34 @@ with DAG(
     tags=['lake', 'streaming', 'spark']
 ) as dag:
     
+    notify_start = TaskSlackNotification(task_id="notify_start").build(
+        dag=dag,
+        message="🚀 Spark Streaming (Incremental): Initializing and starting...",
+        trigger_rule=TriggerRule.ALL_SUCCESS
+    )
+
     spark_load = TaskSparkIngestion(
-        python_command="python3 /opt/spark/spark_jobs/silver_staging/streaming/incremental_loader.py",
-        task_id="spark_lake_to_staging"
+        task_id="spark_lake_to_staging",
+        pipeline_script="/opt/spark/spark_jobs/silver_staging/streaming/incremental_loader.py",
+        extra_args=[
+            "--executor-memory", "2g", 
+            "--executor-cores", "2", 
+            "--total-executor-cores", "2"
+        ]
     ).build(dag)
 
-    notify_success = TaskSlackNotification(task_id="notify_success").build(
+    notify_stopped = TaskSlackNotification(task_id="notify_stopped").build(
         dag=dag,
-        message="🔄 Spark Streaming (Incremental) completed successfully!",
+        message="🛑 Spark Streaming (Incremental): Stopped cleanly.",
         trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
     notify_failure = TaskSlackNotification(task_id="notify_failure").build(
         dag=dag,
-        message="🚨 Spark Streaming (Incremental) failed.",
+        message="🚨 Spark Streaming (Incremental): FAILED or Crashed!",
         trigger_rule=TriggerRule.ONE_FAILED
     )
 
-    spark_load >> [notify_success, notify_failure]
+    notify_start >> spark_load >> [notify_stopped, notify_failure]
 
 globals()["dag_lake_streaming"] = dag
