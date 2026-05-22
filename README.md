@@ -175,6 +175,7 @@ The entire workflow is orchestrated by Airflow, with real-time failure alerts an
 *   **Stream Processing (Flink)**: High-performance CDC ingestion from Kafka into Apache Iceberg tables.
     ![Flink](images/system/service_flink.png)
 *   **Continuous Streaming (Spark)**: 24/7 Spark Continuous Streaming jobs syncing data from Iceberg directly to Elasticsearch for near-real-time search.
+    ![Spark Master](images/system/service_spark.png)
 *   **Query Engine (Trino)**: Distributed SQL engine for fast, ad-hoc querying of the Data Lake.
     ![Trino](images/system/service_trino.png)
 *   **Data Lake Storage (MinIO)**: Distributed object storage for Apache Iceberg tables, acting as the foundation of the Medallion architecture.
@@ -184,6 +185,11 @@ The entire workflow is orchestrated by Airflow, with real-time failure alerts an
 Secure access to the infrastructure is managed via WireGuard VPN, with a centralized dashboard for peer management.
 
 ![WGDashboard](images/system/wgdashboard.png)
+
+### 6. Enterprise Search & Analytics (Elasticsearch & Kibana)
+An intelligent search system supporting rapid patient lookup, service catalog auto-completion, and centralized log analysis. The Kibana dashboard provides real-time monitoring of search performance and cluster health.
+
+![Elasticsearch Kibana](images/system/service_elastich_search.png)
 
 ---
 
