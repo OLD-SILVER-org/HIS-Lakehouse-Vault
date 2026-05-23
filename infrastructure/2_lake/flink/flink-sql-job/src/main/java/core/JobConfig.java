@@ -9,13 +9,10 @@ public final class JobConfig {
 
     private static final Properties properties = new Properties();
     private static final String CONFIG_FILE = "flink-job.properties";
-    private static final String SECRET_CONFIG_FILE = "secret.properties";
 
     static {
-        // Load cấu hình thông thường (Bắt buộc)
         loadProperties(CONFIG_FILE, true);
-        // Load cấu hình bảo mật (Bắt buộc để đảm bảo "kiểm soát" như bạn muốn)
-        loadProperties(SECRET_CONFIG_FILE, true);
+
     }
 
     private JobConfig() {}
@@ -35,6 +32,12 @@ public final class JobConfig {
     }
 
     public static String get(String key) {
+        String envKey = key.replace('.', '_').toUpperCase();
+        String envValue = System.getenv(envKey);
+        if (envValue != null) {
+            return envValue;
+        }
+
         String value = properties.getProperty(key);
         if (value == null) {
             throw new NullPointerException("Cant find key: '" + key + "' in " + CONFIG_FILE);
@@ -43,6 +46,11 @@ public final class JobConfig {
     }
 
     public static String get(String key, String defaultValue) {
+        String envKey = key.replace('.', '_').toUpperCase();
+        String envValue = System.getenv(envKey);
+        if (envValue != null) {
+            return envValue;
+        }
         return properties.getProperty(key, defaultValue);
     }
 }

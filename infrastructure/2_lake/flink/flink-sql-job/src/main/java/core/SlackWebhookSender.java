@@ -3,15 +3,13 @@ package core;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import JobConfig;
 
 public class SlackWebhookSender {
 
-    private static final String WEBHOOK_URL = JobConfig.get("slack.webhook.url");
-
     public static void sendMessage(String message) {
         try {
-            URL url = new URL(WEBHOOK_URL);
+            String webhookUrl = JobConfig.get("WEBHOOK_URL");
+            URL url = new URL(webhookUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
@@ -33,6 +31,6 @@ public class SlackWebhookSender {
 
     // Demo
     public static void main(String[] args) {
-        sendMessage("Hello from Java.");
+        sendMessage("Hello from Slack.");
     }
 }
