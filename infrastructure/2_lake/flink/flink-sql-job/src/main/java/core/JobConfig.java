@@ -9,24 +9,30 @@ public final class JobConfig {
 
     private static final Properties properties = new Properties();
     private static final String CONFIG_FILE = "flink-job.properties";
+    private static final String SECRET_CONFIG_FILE = "secret.properties";
 
     static {
-        try (InputStream input = JobConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
-            if (input == null) {
-                String errorMessage = "Cant find config file '" + CONFIG_FILE + "' in classpath.";
-                System.err.println(errorMessage);
-                throw new RuntimeException(errorMessage);
-            }
-            properties.load(input);
-        } catch (IOException ex) {
-            String errorMessage = "Cant load config file '" + CONFIG_FILE + "'.";
-            System.err.println(errorMessage);
-            ex.printStackTrace();
-            throw new RuntimeException(errorMessage, ex);
-        }
+        // Load cấu hình thông thường (Bắt buộc)
+        loadProperties(CONFIG_FILE, true);
+        // Load cấu hình bảo mật (Bắt buộc để đảm bảo "kiểm soát" như bạn muốn)
+        loadProperties(SECRET_CONFIG_FILE, true);
     }
 
     private JobConfig() {}
+
+    private static void loadProperties(String fileName, boolean mandatory) {
+        try (InputStream input = JobConfig.class.getClassLoader().getResourceAsStream(fileName)) {
+            if (input == null) {
+                if (mandatory) {
+                    throw new RuntimeException("Missing mandatory config file: " + fileName);
+                }
+                return;
+            }
+            properties.load(input);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to load config file: " + fileName, ex);
+        }
+    }
 
     public static String get(String key) {
         String value = properties.getProperty(key);
