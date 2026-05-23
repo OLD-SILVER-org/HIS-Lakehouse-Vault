@@ -3,10 +3,11 @@ package core;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import JobConfig;
 
 public class SlackWebhookSender {
 
-    private static final String WEBHOOK_URL = "https://hooks.slack.com/services/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";
+    private static final String WEBHOOK_URL = JobConfig.get("slack.webhook.url");
 
     public static void sendMessage(String message) {
         try {
@@ -32,6 +33,6 @@ public class SlackWebhookSender {
 
     // Demo
     public static void main(String[] args) {
-        sendMessage("Xin chào từ Java! Đây là tin nhắn demo gửi đến Slack.");
+        sendMessage("Hello from Java.");
     }
 }

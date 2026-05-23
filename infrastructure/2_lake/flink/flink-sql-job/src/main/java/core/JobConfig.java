@@ -13,13 +13,13 @@ public final class JobConfig {
     static {
         try (InputStream input = JobConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
             if (input == null) {
-                String errorMessage = "Không thể tìm thấy tệp cấu hình '" + CONFIG_FILE + "' trong classpath.";
+                String errorMessage = "Cant find config file '" + CONFIG_FILE + "' in classpath.";
                 System.err.println(errorMessage);
                 throw new RuntimeException(errorMessage);
             }
             properties.load(input);
         } catch (IOException ex) {
-            String errorMessage = "Lỗi khi tải tệp cấu hình '" + CONFIG_FILE + "'.";
+            String errorMessage = "Cant load config file '" + CONFIG_FILE + "'.";
             System.err.println(errorMessage);
             ex.printStackTrace();
             throw new RuntimeException(errorMessage, ex);
@@ -31,7 +31,7 @@ public final class JobConfig {
     public static String get(String key) {
         String value = properties.getProperty(key);
         if (value == null) {
-            throw new NullPointerException("Không tìm thấy thuộc tính cấu hình bắt buộc: '" + key + "' trong " + CONFIG_FILE);
+            throw new NullPointerException("Cant find key: '" + key + "' in " + CONFIG_FILE);
         }
         return value;
     }
