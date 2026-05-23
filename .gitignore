@@ -80,3 +80,4 @@ services/data/login_cache.json
 docs/log.txt
 services/data/login_cache.json
 infrastructure/2_lake/flink/flink-sql-job/src/main/resources/secret.properties
+services/service_env.env
