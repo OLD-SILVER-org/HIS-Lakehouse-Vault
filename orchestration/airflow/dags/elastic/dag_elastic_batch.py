@@ -6,7 +6,6 @@ from tasks.task_slack_notification import TaskSlackNotification
 from common.dag_config import get_dag_config
 
 with DAG(
-    dag_id="dag_elastich_batch",
     dag_id="dag_elastic_batch",
     default_args=get_dag_config(),
     schedule=None,
@@ -32,14 +31,12 @@ with DAG(
 
     notify_success = TaskSlackNotification(task_id="notify_success").build(
         dag=dag,
-        message="🚀 Spark Batch (Lake to Elastich) completed successfully!",
         message="🚀 Spark Batch (Lake to Elastic) completed successfully!",
         trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
     notify_failure = TaskSlackNotification(task_id="notify_failure").build(
         dag=dag,
-        message="❌ Spark Batch (Lake to Elastich) failed.",
         message="❌ Spark Batch (Lake to Elastic) failed.",
         trigger_rule=TriggerRule.ONE_FAILED
     )

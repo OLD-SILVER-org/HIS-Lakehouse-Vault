@@ -1,5 +1,5 @@
 import requests
-import json
+import json,os
 
 class SlackNotifier:
     """
@@ -8,8 +8,7 @@ class SlackNotifier:
     """
     def __init__(self):
         # Use the same Webhook URL as Flink
-        self.webhook_url = "https://hooks.slack.com/services/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"
-
+        self.webhook_url = os.getenv("WEBHOOK_URL")
     def send_message(self, message: str):
         """Sends a text message to the Slack channel."""
         payload = {"text": message}

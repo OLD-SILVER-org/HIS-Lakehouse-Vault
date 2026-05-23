@@ -1,5 +1,5 @@
 import requests
-import json
+import json,os
 from datetime import datetime
 from airflow.providers.standard.operators.python import PythonOperator
 
@@ -8,7 +8,7 @@ class TaskSlackNotification:
     Template task for sending results to Slack.
     Can be used as a standalone task or as a callback.
     """
-    WEBHOOK_URL = "https://hooks.slack.com/services/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"
+    WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
     def __init__(self, task_id="slack_notification"):
         self.task_id = task_id
