@@ -12,7 +12,8 @@ class FakerGenerator:
 
     def __init__(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        env_path = os.path.join(current_dir, '..', 'service_env.env')
+        env_path = os.path.join(current_dir, '..', '..',
+                                '..', 'service_env.env')
 
         load_dotenv(dotenv_path=env_path)
         self.fake = Faker('en_US')
