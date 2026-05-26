@@ -49,11 +49,7 @@ docker compose --env-file .env -f infrastructure/2_lake/minio/docker-compose.yml
 docker compose --env-file .env -f infrastructure/2_lake/hive_metastore/docker-compose.yml up -d
 docker compose --env-file .env -f infrastructure/2_lake/flink/docker-compose.yml up -d
 docker compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml up -d
-docker compose --env-file .env -f infrastructure/2_lake/postgres/docker-compose.yml up -d
-docker compose --env-file .env -f infrastructure/2_lake/minio/docker-compose.yml up -d
-docker compose --env-file .env -f infrastructure/2_lake/hive_metastore/docker-compose.yml up -d
-docker compose --env-file .env -f infrastructure/2_lake/flink/docker-compose.yml up -d
-docker compose --env-file .env -f infrastructure/2_lake/trino/docker-compose.yml up -d
+
 ```
 
 
