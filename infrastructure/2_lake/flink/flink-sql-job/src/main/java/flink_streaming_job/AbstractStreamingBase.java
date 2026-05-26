@@ -13,11 +13,12 @@ import java.util.stream.Collectors;
 
 /**
  * An abstract base class for Flink streaming jobs that process multiple tables.
- * It provides the common infrastructure for setting up the Flink streaming environment,
- * managing catalogs, and executing a set of table processing pipelines in a unified job.
+ * It provides the common infrastructure for setting up the Flink streaming
+ * environment,
+ * managing catalogs, and executing a set of table processing pipelines in a
+ * unified job.
  */
 public abstract class AbstractStreamingBase {
-    
 
     // --- Flink & Configuration Fields ---
     protected final StreamExecutionEnvironment env;
@@ -30,7 +31,8 @@ public abstract class AbstractStreamingBase {
     protected final Map<String, String> catalogProperties;
 
     /**
-     * Constructor to initialize the Flink streaming environment and load configurations.
+     * Constructor to initialize the Flink streaming environment and load
+     * configurations.
      */
     public AbstractStreamingBase() {
         // 1. Load config from flink-job.properties
@@ -59,16 +61,21 @@ public abstract class AbstractStreamingBase {
         env.setParallelism(1); // Default parallelism
 
         // 4. Configure Checkpointing for fault tolerance and exactly-once sinks
-        //env.enableCheckpointing(10000); // 10 seconds
-        //env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000); // 5 seconds
-        //env.getCheckpointConfig().setCheckpointTimeout(60000); // 60 seconds
-        //env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+        // Checkpoint every 5 minutes to balance between latency and fault tolerance
+        env.enableCheckpointing(300000); // 300.000 ms = 5 minutes
+        // between checkpoints
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(60000); // 60 seconds
+        // Timeout
+        env.getCheckpointConfig().setCheckpointTimeout(600000); // 600.000 ms = 10 minutes
+        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
     }
 
     /**
      * Subclasses must implement this method to provide the map of table processors
      * that this specific job will handle.
-     * @return A map where the key is a descriptive name and the value is the TableProcessor instance.
+     * 
+     * @return A map where the key is a descriptive name and the value is the
+     *         TableProcessor instance.
      */
     protected abstract Map<String, TableProcessor> getTableProcessors();
 
@@ -86,11 +93,13 @@ public abstract class AbstractStreamingBase {
         // Use a StatementSet to combine all INSERT statements into a single job graph
         StatementSet statementSet = tEnv.createStatementSet();
 
-        // Step 2, 3, 4: Loop through all processors to create tables and prepare insert statements
+        // Step 2, 3, 4: Loop through all processors to create tables and prepare insert
+        // statements
         for (Map.Entry<String, TableProcessor> entry : getTableProcessors().entrySet()) {
             String processorName = entry.getKey();
             TableProcessor processor = entry.getValue();
-            System.out.println("--- Preparing pipeline for: " + processorName + " (" + processor.getSourceTableName() + ") ---");
+            System.out.println(
+                    "--- Preparing pipeline for: " + processorName + " (" + processor.getSourceTableName() + ") ---");
 
             // Create Source Table in the default catalog
             tEnv.useCatalog("default_catalog");
@@ -124,82 +133,87 @@ public abstract class AbstractStreamingBase {
     private String getJsonSourceSchemaDDL(TableProcessor processor) {
         String fields = processor.getTableSchemaDDL();
         return String.format("""
-            payload ROW<
-                before ROW<%s>,
-                after ROW<%s>,
-                op STRING,
-                ts_ms BIGINT
-            >
-        """, fields, fields);
+                    payload ROW<
+                        before ROW<%s>,
+                        after ROW<%s>,
+                        op STRING,
+                        ts_ms BIGINT
+                    >
+                """, fields, fields);
     }
 
     private String getSourceTableDDL(TableProcessor processor) {
         return String.format("""
-            CREATE TABLE IF NOT EXISTS %s (%s) WITH (
-              'connector' = 'kafka',
-              'topic' = '%s',
-              'properties.bootstrap.servers' = '%s',
-              'properties.group.id' = 'flink_streaming_%s_consumer',
-              'format' = 'json',
-              'json.ignore-parse-errors' = 'true',
-              'scan.startup.mode' = '%s'
+                    CREATE TABLE IF NOT EXISTS %s (%s) WITH (
+                      'connector' = 'kafka',
+                      'topic' = '%s',
+                      'properties.bootstrap.servers' = '%s',
+                      'properties.group.id' = 'flink_streaming_%s_consumer',
+                      'format' = 'json',
+                      'json.ignore-parse-errors' = 'true',
+                      'scan.startup.mode' = '%s'
 
-            )
-        """, processor.getSourceTableName(), getJsonSourceSchemaDDL(processor), getKafkaTopic(processor), kafkaBootstrapServers, processor.getSourceTableName(), kafkaScanMode);
+                    )
+                """, processor.getSourceTableName(), getJsonSourceSchemaDDL(processor), getKafkaTopic(processor),
+                kafkaBootstrapServers, processor.getSourceTableName(), kafkaScanMode);
     }
 
     private String getSinkTableDDL(TableProcessor processor) {
-        String schemaWithPartition = processor.getTableSchemaDDL() + ",\n  partition_col STRING , op STRING, is_deleted BOOLEAN";
+        String schemaWithPartition = processor.getTableSchemaDDL()
+                + ",\n  partition_col STRING , op STRING, is_deleted BOOLEAN";
 
         return String.format("""
-            CREATE TABLE IF NOT EXISTS %s (%s)
-            PARTITIONED BY (%s)
-            WITH (
-              'format-version' = '2',
-              'write.format.default' = 'parquet',
-              'write.commit-empty-snapshot.enabled' = 'false',
-              'write.metadata.delete-after-commit.enabled' = 'true',
-                'max-snapshots' = '100',
-                'snapshot-retention-days' = '1',
-                'write.metadata.previous-versions-max' = '5'
+                    CREATE TABLE IF NOT EXISTS %s (%s)
+                    PARTITIONED BY (%s)
+                    WITH (
+                      'format-version' = '2',
+                      'write.format.default' = 'parquet',
+                      'write.commit-empty-snapshot.enabled' = 'false',
+                      'write.metadata.delete-after-commit.enabled' = 'true',
+                        'max-snapshots' = '100',
+                        'snapshot-retention-days' = '1',
+                        'write.metadata.previous-versions-max' = '5'
 
-            )
-        """, getSinkTableName(processor), schemaWithPartition, "partition_col");
+                    )
+                """, getSinkTableName(processor), schemaWithPartition, "partition_col");
     }
+
     private String getPartitionColumnSQL(TableProcessor processor) {
         if (processor.getPartitionKey().equals("partition_col")) {
-           
+
             return """
-                CASE
-                    WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
-                    ELSE SUBSTRING(payload.after.created_at, 1, 7)
-                END""";
+                    CASE
+                        WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
+                        ELSE SUBSTRING(payload.after.created_at, 1, 7)
+                    END""";
         }
 
         return String.format("""
-            CASE 
-                WHEN payload.op = 'd' THEN CAST(payload.before.%s AS STRING)
-                ELSE CAST(payload.after.%s AS STRING)
-            END
-        """, processor.getPartitionKey(), processor.getPartitionKey());
+                    CASE
+                        WHEN payload.op = 'd' THEN CAST(payload.before.%s AS STRING)
+                        ELSE CAST(payload.after.%s AS STRING)
+                    END
+                """, processor.getPartitionKey(), processor.getPartitionKey());
     }
 
     private String getInsertSQL(TableProcessor processor) {
-        // The sink table is resolved via `tEnv.useCatalog()`. The source table is in the default catalog.
+        // The sink table is resolved via `tEnv.useCatalog()`. The source table is in
+        // the default catalog.
         String insertColumns = processor.getInsertColumns() + ",\n  partition_col,\n  op,\n  is_deleted";
         return String.format("""
-            INSERT INTO %s (%s)
-            SELECT
-                %s,
-                %s AS partition_col,
-                payload.op AS op,
-                CASE
-                    WHEN payload.op = 'd' THEN TRUE
-                    ELSE FALSE
-                END AS is_deleted
-            FROM default_catalog.default_database.%s
+                    INSERT INTO %s (%s)
+                    SELECT
+                        %s,
+                        %s AS partition_col,
+                        payload.op AS op,
+                        CASE
+                            WHEN payload.op = 'd' THEN TRUE
+                            ELSE FALSE
+                        END AS is_deleted
+                    FROM default_catalog.default_database.%s
 
-        """, getSinkTableName(processor), insertColumns, processor.getSelectColumns(), getPartitionColumnSQL(processor), processor.getSourceTableName());
+                """, getSinkTableName(processor), insertColumns, processor.getSelectColumns(),
+                getPartitionColumnSQL(processor), processor.getSourceTableName());
     }
 
     // --- Catalog and Database Management ---
@@ -216,7 +230,8 @@ public abstract class AbstractStreamingBase {
             System.out.println("✅ Catalog created: " + catalogName);
         } catch (Exception e) {
             // Catalog already exists, which is fine.
-            System.out.println("ℹ️  Catalog '" + catalogName + "' might already exist. Skipping creation. Message: " + e.getMessage());
+            System.out.println("ℹ️  Catalog '" + catalogName + "' might already exist. Skipping creation. Message: "
+                    + e.getMessage());
         }
         tEnv.useCatalog(catalogName);
     }
