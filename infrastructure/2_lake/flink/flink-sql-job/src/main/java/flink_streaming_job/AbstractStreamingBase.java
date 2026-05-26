@@ -59,10 +59,10 @@ public abstract class AbstractStreamingBase {
         env.setParallelism(1); // Default parallelism
 
         // 4. Configure Checkpointing for fault tolerance and exactly-once sinks
-        env.enableCheckpointing(10000); // 10 seconds
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000); // 5 seconds
-        env.getCheckpointConfig().setCheckpointTimeout(60000); // 60 seconds
-        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+        //env.enableCheckpointing(10000); // 10 seconds
+        //env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000); // 5 seconds
+        //env.getCheckpointConfig().setCheckpointTimeout(60000); // 60 seconds
+        //env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
     }
 
     /**
