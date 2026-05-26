@@ -4,8 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: fake_data_script
-    # Gắn volume nếu bạn muốn script ghi kết quả ra file ở máy host
     volumes:
       - .:/app
-    environment:
-      - PYTHONUNBUFFERED=1
+    env_file:
+      - ../../service_env.env
