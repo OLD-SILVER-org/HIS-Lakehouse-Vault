@@ -121,6 +121,10 @@ services:
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 2
+        taskmanager.memory.process.size: 5800m  
+        execution.checkpointing.interval: 300000
+        execution.checkpointing.timeout: 600000
+        execution.checkpointing.min-pause: 60000
 
     depends_on:
       - flink-jobmanager

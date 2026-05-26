@@ -245,9 +245,7 @@ class FakerGenerator:
             # --- CT_PHIEU_THU ---
             phieu_thu_records = []
             for ddt_id in dot_dieu_tri_ids:
-                # Giả lập các measures theo fact_thanh_toan và sample data trong README.md
                 thanh_tien_val = float(random.randint(1000000, 20000000))
-                # 0% hoặc 80% hoặc 100% bảo hiểm
                 tien_bh_val = float(
                     thanh_tien_val * random.choice([0, 0.8, 1.0]))
                 tien_giam_gia_val = float(random.randint(0, 50000))
