@@ -8,3 +8,8 @@ services:
       - .:/app
     env_file:
       - ../../service_env.env
+    networks:
+      - source-net
+networks:
+  source-net:
+    external: true
