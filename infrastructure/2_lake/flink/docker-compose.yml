@@ -9,6 +9,7 @@ services:
       # Config
       - ./core-site.xml:/opt/flink/conf/core-site.xml
       - ./hive-site.xml:/opt/flink/conf/hive-site.xml
+      - ./flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
 
 
 
@@ -61,7 +62,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 6G
+          memory: 4G
     networks:
       - lake-net
       - source-net
@@ -76,6 +77,7 @@ services:
       # Config
       - ./core-site.xml:/opt/flink/conf/core-site.xml
       - ./hive-site.xml:/opt/flink/conf/hive-site.xml
+      - ./flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
 
       # Connectors - Kafka
       - ../jars/flink-connector-kafka-3.1.0-1.18.jar:/opt/flink/lib/flink-connector-kafka-3.1.0-1.18.jar
@@ -122,16 +124,14 @@ services:
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 2
         taskmanager.memory.process.size: 5800m  
-        execution.checkpointing.interval: 300000
-        execution.checkpointing.timeout: 600000
-        execution.checkpointing.min-pause: 60000
+
 
     depends_on:
       - flink-jobmanager
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 4G
     networks:
       - lake-net
       - source-net
