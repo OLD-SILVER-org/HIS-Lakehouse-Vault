@@ -135,9 +135,7 @@ public abstract class AbstractBatchBase {
                     'scan.startup.mode' = 'specific-offsets',
                     'scan.startup.specific-offsets' = '%s',
                     'scan.bounded.mode' = 'specific-offsets',
-                    'scan.bounded.specific-offsets' = '%s',
-                    'properties.fetch.max.bytes' = '104857600',
-                    'properties.max.partition.fetch.bytes' = '10485760'
+                    'scan.bounded.specific-offsets' = '%s'
                     )
                 """, sourceTableName, getJsonSourceSchemaDDL(processor),
                 getKafkaTopic(processor), kafkaBootstrapServers, processor.getSourceTableName(),

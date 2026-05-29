@@ -148,7 +148,9 @@ public abstract class AbstractStreamingBase {
                       'properties.group.id' = 'flink_streaming_%s_consumer',
                       'format' = 'json',
                       'json.ignore-parse-errors' = 'true',
-                      'scan.startup.mode' = '%s'
+                      'scan.startup.mode' = '%s',
+                        'properties.fetch.max.bytes' = '104857600',
+                        'properties.max.partition.fetch.bytes' = '10485760'
 
                     )
                 """, processor.getSourceTableName(), getJsonSourceSchemaDDL(processor), getKafkaTopic(processor),
