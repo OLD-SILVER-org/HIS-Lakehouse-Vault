@@ -1,0 +1,2 @@
+cái này may mà lúc phát triển ình tách hai môi trường nên dễ kiểm soát,
+chỉ cần xác định vài gói python cần cho dự án và đóng gói nó chung với image spark là dc

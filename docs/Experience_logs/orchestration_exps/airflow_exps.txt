@@ -1,0 +1,10 @@
+vài project trước cũng đã thực hành với airflow rồi nên cũng khá quen
+nhưng đây cải tiến hơn, hướng tới production nên ko xài standalone nữa.
+phan rõ service riêng, lên lịch cụ thể. cơ mà: 
+1: về init batch : cái này phía flink ok vì đã test kỹ trước rồi, phía spark cũng ok
+2: về streaming:  phái flink thì ok do cũng test trước rất nhiều, còn phía spark thì 
+        hơi khác một chút do việc tạo streaming spark cho 31 table song song rất tốn tài nguyên
+        mà data 31 bảng ko đồng đều, không thể song song như flink dc nên mình phải làm tuần tự.
+        dùng biến availableNow=True để set tuần tự. kèm theo kiểm soát bằng max_active_runs=1 
+        để kiểm soát spark không bị trùng lặp tài nguyên, đồng thời kéo ngắn khaongr cách giữa
+        các lần gọi để mô phỏng streaming. hình như việc này gọi là Triggered Micro-batching (fake streaming)
