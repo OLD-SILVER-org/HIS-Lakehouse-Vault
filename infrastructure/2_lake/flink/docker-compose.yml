@@ -62,7 +62,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 2G
     networks:
       - lake-net
       - source-net
@@ -123,7 +123,7 @@ services:
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 2
-        taskmanager.memory.process.size: 5800m  
+        taskmanager.memory.process.size: 2800m  
 
 
     depends_on:
@@ -131,7 +131,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 3G
     networks:
       - lake-net
       - source-net

@@ -23,6 +23,10 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 
   kibana:
     image: ${KIBANA_IMAGE}
@@ -41,6 +45,10 @@ services:
     networks:
       - elastic-net
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 volumes:
   esdata:
     driver: local

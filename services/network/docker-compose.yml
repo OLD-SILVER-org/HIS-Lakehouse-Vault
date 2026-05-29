@@ -24,6 +24,10 @@ services:
       - "${NETWORK_WGDASHBOARD_WG_PORT:-51820}:${NETWORK_WGDASHBOARD_WG_PORT:-51820}/udp"
     networks:
       - network_stack
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
   # Caddy: Reverse proxy with automatic HTTPS and BasicAuth
   caddy:
@@ -67,6 +71,10 @@ services:
       - source-net
       - warehouse-net
       - elastic-net
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
   # Portal: Embedded Web Interface (Nginx)
   portal:
@@ -94,6 +102,10 @@ services:
       - caddy
     networks:
       - network_stack
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
 
 # Shared network for the stack

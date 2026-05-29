@@ -325,5 +325,14 @@ execution.checkpointing.externalized-checkpoint.cleanup: RETAIN_ON_CANCELLATION
 
 jobmanager.rpc.address: flink-jobmanager
 taskmanager.numberOfTaskSlots: 2
-taskmanager.memory.process.size: 5800m  
+taskmanager.memory.process.size: 2800m  
+
+
+jobmanager.rpc.address: flink-jobmanager
+taskmanager.numberOfTaskSlots: 2
+taskmanager.memory.process.size: 2800m  
+
+jobmanager.rpc.address: flink-jobmanager
+taskmanager.numberOfTaskSlots: 2
+taskmanager.memory.process.size: 2800m  
 
