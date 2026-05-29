@@ -60,7 +60,7 @@ infrastructure/3_warehouse/dbt/dbt_project/logs/*
 infrastructure/3_warehouse/dbt/dbt_project/target/*
 infrastructure/3_warehouse/dbt/dbt_project/dbt_modules/*
 #
-*.txt
+
 #AI
 AI_Folder/*
 

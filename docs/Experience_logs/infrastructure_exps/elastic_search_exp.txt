@@ -1,0 +1,46 @@
+# Kinh nghiệm: Lỗi ClassNotFoundException (Iceberg) và sự khác biệt giữa `python3` vs `spark-submit`
+
+**Vấn đề:**
+Khi chạy file Pyspark (`patient_pipeline_batch.py`) có query Iceberg bằng lệnh `spark-submit`, hệ thống báo lỗi `ClassNotFoundException: org.apache.iceberg.spark.SparkCatalog` ngay lúc đầu. Mặc dù bên trong code Python (`SparkUtils`) đã cấu hình nạp JAR:
+`SparkSession.builder.config("spark.jars", jars)`
+
+Tuy nhiên, khi đổi sang chạy bằng lệnh `python3 patient_pipeline_batch.py` thì lại chạy trơn tru mà không cần truyền thêm tham số `--jars` nào cả.
+
+**Giải thích nguyên nhân (Root Cause):**
+Sự khác biệt nằm ở thứ tự khởi động JVM (Java Virtual Machine) của Spark.
+
+1. **Khi chạy bằng `python3`:**
+Trình thông dịch Python sẽ đọc code từ trên xuống dưới. Khi gặp đoạn `SparkSession.builder.config("spark.jars", jars)`, nó gom đủ danh sách JAR rồi **mới bắt đầu khởi động môi trường Spark JVM**. Do đó, lúc JVM dựng lên, nó đã cầm sẵn các file JAR của Iceberg và nạp SparkCatalog thành công -> Job chạy bình thường.
+
+2. **Khi chạy bằng `spark-submit`:**
+Đây là công cụ khởi chạy của Spark. Nó sẽ **tự động dựng môi trường Spark JVM LÊN TRƯỚC** khi thèm đọc code Python của bạn. 
+Trong quá trình khởi động JVM này, nó thấy có khai báo dùng Iceberg Catalog (trong các biến môi trường), nhưng do code Python chứa dòng `config("spark.jars")` CHƯA ĐƯỢC CHẠY, JVM hoàn toàn không có file JAR của Iceberg trong tay -> Nó không tìm thấy class SparkCatalog và văng lỗi ngay lập tức.
+*(Đó là lý do nếu muốn dùng `spark-submit`, ta bắt buộc phải truyền thêm cờ `--jars` lúc gọi lệnh để nạp thư viện từ bên ngoài).*
+
+3. **Tại sao các job khác (như `initial_loader.py`) đôi khi không bị lỗi này dù chạy bằng `spark-submit`?**
+Vì `initial_loader.py` chủ yếu lấy dữ liệu từ JDBC (Postgres) và có thể sử dụng Dataframe API thông thường để ghi (ví dụ: `df.write...`), nó không kích hoạt việc parse cấu trúc Catalog phức tạp bằng câu lệnh SQL (`spark.sql("SELECT ...")`) ở ngay giai đoạn đầu, nên không dính lỗi thiếu class nạp sẵn.
+
+**Giải pháp rút ra (Best Practice cho dự án này):**
+Nhờ dự án đã có class `SparkUtils` lo hết phần setup thư viện và config rất xịn, từ nay trở đi **cứ dùng `python3` để chạy trực tiếp các job Pyspark** thay vì `spark-submit` để tránh phải nối chuỗi `--jars` rườm rà.
+
+Lệnh chạy mẫu:
+```bash
+docker exec -it spark-master bash -c "cd /opt/spark/spark_jobs/elastic_search/batching/ && python3 patient_pipeline_batch.py"
+```
+
+---
+
+**Mở rộng (Production Level): Có nên build sẵn JAR vào Docker Image?**
+
+Câu trả lời là **CÓ**. Nếu bạn muốn chuẩn hóa hệ thống để luôn dùng lệnh `spark-submit` một cách trơn tru nhất (chuẩn Production), bạn nên thiết kế lại `Dockerfile` của cụm Spark.
+
+Trong `Dockerfile`, bạn thêm lệnh copy toàn bộ các file JAR cần thiết (Iceberg, AWS, Postgres, Elasticsearch...) thẳng vào thư mục `/opt/spark/jars/` của container:
+```dockerfile
+# Copy custom jars into spark core jars directory
+COPY ./infrastructure/3_warehouse/jars/*.jar /opt/spark/jars/
+```
+
+**Tại sao cách này là tối ưu nhất?**
+- Bất kỳ file JAR nào nằm trong `/opt/spark/jars/` đều được Spark JVM **tự động nạp (auto-load) ngay khi khởi động**, bất kể bạn chạy bằng `python3` hay `spark-submit`.
+- Bạn không cần khai báo `SparkSession.builder.config("spark.jars", jars)` rườm rà trong code Python nữa. Code Python sẽ "sạch" hơn và chỉ tập trung vào logic.
+- Không lo bị lỗi `ClassNotFoundException` do thiếu thư viện lúc khởi động JVM.
