@@ -1,0 +1,33 @@
+# Bài học xương máu: Apache Flink bị OOM do dính Malware đào coin (kdevtmpfsi)
+
+**Ngày ghi nhận:** 10/05/2026
+
+## 1. Dấu hiệu nhận biết
+- Flink JobManager đột ngột bị sập (container Exited với code 137).
+- Dấu hiệu rất đáng ngờ: Ban đầu job được tính toán tài nguyên chi tiết và chạy cực kỳ ổn định dù chỉ cấp 1GB RAM. Tuy nhiên sau đó một thời gian, hệ thống bất ngờ báo thiếu RAM gây sập (OOM). Nâng giới hạn lên 2GB vẫn bị OOM, nâng tiếp lên 4GB vẫn tiếp tục OOM.
+- Phân tích log hệ thống (`dmesg -T`), phát hiện Docker memory cgroup báo lỗi Out-of-Memory.
+- **Điểm bất thường:** Trong log OOM hiển thị tiến trình lạ ngốn tới ~1.4GB RAM: `Memory cgroup out of memory: Killed process 3290672 (kdevtmpfsi)`. Đi kèm với tiến trình `java` của Flink cũng bị kill.
+
+## 2. Nguyên nhân sâu xa (Root Cause)
+- Tiến trình `kdevtmpfsi` (thường đi chung với `kinsing`) là malware đào tiền ảo khét tiếng.
+- Lỗ hổng bảo mật: Apache Flink Web UI / REST API (port 8081) **mặc định không có cơ chế xác thực** (no authentication).
+- Do vô tình cấu hình map port public ra ngoài (vd: `8081:8081` hoặc `0.0.0.0:8081` qua biến môi trường) trên VPS, các botnet trên mạng tự động scan thấy Flink và gọi API để submit một Job Flink (bằng file `.jar` chứa mã độc).
+- Malware sau đó chạy ngầm bên trong chính Flink container, "hút" toàn bộ CPU và RAM để cày coin, kéo theo Flink sụp đổ vì đụng trần RAM 4GB của container.
+
+## 3. Bài học & Cách phòng chống
+1. **Đóng port public:** Sửa file `docker-compose.yml`, bind port Flink Web UI vào localhost: 
+   `"127.0.0.1:${LAKE_FLINK_JOBMANAGER_PORT}:8081"`
+2. **Che chắn (Shielding):** Truy cập Flink UI phải thông qua mạng nội bộ ảo (như WireGuard VPN) hoặc sử dụng Reverse Proxy (Caddy, Nginx) kết hợp Basic Auth. Tuyệt đối không phơi port trần ra internet.
+3. **Dọn dẹp triệt để:** Malware chạy trên memory và có thể cài rootkit trong image/container. Cần `docker compose down`, xóa bỏ container hiện tại và `docker compose up -d` lại để dọn dẹp sạch sẽ. Mọi biện pháp kill process tạm thời bên trong container đều sẽ bị nó tự khởi động lại.
+4. **Cảnh giác hệ thống khác:** Phải luôn cẩn trọng với các công cụ Big Data khác (Hadoop, Redis, Spark) vì đa số mặc định không bật security.
+------------
+**Ngày ghi nhận:** 10/05/2026
+deploy trên vps có nhều thứ cần check :
+xuất cổng ra bên ngoài cần kiểm saots, phải xem lại cơ chế ufw và firewall của contabo ( 2 lớp)
+chú ý là contabo chỉ cấp 1 domain nên có 3 cách là muadomain, xài path và dùng cổng riêng
+vấn đề ỏe đây:
+cách mua domain : Hết tiền
+cách xài path : vài service ko load js, css tốt,, gọi nội bộ sai path.
+cách dùng cổng : cần đặc biệt kiểm soát cổng, tránh mở khơi khơi và chú ý về https, http, ssl,...
+ cuối cùng quyết định cách dùng cổng, mỗi cổng cho 1 service
+ 

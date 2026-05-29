@@ -1,0 +1,9 @@
+làm xong r viết nên vài cái quên. 
+5/5/2026 :
+cơ bản cái này phần khó nhất vẫn là nhìn data và ra bài toán mà người dùng cần 
+cần loại dashboard nào, con số nào cần quan tâm , loại chart nào cần hiển thị, bộ lọc ra sao...
+đây ko phải là việc của DE nhưng mà mình thiết kế full nên phải làm hết
+tổng 3 dashboard, gần 20 dataset + chart. 
+có vài cột data mình ko hiểu lắm nên ko xác định dc sẽ thuộc loại nào  và cũng ko triển khai thêm dc. ví dụ như :
+tại sao thanh toán nhiều hóa đơn chỉ ghi 50 , 50 đây là gì ko biết, mà khi thanh toán tổng củng ko thấy trừ ra
+nhiều cái ko biết thì bỏ qua vì ko có chuyên môn, bịt đường
