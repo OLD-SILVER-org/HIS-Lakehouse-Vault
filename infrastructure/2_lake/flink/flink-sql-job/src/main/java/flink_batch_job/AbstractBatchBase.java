@@ -8,7 +8,7 @@ package flink_batch_job;
  * 
  * 
  * */
- 
+
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.kafka.clients.admin.*;
@@ -32,7 +32,6 @@ public abstract class AbstractBatchBase {
     protected final Map<String, String> catalogProperties;
     protected int batchStep;
     protected int partitionDivisionSize;
-
 
     public AbstractBatchBase() {
         // 1. Load config
@@ -59,8 +58,8 @@ public abstract class AbstractBatchBase {
 
         // 3. Setup Flink Environment
         EnvironmentSettings settings = EnvironmentSettings.newInstance()
-            .inBatchMode() // Set bounded ( Batching) mode
-            .build();
+                .inBatchMode() // Set bounded ( Batching) mode
+                .build();
         this.tEnv = TableEnvironment.create(settings);
 
         // 4. Configure Checkpointing
@@ -69,7 +68,7 @@ public abstract class AbstractBatchBase {
         // env.getCheckpointConfig().setCheckpointTimeout(60000); // 60 seconds
         // env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
     }
-        
+
     protected abstract Map<String, TableProcessor> getTableProcessors();
 
     // --- DDL and SQL Generation Methods ---
@@ -94,7 +93,8 @@ public abstract class AbstractBatchBase {
             tEnv.executeSql(createCatalogSQL);
             System.out.println("✅ Catalog created.");
         } catch (Exception e) {
-            System.out.println("ℹ️  Catalog '" + catalogName + "' might already exist. Skipping creation. Message: " + e.getMessage());
+            System.out.println("ℹ️  Catalog '" + catalogName + "' might already exist. Skipping creation. Message: "
+                    + e.getMessage());
         }
         tEnv.useCatalog(catalogName);
     }
@@ -105,65 +105,73 @@ public abstract class AbstractBatchBase {
             tEnv.executeSql(sql);
             System.out.println("✅ Database created: " + sinkDatabaseName);
         } catch (Exception e) {
-            System.out.println("ℹ️  Database '" + sinkDatabaseName + "' might already exist. Skipping creation. Message: " + e.getMessage());
+            System.out.println("ℹ️  Database '" + sinkDatabaseName
+                    + "' might already exist. Skipping creation. Message: " + e.getMessage());
         }
     }
 
     private String getJsonSourceSchemaDDL(TableProcessor processor) {
         String fields = processor.getTableSchemaDDL();
         return String.format("""
-            payload ROW<
-                before ROW<%s>,
-                after ROW<%s>,
-                op STRING,
-                ts_ms BIGINT
-            >
-        """, fields, fields);
+                    payload ROW<
+                        before ROW<%s>,
+                        after ROW<%s>,
+                        op STRING,
+                        ts_ms BIGINT
+                    >
+                """, fields, fields);
     }
 
-    private String getSourceTableDDL(TableProcessor processor, String sourceTableName, String startOffsetStr, String endOffsetStr) {
+    private String getSourceTableDDL(TableProcessor processor, String sourceTableName, String startOffsetStr,
+            String endOffsetStr) {
         return String.format("""
-            CREATE TABLE %s (%s) WITH (
-            'connector' = 'kafka',
-            'topic' = '%s',
-            'properties.bootstrap.servers' = '%s',
-            'properties.group.id' = 'flink_batch_%s_consumer',
-            'format' = 'json',
-            'json.ignore-parse-errors' = 'true',
-            'scan.startup.mode' = 'specific-offsets',
-            'scan.startup.specific-offsets' = '%s',
-            'scan.bounded.mode' = 'specific-offsets',
-            'scan.bounded.specific-offsets' = '%s'
-            )
-        """, sourceTableName, getJsonSourceSchemaDDL(processor),
-            getKafkaTopic(processor), kafkaBootstrapServers, processor.getSourceTableName(),
-            startOffsetStr, endOffsetStr);
+                    CREATE TABLE %s (%s) WITH (
+                    'connector' = 'kafka',
+                    'topic' = '%s',
+                    'properties.bootstrap.servers' = '%s',
+                    'properties.group.id' = 'flink_batch_%s_consumer',
+                    'format' = 'json',
+                    'json.ignore-parse-errors' = 'true',
+                    'scan.startup.mode' = 'specific-offsets',
+                    'scan.startup.specific-offsets' = '%s',
+                    'scan.bounded.mode' = 'specific-offsets',
+                    'scan.bounded.specific-offsets' = '%s',
+                    'properties.fetch.max.bytes' = '104857600',
+                    'properties.max.partition.fetch.bytes' = '10485760'
+                    )
+                """, sourceTableName, getJsonSourceSchemaDDL(processor),
+                getKafkaTopic(processor), kafkaBootstrapServers, processor.getSourceTableName(),
+                startOffsetStr, endOffsetStr);
     }
 
     private String getSinkTableDDL(TableProcessor processor) {
         // Add the 'partition_col' to the schema for the sink table.
-        String schemaWithPartition = processor.getTableSchemaDDL() + ",\n  partition_col STRING , op STRING, is_deleted BOOLEAN";
+        String schemaWithPartition = processor.getTableSchemaDDL()
+                + ",\n  partition_col STRING , op STRING, is_deleted BOOLEAN";
         return String.format("""
-            CREATE TABLE %s (%s)
-            PARTITIONED BY (%s)
-            WITH (
-              'format-version' = '2',
-              'write.format.default' = 'parquet',
-              'write.parquet.row-group-size-bytes' = '8388608',
-              'write.parquet.page-size-bytes' = '65536',
-              'write.target-file-size-bytes' = '67108864',
-              'write.distribution-mode' = 'none',
-            'write.commit-empty-snapshot.enabled' = 'false',
-              'write.metadata.delete-after-commit.enabled' = 'true',
-                'max-snapshots' = '100',
-                'snapshot-retention-days' = '1',
-                'write.metadata.previous-versions-max' = '5'
-            )
-        """, getSinkTableName(processor), schemaWithPartition, "partition_col");
+                    CREATE TABLE %s (%s)
+                    PARTITIONED BY (%s)
+                    WITH (
+                      'format-version' = '2',
+                      'write.format.default' = 'parquet',
+                      'write.parquet.row-group-size-bytes' = '8388608',
+                      'write.parquet.page-size-bytes' = '65536',
+                      'write.target-file-size-bytes' = '67108864',
+                      'write.distribution-mode' = 'none',
+                    'write.commit-empty-snapshot.enabled' = 'false',
+                      'write.metadata.delete-after-commit.enabled' = 'true',
+                        'max-snapshots' = '100',
+                        'snapshot-retention-days' = '1',
+                        'write.metadata.previous-versions-max' = '5'
+                    )
+                """, getSinkTableName(processor), schemaWithPartition, "partition_col");
     }
+
     /**
-     * Generates the SQL expression for the 'partition_col' based on the processor's configuration.
-     * If the partition key is a real column in the table (e.g., 'dm_xa_phuong'), it uses that column's value.
+     * Generates the SQL expression for the 'partition_col' based on the processor's
+     * configuration.
+     * If the partition key is a real column in the table (e.g., 'dm_xa_phuong'), it
+     * uses that column's value.
      * Otherwise, it defaults to deriving the partition from the 'created_at' field.
      *
      * @param processor The table processor.
@@ -174,50 +182,56 @@ public abstract class AbstractBatchBase {
 
         if ("partition_col".equals(partitionKey)) {
             return """
-                CASE
-                    WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
-                    ELSE SUBSTRING(payload.after.created_at, 1, 7)
-                END""";
+                    CASE
+                        WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
+                        ELSE SUBSTRING(payload.after.created_at, 1, 7)
+                    END""";
         }
 
         // Case when partitionKey is not 'created_at' → group by FLOOR
-       else {
+        else {
             System.out.println("⚙️ Partitioning by grouped " + partitionKey);
             return String.format("""
-                CASE
-                    WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
-                    ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
-                END
-            """, partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
+                        CASE
+                            WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
+                            ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
+                        END
+                    """, partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
         }
     }
 
     /**
-     * Generates the INSERT SQL statement to move data from the source Kafka view to the sink Iceberg table.
-     * @param processor The table processor for schema information.
-     * @param batchSourceTableName The name of the temporary source table for this batch.
+     * Generates the INSERT SQL statement to move data from the source Kafka view to
+     * the sink Iceberg table.
+     * 
+     * @param processor            The table processor for schema information.
+     * @param batchSourceTableName The name of the temporary source table for this
+     *                             batch.
      * @return The complete INSERT INTO ... SELECT ... SQL string.
      */
-    private String getInsertSQL(TableProcessor processor, String batchSourceTableName, String startOffsetStr, String endOffsetStr) {
-        // Add 'partition_col', 'op', and 'is_deleted' to the list of columns for the INSERT statement.
+    private String getInsertSQL(TableProcessor processor, String batchSourceTableName, String startOffsetStr,
+            String endOffsetStr) {
+        // Add 'partition_col', 'op', and 'is_deleted' to the list of columns for the
+        // INSERT statement.
         String insertColumns = processor.getInsertColumns() + ",\n  partition_col,\n  op,\n  is_deleted";
 
-        return String.format("""
-            INSERT INTO %s (%s)
-            SELECT /*+ OPTIONS('scan.bounded.mode'='specific-offsets', 'scan.startup.mode'='specific-offsets', 'scan.startup.specific-offsets'='%s', 'scan.bounded.specific-offsets'='%s') */
-              %s,
-              %s AS partition_col,
-              payload.op AS op,
-              CASE
-                  WHEN payload.op = 'd' THEN TRUE
-                  ELSE FALSE
-              END AS is_deleted
-            FROM default_catalog.default_database.%s
-            """, 
-            getSinkTableName(processor), insertColumns, startOffsetStr, endOffsetStr,
-            processor.getSelectColumns(), getPartitionColumnSQL(processor), batchSourceTableName
-        );
+        return String.format(
+                """
+                        INSERT INTO %s (%s)
+                        SELECT /*+ OPTIONS('scan.bounded.mode'='specific-offsets', 'scan.startup.mode'='specific-offsets', 'scan.startup.specific-offsets'='%s', 'scan.bounded.specific-offsets'='%s') */
+                          %s,
+                          %s AS partition_col,
+                          payload.op AS op,
+                          CASE
+                              WHEN payload.op = 'd' THEN TRUE
+                              ELSE FALSE
+                          END AS is_deleted
+                        FROM default_catalog.default_database.%s
+                        """,
+                getSinkTableName(processor), insertColumns, startOffsetStr, endOffsetStr,
+                processor.getSelectColumns(), getPartitionColumnSQL(processor), batchSourceTableName);
     }
+
     public void run() throws Exception {
         // Step 1 : create Catalog and Database
         createCatalog();
@@ -247,7 +261,7 @@ public abstract class AbstractBatchBase {
                 Map<TopicPartition, Long> currentOffsets = new HashMap<>(startOffsets);
 
                 boolean topicIsEmpty = startOffsets.entrySet().stream()
-                    .allMatch(e -> e.getValue().equals(endOffsets.get(e.getKey())));
+                        .allMatch(e -> e.getValue().equals(endOffsets.get(e.getKey())));
                 if (topicIsEmpty) {
                     System.out.println("ℹ️ Topic " + topic + " is empty or has been fully read. Skipping.");
                     continue;
@@ -275,13 +289,14 @@ public abstract class AbstractBatchBase {
                                 hasData = true;
                             }
                         } else {
-                            batchEndOffsets.put(tp, current); 
+                            batchEndOffsets.put(tp, current);
                         }
                     }
 
                     if (!hasData) {
                         System.out.println("✅ All partitions processed for table " + tableName + ". Finished.");
-                        SlackWebhookSender.sendMessage("✅ Batch job completed for table " + tableName + ". All data processed.");
+                        SlackWebhookSender
+                                .sendMessage("✅ Batch job completed for table " + tableName + ". All data processed.");
                         finished = true;
                         break;
                     }
