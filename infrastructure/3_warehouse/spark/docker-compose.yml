@@ -13,7 +13,6 @@ services:
       - ../../../.env
     environment:
       - SPARK_ENV=docker
-      - SPARK_MASTER_OPTS=-Xmx512m
     volumes:
       - ./conf/spark-env.sh:/opt/spark/conf/spark-env.sh
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
@@ -41,7 +40,6 @@ services:
     environment:
       - SPARK_ENV=docker
       - SPARK_WORKER_MEMORY=3g      # Spark dùng để cấp cho executor
-      - SPARK_WORKER_OPTS=-Xmx512m
     volumes:
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./conf/hive-site.xml:/opt/spark/conf/hive-site.xml
