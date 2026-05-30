@@ -202,7 +202,6 @@ class IncrementalStreamingLoader:
             # Count records for logging (Using a trick to get count from write or just defaulting to -1 if we skip it to save memory)
             # Actually, to be safe and informative, let's keep a simplified count or just skip it if it's too much.
             # If the user really needs it:
-            records_count = df_matched.count() 
             
             df_matched.write.jdbc(
                 url=jdbc_url,
@@ -210,10 +209,7 @@ class IncrementalStreamingLoader:
                 mode="append",
                 properties=properties
             )
-            print(f"[{table_name}] ↳ Successfully appended {records_count} rows to {target_table}")
             
-            # 4. Log Success Status to Postgres
-            self.log_load_tracker(table_name, batch_id, "SUCCESS", records_count)
             
         except Exception as e:
             print(f"[✘] Error in micro-batch for {table_name}: {str(e)}")
@@ -243,6 +239,8 @@ class IncrementalStreamingLoader:
         # But wait, since it's scheduled hourly, checkpoint will track the state.
         stream_df = self.spark.readStream \
             .format("iceberg") \
+            .option("streaming-skip-delete-snapshots", "true") \
+            .option("streaming-skip-overwrite-snapshots", "true") \
             .load(f"{self.catalog}.{self.source_db}.{table_name}")
             
         # 2. Write Stream via foreachBatch
