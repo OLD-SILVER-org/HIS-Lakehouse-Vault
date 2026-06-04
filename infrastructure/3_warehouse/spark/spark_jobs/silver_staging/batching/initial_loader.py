@@ -2,7 +2,7 @@ import sys
 import os
 import traceback
 from datetime import datetime
-from pyspark.sql.functions import current_timestamp, lit, col, to_timestamp, max as spark_max,  monotonically_increasing_id
+from pyspark.sql.functions import current_timestamp, lit, col, to_timestamp, desc, max as spark_max,  monotonically_increasing_id
 from pyspark.sql.types import TimestampType, DateType, IntegerType, LongType, FloatType, DoubleType, BooleanType, StringType
 from pyspark import StorageLevel  
 
@@ -135,6 +135,7 @@ class InitialLoader:
 
     def write_to_staging(self, table_name, df):
         target_table = f"{self.target_schema}.{table_name.lower()}"
+        source_table= f"{self.catalog}.{self.source_db}.{table_name}"
 
         try:
             jdbc_url = self.utils.get_jdbc_url(self.target_db)
@@ -153,14 +154,21 @@ class InitialLoader:
                 url=jdbc_url, table=target_table,
                 mode="overwrite", properties=load_props)
               
+            new_snapshot_id = self.spark.read \
+                .format("iceberg") \
+                .load(f"{source_table}.snapshots") \
+                .orderBy(desc("committed_at")) \
+                .limit(1) \
+                .collect()[0]["snapshot_id"]
 
         except Exception as e:
             df.unpersist()
             self.notifier.send_message(f"[!] Error writing to {target_table}: {str(e)}")
             raise e
+        return new_snapshot_id
             
             
-    def update_snapshot_tracker(self, table_name, df):
+    def update_snapshot_tracker(self, table_name, df, new_snapshot_id=None):
         """Update the watermark after initial load. If updated_at is missing, use current time."""
         updated_at_col = next((c for c in df.columns if c.lower() == "updated_at"), None)
 
@@ -171,9 +179,9 @@ class InitialLoader:
                 max_time = datetime.now()
 
             if max_time:
-                schema = "lake_table_name STRING, last_load_time TIMESTAMP"
+                schema = "lake_table_name STRING,   last_snapshot_id BIGINT ,last_load_time TIMESTAMP"
                 meta_df = self.spark.createDataFrame(
-                    [(table_name.lower(), max_time)],
+                    [(table_name.lower(), new_snapshot_id, max_time)],
                     schema=schema
                 )
                 meta_df.write.jdbc(
@@ -207,14 +215,6 @@ class InitialLoader:
     def process_table(self, table_name):
         print(f"\n--- Processing Table: {table_name} ---")
         try:
-            # CẤU HÌNH QUAN TRỌNG ĐỂ TRÁNH LỖI 134 TRÊN VPS RAM THẤP
-            # 1. Tắt Vectorized Reader: Buộc Spark đọc từng dòng, cực kỳ tiết kiệm Direct Memory/Netty
-            self.spark.conf.set("spark.sql.iceberg.vectorization.enabled", "false")
-            self.spark.conf.set("spark.sql.parquet.enableVectorizedReader", "false")
-            # 2. Giới hạn kích thước partition khi đọc để không nạp quá nhiều data cùng lúc
-            self.spark.conf.set("spark.sql.files.maxPartitionBytes", "16777216") # 16MB
-            # 3. Ép xử lý tuần tự để giảm tranh chấp tài nguyên
-            self.spark.conf.set("spark.sql.shuffle.partitions", "1")
 
             target_cols = self.get_target_columns(table_name)
             
@@ -227,11 +227,10 @@ class InitialLoader:
             df = self.preprocess_time_columns(df)
             df_matched = self.transform(df, target_cols)
             
-            # Thực hiện ghi vào staging trước
-            self.write_to_staging(table_name, df_matched)
-            # Sau đó mới tính toán watermark. 
-            # Lưu ý: Không dùng .cache() ở đây để tránh chiếm dụng Direct Memory của Netty (Lỗi 134)
-            self.update_snapshot_tracker(table_name, df_matched)
+            # write to staging and get new snapshot id
+            new_snapshot_id = self.write_to_staging(table_name, df_matched)
+            # call update snapshot tracker after successful write
+            self.update_snapshot_tracker(table_name, df_matched, new_snapshot_id=new_snapshot_id)
             self.update_load_tracker(table_name, status="SUCCESS", batch_size=self.batch_size)
             self.notifier.send_message(f"✅ *Success Processing Table*: `{table_name}`\n> Batch Size: {self.batch_size}")
 

@@ -6,6 +6,7 @@ CREATE SCHEMA IF NOT EXISTS staging_metadata;
 
 CREATE TABLE IF NOT EXISTS staging_metadata.snapshot_tracker (
   lake_table_name  VARCHAR(255) PRIMARY KEY,
+  last_snapshot_id BIGINT,
   last_load_time   TIMESTAMP
 );
 
