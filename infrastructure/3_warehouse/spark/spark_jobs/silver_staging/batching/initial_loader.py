@@ -1,8 +1,10 @@
 import sys
 import os
 import traceback
-from pyspark.sql.functions import current_timestamp, lit, col, to_timestamp
+from datetime import datetime
+from pyspark.sql.functions import current_timestamp, lit, col, to_timestamp, max as spark_max,  monotonically_increasing_id
 from pyspark.sql.types import TimestampType, DateType, IntegerType, LongType, FloatType, DoubleType, BooleanType, StringType
+from pyspark import StorageLevel  
 
 # Add parent directory to sys.path to import utils
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -22,6 +24,9 @@ class InitialLoader:
         self.target_db="dwh"
         self.target_schema = "staging"
         self.notifier = SlackNotifier()
+
+        self.batch_size = int(os.getenv("SPARK_BATCH_SIZE", "200"))
+
 
     def preprocess_time_columns(self, df):
         """
@@ -68,6 +73,7 @@ class InitialLoader:
                 table=query,
                 properties=self.utils.get_postgres_properties()
             )
+            print(f"[*] Columns in Postgres for {table_name}: collected {col_df.count()} columns")
             # Returns a dict {column_name: data_type}
             return {row['column_name']: row['data_type'] for row in col_df.collect()}
         except Exception as e:
@@ -126,64 +132,116 @@ class InitialLoader:
         
         return df.select(*final_cols)
 
+
     def write_to_staging(self, table_name, df):
-        """
-        Writes data to the Postgres staging table.
-        """
-        # Using 2-part name for Postgres (schema.table) since we're already connected to the database.
         target_table = f"{self.target_schema}.{table_name.lower()}"
-        print(f"[*] Loading data to {target_table}...")
-        
+
         try:
             jdbc_url = self.utils.get_jdbc_url(self.target_db)
-            print(f"[*] Connecting to: {jdbc_url}")
-            properties = self.utils.get_postgres_properties()
+            base_props = self.utils.get_postgres_properties()
+            load_props = {
+                **base_props,
+                "truncate": "true",
+                "batchsize": str(self.batch_size),
+                "reWriteBatchedInserts": "true"
+            }
+            table_cols = df.columns
+            print(f"[*] Writing to {target_table} (Wide table: {len(table_cols)} cols). Forcing coalesce(1) to avoid OOM 134.")
             
-            # Using overwrite + truncate to clear data without dropping the table
-            df.write.jdbc(
-                url=jdbc_url,
-                table=target_table,
-                mode="overwrite",
-                properties={**properties, "truncate": "true"}
-            )
-            print(f"[✔] Successfully loaded {target_table} ({df.count()} records)")
+            # Coalesce(1) 
+            df.coalesce(1).write.jdbc(                       
+                url=jdbc_url, table=target_table,
+                mode="overwrite", properties=load_props)
+              
+
         except Exception as e:
-            print(f"[✘] Error writing {table_name} to staging: {str(e)}")
-            traceback.print_exc()
+            df.unpersist()
+            self.notifier.send_message(f"[!] Error writing to {target_table}: {str(e)}")
+            raise e
+            
+            
+    def update_snapshot_tracker(self, table_name, df):
+        """Update the watermark after initial load. If updated_at is missing, use current time."""
+        updated_at_col = next((c for c in df.columns if c.lower() == "updated_at"), None)
+
+        try:
+            if updated_at_col:
+                max_time = df.select(spark_max(col(updated_at_col))).collect()[0][0]
+            else:
+                max_time = datetime.now()
+
+            if max_time:
+                schema = "lake_table_name STRING, last_load_time TIMESTAMP"
+                meta_df = self.spark.createDataFrame(
+                    [(table_name.lower(), max_time)],
+                    schema=schema
+                )
+                meta_df.write.jdbc(
+                    url=self.utils.get_jdbc_url(self.target_db),
+                    table="staging_metadata.snapshot_tracker",
+                    mode="append",
+                    properties=self.utils.get_postgres_properties()
+                )
+        except Exception as e:
+            self.notifier.send_message(f"[!] Could not update snapshot_tracker: {e}")
+
+    def update_load_tracker(self, table_name, status, batch_size, error_message=None):
+        try:
+            load_type = "INIT"
+            load_time = datetime.now()
+           
+            schema = "lake_table_name STRING, load_type STRING, load_time TIMESTAMP, status STRING, batch_size INT, error_message STRING"
+            meta_df = self.spark.createDataFrame(
+                [(table_name.lower(), load_type, load_time, status, batch_size, error_message)],
+                schema=schema
+            )
+            meta_df.write.jdbc(
+                url=self.utils.get_jdbc_url(self.target_db),
+                table="staging_metadata.load_tracker",
+                mode="append",
+                properties=self.utils.get_postgres_properties()
+            )
+        except Exception as e:
+            print(f"[!] Could not update load_tracker: {e}")
 
     def process_table(self, table_name):
-        """
-        Full pipeline for a single table with column matching.
-        """
         print(f"\n--- Processing Table: {table_name} ---")
         try:
-            # 1. Fetch existing columns in Postgres
+            # CẤU HÌNH QUAN TRỌNG ĐỂ TRÁNH LỖI 134 TRÊN VPS RAM THẤP
+            # 1. Tắt Vectorized Reader: Buộc Spark đọc từng dòng, cực kỳ tiết kiệm Direct Memory/Netty
+            self.spark.conf.set("spark.sql.iceberg.vectorization.enabled", "false")
+            self.spark.conf.set("spark.sql.parquet.enableVectorizedReader", "false")
+            # 2. Giới hạn kích thước partition khi đọc để không nạp quá nhiều data cùng lúc
+            self.spark.conf.set("spark.sql.files.maxPartitionBytes", "16777216") # 16MB
+            # 3. Ép xử lý tuần tự để giảm tranh chấp tài nguyên
+            self.spark.conf.set("spark.sql.shuffle.partitions", "1")
+
             target_cols = self.get_target_columns(table_name)
             
             if target_cols is None:
-                print(f"[!] Skipping {table_name}: Unable to connect to Postgres or query information_schema.")
                 return
-                
             if len(target_cols) == 0:
-                print(f"[!] Skipping {table_name}: Table not found in Postgres schema '{self.target_schema}'")
                 return
 
-            # 2. Read from Iceberg (MinIO)
             df = self.spark.read.table(f"{self.catalog}.{self.source_db}.{table_name}")
-            
-            # 2.5 Preprocess time columns
             df = self.preprocess_time_columns(df)
-            
-            # 3. Transform (Filter to match Postgres columns)
             df_matched = self.transform(df, target_cols)
             
-            # 4. Write to Postgres
+            # Thực hiện ghi vào staging trước
             self.write_to_staging(table_name, df_matched)
-            
+            # Sau đó mới tính toán watermark. 
+            # Lưu ý: Không dùng .cache() ở đây để tránh chiếm dụng Direct Memory của Netty (Lỗi 134)
+            self.update_snapshot_tracker(table_name, df_matched)
+            self.update_load_tracker(table_name, status="SUCCESS", batch_size=self.batch_size)
+            self.notifier.send_message(f"✅ *Success Processing Table*: `{table_name}`\n> Batch Size: {self.batch_size}")
+
         except Exception as e:
             error_msg = f"[✘] Failed to process {table_name}: {str(e)}"
-            print(error_msg)
+            self.update_load_tracker(table_name, status="FAILED", error_message=error_msg, batch_size=self.batch_size)
             self.notifier.send_message(f"❌ *Error Processing Table*: `{table_name}`\n> {str(e)}")
+        finally:
+            self.spark.catalog.clearCache()
+
 
     def load(self):
         """

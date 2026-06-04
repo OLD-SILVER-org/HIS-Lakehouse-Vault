@@ -29,4 +29,23 @@ Streaming : cái này suy nghĩ khác batch chút, dữ liệu không nhiều nh
             nên phải chia ra 1 job duy nhất, nhưng phải đảm bảo tất cả các bảng đều được theo đõi streaming. vì vậy không thể tách 30 job mà gom 1 job chạy tích hợp task nhỏ hơn.
             các core sẽ dc tự tính toán và chia cho hợp lý. vụ này mấy cả tuần để tìm ra dc tỉ lệ hợp lý theo vps ram và rom có dc
             
+một vài thứ phát hiện khi cuối dự án về spark :
+mới bị 1 vả hệ thống OOM không biết nguyên nhân, ct_dot_dieu_tri và ct_phieu_thu bị oom khi chạy init lake -> staging
+ban đầu cứ nghĩ do cấp tài ngnhuyeen spark không đủ, chỉnh ram, memor tùm lum nhưng kkhong giải qiuyeets dc,
+sai đó đặt cờ để chẹk xem OOm ở phần read hay write phải rà saots lại, loại bỏ các hàm spark action do mình nghĩ là do nó
+tại đây thì hiểu thêm các cơ chế như Broadcast , skew, ...
 
+Lỗi là do :
+Netty Direct Memory (off-heap) bị cạn kiệt khi đọc nhiều file parquet từ S3 cùng lúc. Iceberg dùng Netty để đọc S3, Netty cần allocate direct buffer nhưng không còn chỗ 
+→ NullPointerException → executor crash với exit code 134.
+tóm lại là : Small files problem —-------------------
+
+Chưa compact
+→ 7,582 files nhỏ trong 1 partition
+→ Spark tạo 7,582 tasks đọc song song
+→ Mỗi task cần 1 Netty direct buffer
+→ Tổng direct memory vượt -XX:MaxDirectMemorySize
+→ Netty không allocate được buffer mới → NullPointerException
+→ JVM abort → exit code 134
+giải pháp thì chó hai cách : chữa cháy là Coalesce(1), lâu dài là compact lại trong iceberg ( flink job)
+tạm thời Coalesce(1) trước. 
