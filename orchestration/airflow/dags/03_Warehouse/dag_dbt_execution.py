@@ -1,5 +1,8 @@
 from airflow import DAG
 from airflow.task.trigger_rule import TriggerRule
+from airflow.sensors.time_delta import TimeDeltaSensor
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from datetime import timedelta
 from tasks.task_dbt_execution import TaskDbtExecution
 from tasks.task_slack_notification import TaskSlackNotification
 from common.dag_config import get_dag_config
@@ -7,7 +10,8 @@ from common.dag_config import get_dag_config
 with DAG(
     dag_id="dag_dbt_execution",
     default_args=get_dag_config(),
-    schedule="*/20 * * * *",
+    schedule=None,
+    max_active_runs=1,
     catchup=False,
     tags=['dbt','execution']
 ) as dag:
@@ -26,7 +30,18 @@ with DAG(
         trigger_rule=TriggerRule.ONE_FAILED
     )
 
-    job_main >> job_test >> notify_success
+    wait_5p = TimeDeltaSensor(
+        task_id="wait_5_minutes",
+        delta=timedelta(minutes=5)
+    )
+
+    trigger_lake = TriggerDagRunOperator(
+        task_id="trigger_lake_streaming",
+        trigger_dag_id="dag_lake_streaming",
+        wait_for_completion=False
+    )
+
+    job_main >> job_test >> notify_success >> wait_5p >> trigger_lake
     [job_main, job_test] >> notify_failure
 
 globals()["dag_dbt_execution"] = dag
