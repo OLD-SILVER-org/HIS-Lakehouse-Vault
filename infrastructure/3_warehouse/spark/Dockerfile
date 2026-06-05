@@ -6,8 +6,8 @@ USER root
 COPY jars/*.jar /opt/spark/jars/
 
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
-    pip3 install --no-cache-dir requests python-dotenv && \
+    apt-get install -y python3 python3-pip libpq-dev && \
+    pip3 install --no-cache-dir requests python-dotenv psycopg2-binary && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /tmp/spark-events && \
     chown -R spark:spark /tmp/spark-events && \
