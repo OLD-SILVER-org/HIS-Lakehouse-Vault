@@ -31,6 +31,7 @@ public abstract class AbstractBatchBase {
     protected final String kafkaScanMode;
     protected final Map<String, String> catalogProperties;
     protected int batchStep;
+    protected final String timezone;
     protected int partitionDivisionSize;
 
     public AbstractBatchBase() {
@@ -67,6 +68,7 @@ public abstract class AbstractBatchBase {
         // env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000); // 5 seconds
         // env.getCheckpointConfig().setCheckpointTimeout(60000); // 60 seconds
         // env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+        this.timezone = JobConfig.get("source.timezone", "UTC+7");
     }
 
     protected abstract Map<String, TableProcessor> getTableProcessors();
@@ -166,24 +168,50 @@ public abstract class AbstractBatchBase {
     }
 
     /**
+     * Formats timezone from JobConfig (e.g., "UTC+7") to SQL offset format (e.g.,
+     * "+0700").
+     */
+    private String formatTimezoneOffset(String tz) {
+        String offset = tz.replace("UTC", "").trim();
+        if (!offset.startsWith("+") && !offset.startsWith("-"))
+            offset = "+" + offset;
+
+        String sign = offset.substring(0, 1);
+        String digits = offset.substring(1).replace(":", "");
+        if (digits.length() < 2)
+            digits = "0" + digits;
+        if (digits.length() == 2)
+            digits = digits + "00";
+
+        return sign + digits;
+    }
+
+    /**
+     * Wraps a timestamp field with logic to append timezone if missing.
+     */
+    private String normalizeTimestampSQL(String fieldPath) {
+        String offsetStr = formatTimezoneOffset(this.timezone);
+        return String.format(
+                "IF(%s LIKE '%%+%%' OR %s LIKE '%%-%%', %s, %s || ' %s')",
+                fieldPath, fieldPath, fieldPath, fieldPath, offsetStr);
+    }
+
+    /**
      * Generates the SQL expression for the 'partition_col' based on the processor's
      * configuration.
-     * If the partition key is a real column in the table (e.g., 'dm_xa_phuong'), it
-     * uses that column's value.
-     * Otherwise, it defaults to deriving the partition from the 'created_at' field.
-     *
-     * @param processor The table processor.
-     * @return The SQL expression for the partition column.
      */
     private String getPartitionColumnSQL(TableProcessor processor) {
         String partitionKey = processor.getPartitionKey();
 
         if ("partition_col".equals(partitionKey)) {
-            return """
+            String beforeNormalized = normalizeTimestampSQL("payload.before.created_at");
+            String afterNormalized = normalizeTimestampSQL("payload.after.created_at");
+
+            return String.format("""
                     CASE
-                        WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
-                        ELSE SUBSTRING(payload.after.created_at, 1, 7)
-                    END""";
+                        WHEN payload.op = 'd' THEN SUBSTRING(%s, 1, 7)
+                        ELSE SUBSTRING(%s, 1, 7)
+                    END""", beforeNormalized, afterNormalized);
         }
 
         // Case when partitionKey is not 'created_at' → group by FLOOR

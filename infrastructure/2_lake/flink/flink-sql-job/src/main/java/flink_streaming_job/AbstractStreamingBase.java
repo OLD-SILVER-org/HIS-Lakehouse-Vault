@@ -29,6 +29,7 @@ public abstract class AbstractStreamingBase {
     protected final String kafkaBootstrapServers;
     protected final String kafkaScanMode;
     protected final Map<String, String> catalogProperties;
+    protected final String timezone;
 
     /**
      * Constructor to initialize the Flink streaming environment and load
@@ -65,6 +66,7 @@ public abstract class AbstractStreamingBase {
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(10000);
         env.getCheckpointConfig().setCheckpointTimeout(60000);
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+        this.timezone = JobConfig.get("source.timezone", "UTC+7");
     }
 
     /**
@@ -177,14 +179,57 @@ public abstract class AbstractStreamingBase {
                 """, getSinkTableName(processor), schemaWithPartition, "partition_col");
     }
 
+    /**
+     * Formats timezone from JobConfig (e.g., "UTC+7") to SQL offset format (e.g.,
+     * "+0700").
+     */
+    private String formatTimezoneOffset(String tz) {
+        String offset = tz.replace("UTC", "").trim();
+        if (!offset.startsWith("+") && !offset.startsWith("-"))
+            offset = "+" + offset;
+
+        String sign = offset.substring(0, 1);
+        String digits = offset.substring(1).replace(":", "");
+        if (digits.length() < 2)
+            digits = "0" + digits;
+        if (digits.length() == 2)
+            digits = digits + "00";
+
+        return sign + digits;
+    }
+
+    /**
+     * Wraps a timestamp field with logic to append timezone if missing.
+     */
+    private String normalizeTimestampSQL(String fieldPath) {
+        String offsetStr = formatTimezoneOffset(this.timezone);
+        return String.format(
+                "IF(%s LIKE '%%+%%' OR %s LIKE '%%-%%', %s, %s || ' %s')",
+                fieldPath, fieldPath, fieldPath, fieldPath, offsetStr);
+    }
+
+    /**
+     * Normalizes all created_at/updated_at fields in the select columns list.
+     */
+    private String getNormalizedSelectColumns(TableProcessor processor) {
+        String cols = processor.getSelectColumns();
+        String offsetStr = formatTimezoneOffset(this.timezone);
+        // Automatically wraps payload fields with timezone handling
+        return cols.replaceAll(
+                "(payload\\.(?:after|before)\\.(?:created_at|updated_at))",
+                String.format("IF($1 LIKE '%%+%%' OR $1 LIKE '%%-%%', $1, $1 || ' %s')", offsetStr));
+    }
+
     private String getPartitionColumnSQL(TableProcessor processor) {
         if (processor.getPartitionKey().equals("partition_col")) {
+            String beforeNormalized = normalizeTimestampSQL("payload.before.created_at");
+            String afterNormalized = normalizeTimestampSQL("payload.after.created_at");
 
-            return """
+            return String.format("""
                     CASE
-                        WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
-                        ELSE SUBSTRING(payload.after.created_at, 1, 7)
-                    END""";
+                        WHEN payload.op = 'd' THEN SUBSTRING(%s, 1, 7)
+                        ELSE SUBSTRING(%s, 1, 7)
+                    END""", beforeNormalized, afterNormalized);
         }
 
         return String.format("""
@@ -211,7 +256,7 @@ public abstract class AbstractStreamingBase {
                         END AS is_deleted
                     FROM default_catalog.default_database.%s
 
-                """, getSinkTableName(processor), insertColumns, processor.getSelectColumns(),
+                """, getSinkTableName(processor), insertColumns, getNormalizedSelectColumns(processor),
                 getPartitionColumnSQL(processor), processor.getSourceTableName());
     }
 
