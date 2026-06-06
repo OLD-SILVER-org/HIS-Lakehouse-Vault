@@ -190,10 +190,16 @@ public abstract class AbstractBatchBase {
      * Wraps a timestamp field with logic to append timezone if missing.
      */
     private String normalizeTimestampSQL(String fieldPath) {
-        String offsetStr = formatTimezoneOffset(this.timezone);
+        // Convert the configured timezone (e.g., UTC+7) to a +07:00 format required by TO_TIMESTAMP_LTZ
+        String offsetRaw = formatTimezoneOffset(this.timezone); // +0700
+        String offsetForFlink = offsetRaw.substring(0, 3) + ":" + offsetRaw.substring(3); // +07:00
+        // If the timestamp already contains a timezone (+/-), keep it as‑is.
+        // Otherwise, append the default offset and cast to TIMESTAMP_LTZ (precision 3).
         return String.format(
-                "IF(%s LIKE '%%+%%' OR %s LIKE '%%-%%', %s, %s || ' %s')",
-                fieldPath, fieldPath, fieldPath, fieldPath, offsetStr);
+            "IF(%s LIKE '%%+%%' OR %s LIKE '%%-%%', " +
+            "CAST(%s AS TIMESTAMP(3) WITH TIME ZONE), " +
+            "TO_TIMESTAMP_LTZ(CAST(CONCAT(%s, ' %s') AS BIGINT), 3))",
+            fieldPath, fieldPath, fieldPath, fieldPath, offsetForFlink);
     }
 
     /**
