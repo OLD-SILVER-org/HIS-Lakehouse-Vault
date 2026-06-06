@@ -1,20 +1,12 @@
 package flink_batch_job;
 
-/*
- * A class abstract for batch job, include common function for batch job ( first ingertion)
- *  
- *  
- * 
- * 
- * 
- * */
-
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.TopicPartition;
 import core.TableProcessor;
 import core.JobConfig;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +14,6 @@ import core.SlackWebhookSender;
 
 public abstract class AbstractBatchBase {
 
-    // --- Configuration Fields ---
     protected final TableEnvironment tEnv;
     protected final String catalogName;
     protected final String sinkDatabaseName;
@@ -35,7 +26,6 @@ public abstract class AbstractBatchBase {
     protected int partitionDivisionSize;
 
     public AbstractBatchBase() {
-        // 1. Load config
         this.catalogName = JobConfig.get("catalog.name");
         this.sinkDatabaseName = JobConfig.get("sink.database.name");
         this.kafkaTopicPre = JobConfig.get("kafka.topic.prefix");
@@ -43,8 +33,8 @@ public abstract class AbstractBatchBase {
         this.kafkaScanMode = JobConfig.get("kafka.scan.startup.mode");
         this.batchStep = Integer.parseInt(JobConfig.get("batch.step", "500"));
         this.partitionDivisionSize = Integer.parseInt(JobConfig.get("partition.division.size", "100"));
+        this.timezone = JobConfig.get("source.timezone", "UTC+7");
 
-        // 2. Prepare Catalog Properties
         this.catalogProperties = new HashMap<>();
         catalogProperties.put("type", JobConfig.get("type"));
         catalogProperties.put("catalog-type", JobConfig.get("catalog.type"));
@@ -57,23 +47,61 @@ public abstract class AbstractBatchBase {
         catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
         catalogProperties.put("s3.path-style-access", "true");
 
-        // 3. Setup Flink Environment
         EnvironmentSettings settings = EnvironmentSettings.newInstance()
-                .inBatchMode() // Set bounded ( Batching) mode
+                .inBatchMode()
                 .build();
         this.tEnv = TableEnvironment.create(settings);
-
-        // 4. Configure Checkpointing
-        // env.enableCheckpointing(10000); // 10 seconds
-        // env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000); // 5 seconds
-        // env.getCheckpointConfig().setCheckpointTimeout(60000); // 60 seconds
-        // env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
-        this.timezone = JobConfig.get("source.timezone", "UTC+7");
     }
 
     protected abstract Map<String, TableProcessor> getTableProcessors();
 
-    // --- DDL and SQL Generation Methods ---
+    // -------------------------------------------------------------------------
+    // Timezone helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Converts config value (e.g. "UTC+7", "UTC+07", "UTC+07:00", "+0700")
+     * to canonical SQL offset format "+0700" / "-0700".
+     */
+    private String formatTimezoneOffset(String tz) {
+        String offset = tz.replace("UTC", "").trim();
+        if (!offset.startsWith("+") && !offset.startsWith("-"))
+            offset = "+" + offset;
+
+        String sign = offset.substring(0, 1);
+        String digits = offset.substring(1).replace(":", "");
+        if (digits.length() < 2)
+            digits = "0" + digits;
+        if (digits.length() == 2)
+            digits = digits + "00"; // "7" → "700" → "+0700"
+        if (digits.length() == 3)
+            digits = "0" + digits; // "700" → "0700"
+
+        return sign + digits; // e.g. "+0700"
+    }
+
+    /**
+     * Wraps a SQL timestamp STRING expression so that:
+     * '2025-03-09 16:04:54.849 +0700' → kept as-is
+     * '2025-03-09 23:18:05.000' → CONCAT(..., ' +0700')
+     *
+     * Detection uses ' +' / ' -' (space before sign) to avoid false-positives
+     * from the date part which contains '-' without a leading space.
+     */
+    private String normalizeTimestampExpr(String colExpr) {
+        String tzOffset = formatTimezoneOffset(this.timezone); // "+0700"
+        return String.format(
+                "CASE WHEN %s LIKE '%% +%%' OR %s LIKE '%% -%%' " +
+                        "THEN %s " +
+                        "ELSE CONCAT(%s, ' %s') END",
+                colExpr, colExpr,
+                colExpr,
+                colExpr, tzOffset);
+    }
+
+    // -------------------------------------------------------------------------
+    // DDL / SQL generation
+    // -------------------------------------------------------------------------
 
     private String getKafkaTopic(TableProcessor processor) {
         return kafkaTopicPre + processor.getSourceTableName();
@@ -82,7 +110,6 @@ public abstract class AbstractBatchBase {
     private String getSinkTableName(TableProcessor processor) {
         return sinkDatabaseName + "." + processor.getSourceTableName();
     }
-    // --- Catalog and Database Management ---
 
     private void createCatalog() {
         String propertiesString = catalogProperties.entrySet().stream()
@@ -95,8 +122,8 @@ public abstract class AbstractBatchBase {
             tEnv.executeSql(createCatalogSQL);
             System.out.println("✅ Catalog created.");
         } catch (Exception e) {
-            System.out.println("ℹ️  Catalog '" + catalogName + "' might already exist. Skipping creation. Message: "
-                    + e.getMessage());
+            System.out.println(
+                    "ℹ️  Catalog '" + catalogName + "' might already exist. Skipping. Message: " + e.getMessage());
         }
         tEnv.useCatalog(catalogName);
     }
@@ -107,15 +134,15 @@ public abstract class AbstractBatchBase {
             tEnv.executeSql(sql);
             System.out.println("✅ Database created: " + sinkDatabaseName);
         } catch (Exception e) {
-            System.out.println("ℹ️  Database '" + sinkDatabaseName
-                    + "' might already exist. Skipping creation. Message: " + e.getMessage());
+            System.out.println("ℹ️  Database '" + sinkDatabaseName + "' might already exist. Skipping. Message: "
+                    + e.getMessage());
         }
     }
 
     private String getJsonSourceSchemaDDL(TableProcessor processor) {
         String fields = processor.getTableSchemaDDL();
         return String.format("""
-                    payload ROW<
+                    payload ROW
                         before ROW<%s>,
                         after ROW<%s>,
                         op STRING,
@@ -124,8 +151,8 @@ public abstract class AbstractBatchBase {
                 """, fields, fields);
     }
 
-    private String getSourceTableDDL(TableProcessor processor, String sourceTableName, String startOffsetStr,
-            String endOffsetStr) {
+    private String getSourceTableDDL(TableProcessor processor, String sourceTableName,
+            String startOffsetStr, String endOffsetStr) {
         return String.format("""
                     CREATE TABLE %s (%s) WITH (
                     'connector' = 'kafka',
@@ -145,9 +172,8 @@ public abstract class AbstractBatchBase {
     }
 
     private String getSinkTableDDL(TableProcessor processor) {
-        // Add the 'partition_col' to the schema for the sink table.
         String schemaWithPartition = processor.getTableSchemaDDL()
-                + ",\n  partition_col STRING , op STRING, is_deleted BOOLEAN";
+                + ",\n  partition_col STRING, op STRING, is_deleted BOOLEAN";
         return String.format("""
                     CREATE TABLE %s (%s)
                     PARTITIONED BY (%s)
@@ -158,114 +184,93 @@ public abstract class AbstractBatchBase {
                       'write.parquet.page-size-bytes' = '65536',
                       'write.target-file-size-bytes' = '67108864',
                       'write.distribution-mode' = 'none',
-                    'write.commit-empty-snapshot.enabled' = 'false',
+                      'write.commit-empty-snapshot.enabled' = 'false',
                       'write.metadata.delete-after-commit.enabled' = 'true',
-                        'max-snapshots' = '100',
-                        'snapshot-retention-days' = '1',
-                        'write.metadata.previous-versions-max' = '5'
+                      'max-snapshots' = '100',
+                      'snapshot-retention-days' = '1',
+                      'write.metadata.previous-versions-max' = '5'
                     )
                 """, getSinkTableName(processor), schemaWithPartition, "partition_col");
     }
 
     /**
-     * Formats timezone from JobConfig (e.g., "UTC+7") to SQL offset format (e.g.,
-     * "+0700").
+     * SELECT columns for INSERT — same as TableProcessor.getSelectColumns() but
+     * wraps created_at / updated_at with normalizeTimestampExpr() so that rows
+     * missing a timezone offset get one appended automatically.
      */
-    private String formatTimezoneOffset(String tz) {
-        String offset = tz.replace("UTC", "").trim();
-        if (!offset.startsWith("+") && !offset.startsWith("-"))
-            offset = "+" + offset;
+    private String getSelectColumnsWithTz(TableProcessor processor) {
+        return Arrays.stream(processor.getTableSchemaDDL().split(","))
+                .map(line -> {
+                    String columnName = line.trim().split("\\s+")[0];
+                    String beforeExpr = "payload.before." + columnName;
+                    String afterExpr = "payload.after." + columnName;
 
-        String sign = offset.substring(0, 1);
-        String digits = offset.substring(1).replace(":", "");
-        if (digits.length() < 2)
-            digits = "0" + digits;
-        if (digits.length() == 2)
-            digits = digits + "00";
+                    if (columnName.equals("created_at") || columnName.equals("updated_at")) {
+                        beforeExpr = normalizeTimestampExpr(beforeExpr);
+                        afterExpr = normalizeTimestampExpr(afterExpr);
+                    }
 
-        return sign + digits;
+                    return String.format(
+                            "CASE WHEN payload.op = 'd' THEN %s ELSE %s END",
+                            beforeExpr, afterExpr);
+                })
+                .collect(Collectors.joining(",\n"));
     }
 
     /**
-     * Wraps a timestamp field with logic to append timezone if missing.
-     */
-    private String normalizeTimestampSQL(String fieldPath) {
-        // Convert the configured timezone (e.g., UTC+7) to a +07:00 format required by TO_TIMESTAMP_LTZ
-        String offsetRaw = formatTimezoneOffset(this.timezone); // +0700
-        String offsetForFlink = offsetRaw.substring(0, 3) + ":" + offsetRaw.substring(3); // +07:00
-        // If the timestamp already contains a timezone (+/-), keep it as‑is.
-        // Otherwise, append the default offset and cast to TIMESTAMP_LTZ (precision 3).
-        return String.format(
-            "IF(%s LIKE '%%+%%' OR %s LIKE '%%-%%', " +
-            "CAST(%s AS TIMESTAMP(3) WITH TIME ZONE), " +
-            "TO_TIMESTAMP_LTZ(CAST(CONCAT(%s, ' %s') AS BIGINT), 3))",
-            fieldPath, fieldPath, fieldPath, fieldPath, offsetForFlink);
-    }
-
-    /**
-     * Generates the SQL expression for the 'partition_col' based on the processor's
-     * configuration.
+     * partition_col expression.
+     * For created_at-based partitions: normalize timezone before SUBSTRING so
+     * the offset suffix doesn't corrupt the YYYY-MM slice.
      */
     private String getPartitionColumnSQL(TableProcessor processor) {
         String partitionKey = processor.getPartitionKey();
 
         if ("partition_col".equals(partitionKey)) {
-            String beforeNormalized = normalizeTimestampSQL("payload.before.created_at");
-            String afterNormalized = normalizeTimestampSQL("payload.after.created_at");
-
+            String beforeTs = normalizeTimestampExpr("payload.before.created_at");
+            String afterTs = normalizeTimestampExpr("payload.after.created_at");
             return String.format("""
                     CASE
-                        WHEN payload.op = 'd' THEN SUBSTRING(%s, 1, 7)
-                        ELSE SUBSTRING(%s, 1, 7)
-                    END""", beforeNormalized, afterNormalized);
-        }
-
-        // Case when partitionKey is not 'created_at' → group by FLOOR
-        else {
+                        WHEN payload.op = 'd' THEN SUBSTRING((%s), 1, 7)
+                        ELSE SUBSTRING((%s), 1, 7)
+                    END""",
+                    beforeTs, afterTs);
+        } else {
             System.out.println("⚙️ Partitioning by grouped " + partitionKey);
             return String.format("""
-                        CASE
-                            WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
-                            ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
-                        END
+                    CASE
+                        WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
+                        ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
+                    END
                     """, partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
         }
     }
 
-    /**
-     * Generates the INSERT SQL statement to move data from the source Kafka view to
-     * the sink Iceberg table.
-     * 
-     * @param processor            The table processor for schema information.
-     * @param batchSourceTableName The name of the temporary source table for this
-     *                             batch.
-     * @return The complete INSERT INTO ... SELECT ... SQL string.
-     */
-    private String getInsertSQL(TableProcessor processor, String batchSourceTableName, String startOffsetStr,
-            String endOffsetStr) {
-        // Add 'partition_col', 'op', and 'is_deleted' to the list of columns for the
-        // INSERT statement.
+    private String getInsertSQL(TableProcessor processor, String batchSourceTableName,
+            String startOffsetStr, String endOffsetStr) {
         String insertColumns = processor.getInsertColumns() + ",\n  partition_col,\n  op,\n  is_deleted";
 
         return String.format(
                 """
                         INSERT INTO %s (%s)
                         SELECT /*+ OPTIONS('scan.bounded.mode'='specific-offsets', 'scan.startup.mode'='specific-offsets', 'scan.startup.specific-offsets'='%s', 'scan.bounded.specific-offsets'='%s') */
-                          %s,
-                          %s AS partition_col,
-                          payload.op AS op,
-                          CASE
-                              WHEN payload.op = 'd' THEN TRUE
-                              ELSE FALSE
-                          END AS is_deleted
+                        %s,
+                        %s AS partition_col,
+                        payload.op AS op,
+                        CASE WHEN payload.op = 'd' THEN TRUE ELSE FALSE END AS is_deleted
                         FROM default_catalog.default_database.%s
                         """,
-                getSinkTableName(processor), insertColumns, startOffsetStr, endOffsetStr,
-                processor.getSelectColumns(), getPartitionColumnSQL(processor), batchSourceTableName);
+                getSinkTableName(processor), insertColumns,
+                startOffsetStr, endOffsetStr,
+                getSelectColumnsWithTz(processor),
+                getPartitionColumnSQL(processor),
+                batchSourceTableName);
     }
 
+    // -------------------------------------------------------------------------
+    // run()
+    // -------------------------------------------------------------------------
+
     public void run() throws Exception {
-        // Step 1 : create Catalog and Database
         createCatalog();
         createDatabase();
         System.out.println("✅ Step 1 done - Catalog & Database setup.");
@@ -277,7 +282,6 @@ public abstract class AbstractBatchBase {
                 String topic = getKafkaTopic(processor);
                 System.out.println("\n--- Processing table: " + tableName + " from topic: " + topic + " ---");
 
-                // Step 2: Create Sink Table in Iceberg catalog (once per table)
                 tEnv.useCatalog(catalogName);
                 System.out.println("Using catalog: " + tEnv.getCurrentCatalog());
                 String sinkTableName = getSinkTableName(processor);
@@ -285,9 +289,6 @@ public abstract class AbstractBatchBase {
                 tEnv.executeSql(getSinkTableDDL(processor)).await();
                 System.out.println("✅ Created sink table: " + sinkTableName);
 
-                // System.out.println("Sink Table DDL:\n" + getSinkTableDDL(processor));
-
-                // Step 3: Get offset ranges for the topic
                 Map<TopicPartition, Long> startOffsets = offsetManager.getOffsets(topic, OffsetSpec.earliest());
                 Map<TopicPartition, Long> endOffsets = offsetManager.getOffsets(topic, OffsetSpec.latest());
                 Map<TopicPartition, Long> currentOffsets = new HashMap<>(startOffsets);
@@ -295,14 +296,14 @@ public abstract class AbstractBatchBase {
                 boolean topicIsEmpty = startOffsets.entrySet().stream()
                         .allMatch(e -> e.getValue().equals(endOffsets.get(e.getKey())));
                 if (topicIsEmpty) {
-                    System.out.println("ℹ️ Topic " + topic + " is empty or has been fully read. Skipping.");
+                    System.out.println("ℹ️ Topic " + topic + " is empty. Skipping.");
                     continue;
                 }
 
-                // Step 4: Process data in batches until all offsets are consumed
                 int batchNum = 0;
                 boolean finished = false;
                 String sourceTableName = processor.getSourceTableName() + "_batch_source";
+
                 while (!finished) {
                     batchNum++;
                     System.out.println("--- Starting Batch #" + batchNum + " for table " + tableName + " ---");
@@ -313,13 +314,11 @@ public abstract class AbstractBatchBase {
                     for (TopicPartition tp : currentOffsets.keySet()) {
                         long current = currentOffsets.getOrDefault(tp, 0L);
                         long latest = endOffsets.getOrDefault(tp, 0L);
-
                         if (current < latest) {
                             long endOfBatch = Math.min(current + batchStep, latest);
                             batchEndOffsets.put(tp, endOfBatch);
-                            if (endOfBatch > current) {
+                            if (endOfBatch > current)
                                 hasData = true;
-                            }
                         } else {
                             batchEndOffsets.put(tp, current);
                         }
@@ -327,29 +326,27 @@ public abstract class AbstractBatchBase {
 
                     if (!hasData) {
                         System.out.println("✅ All partitions processed for table " + tableName + ". Finished.");
-                        SlackWebhookSender
-                                .sendMessage("✅ Batch job completed for table " + tableName + ". All data processed.");
+                        SlackWebhookSender.sendMessage("✅ Batch job completed for table " + tableName + ".");
                         finished = true;
                         break;
                     }
+
                     String startOffsetStr = offsetManager.formatOffsets(currentOffsets);
                     String endOffsetStr = offsetManager.formatOffsets(batchEndOffsets);
                     System.out.println("Batch Start Offsets: " + startOffsetStr);
                     System.out.println("Batch End Offsets:   " + endOffsetStr);
-                    // Create source table for batch offsets
-                    String sourceDDL = getSourceTableDDL(processor, sourceTableName, startOffsetStr, endOffsetStr);
+
                     tEnv.useCatalog("default_catalog");
-                    tEnv.executeSql(sourceDDL).await();
-                    // switch back to sink catalog
+                    tEnv.executeSql(getSourceTableDDL(processor, sourceTableName, startOffsetStr, endOffsetStr))
+                            .await();
+
                     tEnv.useCatalog(catalogName);
-                    String insertSQL = getInsertSQL(processor, sourceTableName, startOffsetStr, endOffsetStr);
-                    // System.out.println("Insert SQL:\n" + insertSQL);
-                    tEnv.executeSql(insertSQL).await();
+                    tEnv.executeSql(getInsertSQL(processor, sourceTableName, startOffsetStr, endOffsetStr)).await();
 
                     currentOffsets = batchEndOffsets;
                     System.out.println("✅ Completed Batch #" + batchNum);
-                    // Clean up the reusable source table after processing the entire topic
-                    tEnv.useCatalog("default_catalog"); // Switch to default catalog to drop the source table
+
+                    tEnv.useCatalog("default_catalog");
                     tEnv.executeSql("DROP TABLE IF EXISTS " + sourceTableName).await();
                     System.out.println("Cleaned up source table: " + sourceTableName);
                     SlackWebhookSender.sendMessage("✅ Completed Batch #" + batchNum + " for table " + tableName + ".");
@@ -357,7 +354,6 @@ public abstract class AbstractBatchBase {
             }
         }
         System.out.println("\n🚀 All tables processed successfully!");
-        SlackWebhookSender.sendMessage("🚀 All batch jobs completed successfully for all tables!");
+        SlackWebhookSender.sendMessage("🚀 All batch jobs completed successfully!");
     }
-
 }
