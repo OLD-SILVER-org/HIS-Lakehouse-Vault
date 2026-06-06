@@ -142,7 +142,7 @@ public abstract class AbstractBatchBase {
     private String getJsonSourceSchemaDDL(TableProcessor processor) {
         String fields = processor.getTableSchemaDDL();
         return String.format("""
-                    payload ROW
+                    payload ROW <
                         before ROW<%s>,
                         after ROW<%s>,
                         op STRING,
