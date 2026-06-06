@@ -307,38 +307,27 @@ rest.bind-address: 0.0.0.0
 
 # Interval in milliseconds for refreshing the monitored directories.
 #historyserver.archive.fs.refresh-interval: 10000
-
 blob.server.port: 6124
 query.server.port: 6125
 
 historyserver.archive.fs.refresh-interval: 10000
-# Checkpointing configuration
-execution.checkpointing.interval: 30000        # 30s
-execution.checkpointing.min-pause: 10000       # 10s pause
-execution.checkpointing.timeout: 60000         # 1m  timeout 
-execution.checkpointing.max-concurrent-checkpoints: 1
-execution.checkpointing.mode: AT_LEAST_ONCE     
 
+# Checkpointing
+execution.checkpointing.interval: 30000
+execution.checkpointing.min-pause: 10000
+execution.checkpointing.timeout: 60000
+execution.checkpointing.max-concurrent-checkpoints: 1
+execution.checkpointing.mode: AT_LEAST_ONCE
 execution.checkpointing.enabled: true
 execution.checkpointing.externalized-checkpoint.enabled: true
 execution.checkpointing.externalized-checkpoint.cleanup: RETAIN_ON_CANCELLATION
 
+# RPC
 jobmanager.rpc.address: flink-jobmanager
+
+# Memory
+jobmanager.memory.process.size: 3072m
+taskmanager.memory.process.size: 5120m
+
+# TaskManager
 taskmanager.numberOfTaskSlots: 2
-taskmanager.memory.process.size: 2800m  
-
-
-jobmanager.rpc.address: flink-jobmanager
-taskmanager.numberOfTaskSlots: 2
-taskmanager.memory.process.size: 2800m  
-
-jobmanager.rpc.address: flink-jobmanager
-taskmanager.numberOfTaskSlots: 2
-taskmanager.memory.process.size: 2800m  
-
-jobmanager.rpc.address: flink-jobmanager
-
-jobmanager.rpc.address: flink-jobmanager
-taskmanager.numberOfTaskSlots: 2
-taskmanager.memory.process.size: 2800m  
-
