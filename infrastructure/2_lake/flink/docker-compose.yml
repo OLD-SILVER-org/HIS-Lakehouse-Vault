@@ -57,12 +57,11 @@ services:
       HIVE_CONF_DIR: /opt/flink/conf
       HADOOP_CONF_DIR: /opt/flink/conf
       FLINK_PROPERTIES: |
-        jobmanager.rpc.address: flink-jobmanager
 
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 4G
     networks:
       - lake-net
       - source-net
@@ -121,9 +120,7 @@ services:
       HIVE_CONF_DIR: /opt/flink/conf
       HADOOP_CONF_DIR: /opt/flink/conf
       FLINK_PROPERTIES: |
-        jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 2
-        taskmanager.memory.process.size: 2800m  
+
 
 
     depends_on:
@@ -131,7 +128,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 6G
     networks:
       - lake-net
       - source-net
