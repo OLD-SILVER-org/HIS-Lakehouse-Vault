@@ -30,7 +30,7 @@ public abstract class AbstractStreamingBase {
         this.kafkaTopicPre = JobConfig.get("kafka.topic.prefix");
         this.kafkaBootstrapServers = JobConfig.get("kafka.bootstrap.servers");
         this.kafkaScanMode = JobConfig.get("kafka.scan.startup.mode");
-        this.timezone = JobConfig.get("source.timezone", "UTC+7");
+        this.timezone = JobConfig.get("source.timezone", "+0700");
 
         this.catalogProperties = new HashMap<>();
         catalogProperties.put("type", JobConfig.get("type"));
@@ -90,16 +90,13 @@ public abstract class AbstractStreamingBase {
      * from the '-' characters in the date part.
      */
     private String normalizeTimestampExpr(String colExpr) {
-        String tzOffset = formatTimezoneOffset(this.timezone);
+        String tzOffset = formatTimezoneOffset(this.timezone); // "+0700"
+        String stringExpr = String.format("CAST(%s AS STRING)", colExpr);
         return String.format(
-                "CASE WHEN %s LIKE '%% +%%' OR %s LIKE '%% -%%' " +
-                        "THEN %s " +
-                        "ELSE CONCAT(%s, ' %s') END",
-                colExpr, colExpr,
-                colExpr,
-                colExpr, tzOffset);
+                "CASE WHEN TRIM(%s) LIKE '%% +%%' OR TRIM(%s) LIKE '%% -%%' OR TRIM(%s) LIKE '%%Z' " +
+                        "THEN %s ELSE CONCAT(%s, ' %s') END",
+                stringExpr, stringExpr, stringExpr, stringExpr, stringExpr, tzOffset);
     }
-
     // -------------------------------------------------------------------------
     // DDL / SQL generation
     // -------------------------------------------------------------------------
