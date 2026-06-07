@@ -92,11 +92,19 @@ public abstract class AbstractStreamingBase {
     private String normalizeTimestampExpr(String colExpr) {
         String tzOffset = formatTimezoneOffset(this.timezone); // "+0700"
         String stringExpr = String.format("CAST(%s AS STRING)", colExpr);
-        String formatExpr = String.format("DATE_FORMAT(CAST(%s AS TIMESTAMP), 'yyyy-MM-dd HH:mm:ss.SSS')", colExpr);
+
+        // Handle numeric epoch strings (e.g. Debezium microseconds '1741562285000000')
+        String epochToTsExpr = String
+                .format("DATE_FORMAT(TO_TIMESTAMP_LTZ(CAST(%s AS BIGINT), 6), 'yyyy-MM-dd HH:mm:ss.SSS')", stringExpr);
+        // Handle standard timestamp strings
+        String formatExpr = String.format("DATE_FORMAT(TRY_CAST(%s AS TIMESTAMP), 'yyyy-MM-dd HH:mm:ss.SSS')", colExpr);
+
         return String.format(
-                "CASE WHEN TRIM(%s) LIKE '%% +%%' OR TRIM(%s) LIKE '%% -%%' OR TRIM(%s) LIKE '%%Z' " +
-                        "THEN %s ELSE CONCAT(%s, ' %s') END",
-                stringExpr, stringExpr, stringExpr, stringExpr, formatExpr, tzOffset);
+                "CASE " +
+                        "WHEN REGEXP_MATCH(TRIM(%s), '^[0-9]+$') THEN %s " +
+                        "WHEN TRIM(%s) LIKE '%% +%%' OR TRIM(%s) LIKE '%% -%%' OR TRIM(%s) LIKE '%%Z' THEN %s " +
+                        "ELSE CONCAT(%s, ' %s') END",
+                stringExpr, epochToTsExpr, stringExpr, stringExpr, stringExpr, stringExpr, formatExpr, tzOffset);
     }
     // -------------------------------------------------------------------------
     // DDL / SQL generation
