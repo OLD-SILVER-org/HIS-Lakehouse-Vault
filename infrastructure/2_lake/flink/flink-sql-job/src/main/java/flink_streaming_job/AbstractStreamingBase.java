@@ -92,10 +92,11 @@ public abstract class AbstractStreamingBase {
     private String normalizeTimestampExpr(String colExpr) {
         String tzOffset = formatTimezoneOffset(this.timezone); // "+0700"
         String stringExpr = String.format("CAST(%s AS STRING)", colExpr);
+        String formatExpr = String.format("DATE_FORMAT(CAST(%s AS TIMESTAMP), 'yyyy-MM-dd HH:mm:ss.SSS')", colExpr);
         return String.format(
                 "CASE WHEN TRIM(%s) LIKE '%% +%%' OR TRIM(%s) LIKE '%% -%%' OR TRIM(%s) LIKE '%%Z' " +
                         "THEN %s ELSE CONCAT(%s, ' %s') END",
-                stringExpr, stringExpr, stringExpr, stringExpr, stringExpr, tzOffset);
+                stringExpr, stringExpr, stringExpr, stringExpr, formatExpr, tzOffset);
     }
     // -------------------------------------------------------------------------
     // DDL / SQL generation
