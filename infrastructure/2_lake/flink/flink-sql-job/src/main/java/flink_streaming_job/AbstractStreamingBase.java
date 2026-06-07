@@ -189,31 +189,32 @@ public abstract class AbstractStreamingBase {
         }
 
         if ("partition_col".equals(partitionKey)) {
-            return """
-                    CASE
-                        WHEN payload.op = 'd' THEN
-                            CASE
-                                WHEN TRIM(CAST(payload.before.created_at AS STRING)) REGEXP '^[0-9]+$'
-                                THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.before.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7)
-                                ELSE SUBSTRING(TRIM(CAST(payload.before.created_at AS STRING)), 1, 7)
-                            END
-                        ELSE
-                            CASE
-                                WHEN TRIM(CAST(payload.after.created_at AS STRING)) REGEXP '^[0-9]+$'
-                                THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.after.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7)
-                                ELSE SUBSTRING(TRIM(CAST(payload.after.created_at AS STRING)), 1, 7)
-                            END
-                    END""";
+            return "CASE " +
+                    "WHEN payload.op = 'd' THEN " +
+                    "CASE " +
+                    "WHEN TRIM(CAST(payload.before.created_at AS STRING)) SIMILAR TO '[0-9]+' " +
+                    "THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.before.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7) "
+                    +
+                    "ELSE SUBSTRING(TRIM(CAST(payload.before.created_at AS STRING)), 1, 7) " +
+                    "END " +
+                    "ELSE " +
+                    "CASE " +
+                    "WHEN TRIM(CAST(payload.after.created_at AS STRING)) SIMILAR TO '[0-9]+' " +
+                    "THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.after.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7) "
+                    +
+                    "ELSE SUBSTRING(TRIM(CAST(payload.after.created_at AS STRING)), 1, 7) " +
+                    "END " +
+                    "END";
         }
 
         // Case: partition by numeric column → group by FLOOR
         System.out.println("⚙️ Partitioning by grouped " + partitionKey);
-        return String.format("""
-                    CASE
-                        WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
-                        ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
-                    END
-                """, partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
+        return String.format(
+                "CASE " +
+                        "WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING) " +
+                        "ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING) " +
+                        "END",
+                partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
     }
 
     private String getInsertSQL(TableProcessor processor) {
