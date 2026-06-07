@@ -193,14 +193,14 @@ public abstract class AbstractStreamingBase {
                     "WHEN payload.op = 'd' THEN " +
                     "CASE " +
                     "WHEN TRIM(CAST(payload.before.created_at AS STRING)) SIMILAR TO '[0-9]+' " +
-                    "THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.before.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7) "
+                    "THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.before.created_at AS STRING)) AS BIGINT) / 1000, 3), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7) "
                     +
                     "ELSE SUBSTRING(TRIM(CAST(payload.before.created_at AS STRING)), 1, 7) " +
                     "END " +
                     "ELSE " +
                     "CASE " +
                     "WHEN TRIM(CAST(payload.after.created_at AS STRING)) SIMILAR TO '[0-9]+' " +
-                    "THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.after.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7) "
+                    "THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.after.created_at AS STRING)) AS BIGINT) / 1000, 3), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7) "
                     +
                     "ELSE SUBSTRING(TRIM(CAST(payload.after.created_at AS STRING)), 1, 7) " +
                     "END " +

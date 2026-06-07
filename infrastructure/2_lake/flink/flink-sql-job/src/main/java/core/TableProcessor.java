@@ -31,7 +31,7 @@ public interface TableProcessor {
                                                 return String.format(
                                                                 "CASE " +
                                                 // Case 1: Epoch micros → convert to UTC ISO Z
-                                                                                "WHEN %s SIMILAR TO '[0-9]+' THEN DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(%s AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z''') "
+                                                                                "WHEN %s SIMILAR TO '[0-9]+' THEN DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(%s AS BIGINT) / 1000, 3), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z''') "
                                                                                 +
                                                 // Case 2: Already in ISO Z format → keep as is
                                                                                 "WHEN %s LIKE '%%Z' THEN %s " +
