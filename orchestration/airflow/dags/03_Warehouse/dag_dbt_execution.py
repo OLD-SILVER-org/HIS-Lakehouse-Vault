@@ -20,7 +20,7 @@ with DAG(
 
     notify_success = TaskSlackNotification(task_id="notify_success").build(
         dag=dag,
-        message="🚀 DBT Run & Test completed successfully!",
+        message="🚀 DBT Run completed successfully!",
         trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
@@ -41,7 +41,7 @@ with DAG(
         wait_for_completion=False
     )
 
-    job_main >> job_test >> notify_success >> wait_5p >> trigger_lake
-    [job_main, job_test] >> notify_failure
+    job_main  >> notify_success >> wait_5p >> trigger_lake
+    [job_main] >> notify_failure
 
 globals()["dag_dbt_execution"] = dag
