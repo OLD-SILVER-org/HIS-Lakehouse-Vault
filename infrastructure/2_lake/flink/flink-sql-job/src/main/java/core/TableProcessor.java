@@ -34,12 +34,11 @@ public interface TableProcessor {
                                         if ("created_at".equals(columnName) || "updated_at".equals(columnName)) {
                                                 // Check if timezone (+0700) is missing and append it before conversion.
                                                 // Logic: If the string does not end with ' +0700', then append it.
-                                                String normalizedExpr = String.format(
+                                                // We return a STRING to match the Sink schema defined in the
+                                                // Processors.
+                                                return String.format(
                                                                 "CASE WHEN %s NOT LIKE '%% +0700' THEN %s || ' +0700' ELSE %s END",
                                                                 colExpr, colExpr, colExpr);
-
-                                                // Convert to TIMESTAMP to synchronize data types in Iceberg
-                                                return String.format("TO_TIMESTAMP(%s)", normalizedExpr);
                                         }
                                         return colExpr;
                                 })
