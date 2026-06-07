@@ -165,37 +165,41 @@ public abstract class AbstractBatchBase {
                 """, getSinkTableName(processor), schemaWithPartition, "partition_col");
     }
 
-    /**
-     * Generates the SQL expression for the 'partition_col' based on the processor's
-     * configuration.
-     * If the partition key is a real column in the table (e.g., 'dm_xa_phuong'), it
-     * uses that column's value.
-     * Otherwise, it defaults to deriving the partition from the 'created_at' field.
-     *
-     * @param processor The table processor.
-     * @return The SQL expression for the partition column.
-     */
     private String getPartitionColumnSQL(TableProcessor processor) {
         String partitionKey = processor.getPartitionKey();
+
+        // Case: no partition key → all data goes to single partition
+        if (partitionKey == null || partitionKey.isEmpty()) {
+            System.out.println("⚙️ No partition key, using single partition '0'");
+            return "'0'";
+        }
 
         if ("partition_col".equals(partitionKey)) {
             return """
                     CASE
-                        WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
-                        ELSE SUBSTRING(payload.after.created_at, 1, 7)
+                        WHEN payload.op = 'd' THEN
+                            CASE
+                                WHEN TRIM(CAST(payload.before.created_at AS STRING)) REGEXP '^[0-9]+$'
+                                THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.before.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7)
+                                ELSE SUBSTRING(TRIM(CAST(payload.before.created_at AS STRING)), 1, 7)
+                            END
+                        ELSE
+                            CASE
+                                WHEN TRIM(CAST(payload.after.created_at AS STRING)) REGEXP '^[0-9]+$'
+                                THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.after.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7)
+                                ELSE SUBSTRING(TRIM(CAST(payload.after.created_at AS STRING)), 1, 7)
+                            END
                     END""";
         }
 
-        // Case when partitionKey is not 'created_at' → group by FLOOR
-        else {
-            System.out.println("⚙️ Partitioning by grouped " + partitionKey);
-            return String.format("""
-                        CASE
-                            WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
-                            ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
-                        END
-                    """, partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
-        }
+        // Case: partition by numeric column → group by FLOOR
+        System.out.println("⚙️ Partitioning by grouped " + partitionKey);
+        return String.format("""
+                    CASE
+                        WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
+                        ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
+                    END
+                """, partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
     }
 
     /**

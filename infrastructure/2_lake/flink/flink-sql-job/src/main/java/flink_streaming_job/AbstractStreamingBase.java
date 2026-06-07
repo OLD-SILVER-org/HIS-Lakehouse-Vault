@@ -29,6 +29,7 @@ public abstract class AbstractStreamingBase {
     protected final String kafkaBootstrapServers;
     protected final String kafkaScanMode;
     protected final Map<String, String> catalogProperties;
+    protected int partitionDivisionSize;
 
     /**
      * Constructor to initialize the Flink streaming environment and load
@@ -41,6 +42,7 @@ public abstract class AbstractStreamingBase {
         this.kafkaTopicPre = JobConfig.get("kafka.topic.prefix");
         this.kafkaBootstrapServers = JobConfig.get("kafka.bootstrap.servers");
         this.kafkaScanMode = JobConfig.get("kafka.scan.startup.mode");
+        this.partitionDivisionSize = Integer.parseInt(JobConfig.get("partition.division.size", "100"));
 
         // 2. Prepare Catalog Properties for Iceberg
         this.catalogProperties = new HashMap<>();
@@ -178,21 +180,40 @@ public abstract class AbstractStreamingBase {
     }
 
     private String getPartitionColumnSQL(TableProcessor processor) {
-        if (processor.getPartitionKey().equals("partition_col")) {
+        String partitionKey = processor.getPartitionKey();
 
+        // Case: no partition key → all data goes to single partition
+        if (partitionKey == null || partitionKey.isEmpty()) {
+            System.out.println("⚙️ No partition key, using single partition '0'");
+            return "'0'";
+        }
+
+        if ("partition_col".equals(partitionKey)) {
             return """
                     CASE
-                        WHEN payload.op = 'd' THEN SUBSTRING(payload.before.created_at, 1, 7)
-                        ELSE SUBSTRING(payload.after.created_at, 1, 7)
+                        WHEN payload.op = 'd' THEN
+                            CASE
+                                WHEN TRIM(CAST(payload.before.created_at AS STRING)) REGEXP '^[0-9]+$'
+                                THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.before.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7)
+                                ELSE SUBSTRING(TRIM(CAST(payload.before.created_at AS STRING)), 1, 7)
+                            END
+                        ELSE
+                            CASE
+                                WHEN TRIM(CAST(payload.after.created_at AS STRING)) REGEXP '^[0-9]+$'
+                                THEN SUBSTRING(DATE_FORMAT(TO_TIMESTAMP_LTZ(TRY_CAST(TRIM(CAST(payload.after.created_at AS STRING)) AS BIGINT), 6), 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'''), 1, 7)
+                                ELSE SUBSTRING(TRIM(CAST(payload.after.created_at AS STRING)), 1, 7)
+                            END
                     END""";
         }
 
+        // Case: partition by numeric column → group by FLOOR
+        System.out.println("⚙️ Partitioning by grouped " + partitionKey);
         return String.format("""
                     CASE
-                        WHEN payload.op = 'd' THEN CAST(payload.before.%s AS STRING)
-                        ELSE CAST(payload.after.%s AS STRING)
+                        WHEN payload.op = 'd' THEN CAST(FLOOR(payload.before.%s / %s) AS STRING)
+                        ELSE CAST(FLOOR(payload.after.%s / %s) AS STRING)
                     END
-                """, processor.getPartitionKey(), processor.getPartitionKey());
+                """, partitionKey, partitionDivisionSize, partitionKey, partitionDivisionSize);
     }
 
     private String getInsertSQL(TableProcessor processor) {
