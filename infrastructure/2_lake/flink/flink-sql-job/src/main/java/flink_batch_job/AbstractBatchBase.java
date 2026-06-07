@@ -100,7 +100,7 @@ public abstract class AbstractBatchBase {
 
         return String.format(
                 "CASE " +
-                        "WHEN REGEXP_MATCH(TRIM(%s), '^[0-9]+$') THEN %s " +
+                        "WHEN TRIM(%s) REGEXP '^[0-9]+$' THEN %s " +
                         "WHEN TRIM(%s) LIKE '%% +%%' OR TRIM(%s) LIKE '%% -%%' OR TRIM(%s) LIKE '%%Z' THEN %s " +
                         "ELSE CONCAT(%s, ' %s') END",
                 stringExpr, epochToTsExpr, stringExpr, stringExpr, stringExpr, stringExpr, formatExpr, tzOffset);
