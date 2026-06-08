@@ -35,7 +35,7 @@ services:
       - ../../../.env
     environment:
       - SPARK_WORKER_MEMORY=5g
-      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_CORES=5
       - SPARK_ENV=docker
     volumes:
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
