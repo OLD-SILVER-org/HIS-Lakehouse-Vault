@@ -30,9 +30,9 @@ with DAG(
         trigger_rule=TriggerRule.ONE_FAILED
     )
 
-    wait_5p = TimeDeltaSensor(
-        task_id="wait_5_minutes",
-        delta=timedelta(minutes=5)
+    wait_1p = TimeDeltaSensor(
+        task_id="wait_1_minutes",
+        delta=timedelta(minutes=1)
     )
 
     trigger_lake = TriggerDagRunOperator(
@@ -41,7 +41,7 @@ with DAG(
         wait_for_completion=False
     )
 
-    job_main  >> notify_success >> wait_5p >> trigger_lake
+    job_main  >> notify_success >> wait_1p >> trigger_lake
     [job_main] >> notify_failure
 
 globals()["dag_dbt_execution"] = dag

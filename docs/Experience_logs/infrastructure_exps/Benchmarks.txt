@@ -1,0 +1,29 @@
+## ⚡ System Benchmarks
+
+> **Environment**: 1 VPS — 8 cores, 24GB RAM, 387GB SSD  
+> **Containers**: 27 Docker containers running simultaneously  
+> **Test Duration**: 30 minutes
+
+### ⚙️ Flink Configuration
+- **Checkpoint Interval**: 30s
+- **Timeout**: 1m
+- **Minimum Pause Between Checkpoints**: 10s
+
+### 🔥 Stress Test Results
+
+| Total rec/min | Status |
+| :--- | :--- |
+| 4,000 rec/min | ✅ Stable |
+| 40,000 rec/min | ✅ Stable |
+| 60,000 rec/min | ❌ Postgres disconnection (Bottleneck) |
+
+### ⏱️ Latency Breakdown
+- **CDC → Kafka**: ~Real-time
+- **Flink → Iceberg**: ~1-2 minutes
+- **Spark → Staging**: ~1m - 1m15s
+- **dbt → Vault + Mart**: ~1m - 1m15s
+---
+**Total Pipeline Duration**: ~4-5 minutes
+
+**Stable ceiling: 40,000 rec/min**
+**End-to-end latency**: 5-7 minutes
