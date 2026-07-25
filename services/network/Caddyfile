@@ -42,6 +42,11 @@
     reverse_proxy spark-es-master:8080
 }
 
+# Spark History Server
+:8086 {
+    reverse_proxy spark-history-server:18080
+}
+
 # Kafka UI
 :8090 {
     reverse_proxy kafka-ui:8080

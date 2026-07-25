@@ -18,6 +18,7 @@ services:
       - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./spark_jobs:/opt/spark/spark_jobs
       - ../jars:/opt/spark/user_jars
+      - spark_events:/tmp/spark-events
     networks:
       - lake-net
       - warehouse-net
@@ -42,7 +43,26 @@ services:
       - ./conf/hive-site.xml:/opt/spark/conf/hive-site.xml
       - ./spark_jobs:/opt/spark/spark_jobs
       - ../jars:/opt/spark/user_jars
+      - spark_events:/tmp/spark-events
 
+    networks:
+      - lake-net
+      - warehouse-net
+      - elastic-net
+
+  spark-history-server:
+    image: ${WAREHOUSE_SPARK_IMAGE}
+    container_name: spark-history-server
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
+    depends_on:
+      - spark-master
+    env_file:
+      - ../../../.env
+    environment:
+      - SPARK_ENV=docker
+    volumes:
+      - ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - spark_events:/tmp/spark-events
     networks:
       - lake-net
       - warehouse-net
@@ -55,3 +75,7 @@ networks:
     external: true
   elastic-net:
     external: true
+
+volumes:
+  spark_events:
+
